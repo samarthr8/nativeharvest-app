@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
 
     env:
@@ -19,6 +19,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # ---------------- BACKEND TESTS ----------------
+      - name: Backend - Install deps
+        run: |
+          cd backend
+          npm install
+
+      - name: Backend - Run tests
+        run: |
+          cd backend
+          npm test -- --ci --coverage
+
+      # ---------------- FRONTEND TESTS ----------------
+      - name: Frontend - Install deps
+        run: |
+          cd frontend
+          npm install
+
+      - name: Frontend - Run tests
+        run: |
+          cd frontend
+          npm test -- --run
+
+      # ---------------- SONARQUBE ----------------
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # ---------------- SECURITY SCAN ----------------
+      - name: Trivy FS Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+      # ---------------- DOCKER BUILD ----------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -28,15 +77,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # -------- FRONTEND IMAGE --------
-      - name: Build & Push Frontend
+      - name: Build & Push Frontend Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-frontend:${IMAGE_TAG} frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-frontend:${IMAGE_TAG}
 
-      # -------- BACKEND IMAGE --------
-      - name: Build & Push Backend
+      - name: Build & Push Backend Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${IMAGE_TAG} backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${IMAGE_TAG}
+
+      # ---------------- IMAGE SECURITY ----------------
+      #      - name: Trivy Image Scan (Backend)
+      # uses: aquasecurity/trivy-action@master
+      # with:
+      #   image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${IMAGE_TAG}
+      #   severity: HIGH,CRITICAL
+      #   exit-code: 1
+
+      # ---------------- UPLOAD ARTIFACTS ----------------
+      - name: Upload reports to Nexus
+        run: |
+          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+          --upload-file backend/coverage/lcov.info \
+          ${{ secrets.NEXUS_URL }}/repository/nativeharvest-reports/backend-${IMAGE_TAG}.lcov
 
