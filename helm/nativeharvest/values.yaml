@@ -1,0 +1,32 @@
+environment: dev
+
+frontend:
+  image:
+    repository: yourdockerhub/nativeharvest-frontend
+    tag: latest
+  replicas: 1
+  port: 80
+
+backend:
+  image:
+    repository: yourdockerhub/nativeharvest-backend
+    tag: latest
+  replicas: 1
+  port: 5000
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  className: nginx
+  host: nativeharvest.local
+
+secrets:
+  jwtSecret: ""
+  db:
+    host: ""
+    name: ""
+    user: ""
+    password: ""
+
