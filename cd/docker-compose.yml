@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    image: samarthr8/nativeharvest-backend:${IMAGE_TAG}
+    container_name: nativeharvest-backend
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - nativeharvest-net
+
+  frontend:
+    image: samarthr8/nativeharvest-frontend:${IMAGE_TAG}
+    container_name: nativeharvest-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nativeharvest-net
+
+networks:
+  nativeharvest-net:
+    driver: bridge
