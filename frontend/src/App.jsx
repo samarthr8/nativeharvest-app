@@ -1,29 +1,25 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-
-import Home from "./pages/Home";
+import { Routes, Route, Link } from "react-router-dom";
 import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 
-export default function App() {
+const App = () => {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-	  <Route path="/admin/login" element={<AdminLogin />} />
-	  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
-  );
-}
+    <div>
+      <nav>
+        <Link to="/">Products</Link> |{" "}
+        <Link to="/cart">Cart</Link>
+      </nav>
 
+      <Routes>
+        <Route path="/" element={<Products />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order/:orderId" element={<OrderSuccess />} />
+      </Routes>
+    </div>
+  );
+};
+
+export default App;

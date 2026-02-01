@@ -1,30 +1,32 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
-import ProductCard from "../components/ProductCard";
-import SEO from "../components/SEO";
+import { useCart } from "../context/CartContext";
 
-export default function Products() {
+const Products = () => {
   const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    api.get("/products").then(res => setProducts(res.data));
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => setProducts(data));
   }, []);
 
   return (
-    <div className="container">
-      <SEO
-        title="Our Products | NativeHarvest"
-        description="Explore farm-fresh pickles, sattu, and cold-pressed mustard oil made using traditional rural methods."
-      />
+    <div>
+      <h2>Products</h2>
 
-      <h1>Our Products</h1>
-
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-        {products.map(p => (
-          <ProductCard key={p.slug} product={p} />
-        ))}
-      </div>
+      {products.map(product => (
+        <div key={product.slug} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
+          <h3>{product.name}</h3>
+          <p>{product.description}</p>
+          <p>₹{product.price}</p>
+          <button onClick={() => addToCart(product)}>
+            Add to Cart
+          </button>
+        </div>
+      ))}
     </div>
   );
-}
+};
 
+export default Products;
