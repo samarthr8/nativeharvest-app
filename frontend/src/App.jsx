@@ -24,27 +24,22 @@ const App = () => {
         <Link to="/contact">Contact</Link>
       </nav>
 
-      <div className="container">
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/order/:orderId" element={<OrderSuccess />} />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/order/:orderId" element={<OrderSuccess />} />
 
-          {/* Admin */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        </Routes>
-      </div>
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      </Routes>
     </>
   );
 };
 
 export default App;
-
-
-

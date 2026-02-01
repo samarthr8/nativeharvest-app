@@ -8,34 +8,45 @@ const Products = () => {
   useEffect(() => {
     fetch("/api/products")
       .then(res => res.json())
-      .then(setProducts);
+      .then(data => {
+        console.log("Products API response:", data); // TEMP debug
+        setProducts(data);
+      });
   }, []);
 
   return (
     <div>
       <h2>Products</h2>
 
-      {products.map(product => (
-        <div key={product.slug} className="card">
-          {product.image_url && (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}
-            />
-          )}
+      <div className="products-grid">
+        {products.map(product => {
+          const image =
+            product.image_url || product.imageUrl || product.image || null;
 
-          <h3>{product.name}</h3>
-          <p>{product.description}</p>
-          <p><strong>₹{product.price}</strong></p>
+          return (
+            <div key={product.slug} className="product-card">
+              {image && (
+                <img
+                  src={image}
+                  alt={product.name}
+                  className="product-image"
+                />
+              )}
 
-          <button onClick={() => addToCart(product)}>
-            Add to Cart
-          </button>
-        </div>
-      ))}
+              <h3>{product.name}</h3>
+              <p>{product.description}</p>
+              <p><strong>₹{product.price}</strong></p>
+
+              <button onClick={() => addToCart(product)}>
+                Add to Cart
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
 export default Products;
+
