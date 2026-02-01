@@ -44,7 +44,7 @@ const Checkout = () => {
       <input name="customer_name" placeholder="Name" onChange={handleChange} />
       <input name="phone" placeholder="Phone" onChange={handleChange} />
       <input name="email" placeholder="Email" onChange={handleChange} />
-      <textarea name="address" placeholder="Address" onChange={handleChange} />
+      <textarea name="address" placeholder="Address" />
 
       <button onClick={placeOrder}>Place Order</button>
     </div>
@@ -52,3 +52,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

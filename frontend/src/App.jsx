@@ -6,21 +6,24 @@ import OrderSuccess from "./pages/OrderSuccess";
 
 const App = () => {
   return (
-    <div>
-      <nav style={{ marginBottom: "20px" }}>
-        <Link to="/">Products</Link> |{" "}
+    <>
+      <nav>
+        <Link to="/">Products</Link>
         <Link to="/cart">Cart</Link>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Products />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order/:orderId" element={<OrderSuccess />} />
-      </Routes>
-    </div>
+      <div className="container">
+        <Routes>
+          <Route path="/" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order/:orderId" element={<OrderSuccess />} />
+        </Routes>
+      </div>
+    </>
   );
 };
 
 export default App;
+
 

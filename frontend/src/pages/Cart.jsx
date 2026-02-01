@@ -18,7 +18,7 @@ const Cart = () => {
       <h2>Your Cart</h2>
 
       {cart.map(item => (
-        <div key={item.slug}>
+        <div key={item.slug} className="card">
           <h4>{item.name}</h4>
           <p>₹{item.price}</p>
 
@@ -37,12 +37,17 @@ const Cart = () => {
         </div>
       ))}
 
-      <h3>Total: ₹{total}</h3>
+      <div className="total">Total: ₹{total}</div>
 
-      <Link to="/checkout">Proceed to Checkout</Link>
+      <Link to="/checkout">
+        <button style={{ marginTop: "10px" }}>
+          Proceed to Checkout
+        </button>
+      </Link>
     </div>
   );
 };
 
 export default Cart;
+
 

@@ -16,10 +16,10 @@ const Products = () => {
       <h2>Products</h2>
 
       {products.map(product => (
-        <div key={product.slug} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
+        <div key={product.slug} className="card">
           <h3>{product.name}</h3>
           <p>{product.description}</p>
-          <p>₹{product.price}</p>
+          <p><strong>₹{product.price}</strong></p>
           <button onClick={() => addToCart(product)}>
             Add to Cart
           </button>
@@ -30,4 +30,5 @@ const Products = () => {
 };
 
 export default Products;
+
 
