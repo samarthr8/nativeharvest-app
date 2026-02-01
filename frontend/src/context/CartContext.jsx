@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const CartContext = createContext();
+const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
@@ -49,4 +49,11 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const ctx = useContext(CartContext);
+  if (!ctx) {
+    throw new Error("useCart must be used inside CartProvider");
+  }
+  return ctx;
+};
+

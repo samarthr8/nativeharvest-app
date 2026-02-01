@@ -7,7 +7,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 const App = () => {
   return (
     <div>
-      <nav>
+      <nav style={{ marginBottom: "20px" }}>
         <Link to="/">Products</Link> |{" "}
         <Link to="/cart">Cart</Link>
       </nav>
@@ -23,3 +23,4 @@ const App = () => {
 };
 
 export default App;
+

@@ -8,7 +8,7 @@ const Products = () => {
   useEffect(() => {
     fetch("/api/products")
       .then(res => res.json())
-      .then(data => setProducts(data));
+      .then(setProducts);
   }, []);
 
   return (
@@ -30,3 +30,4 @@ const Products = () => {
 };
 
 export default Products;
+
