@@ -25,8 +25,10 @@ const App = () => {
       </nav>
 
       <Routes>
+        {/* ✅ HOME AS INDEX ROUTE */}
+        <Route index element={<Home />} />
+
         {/* Public */}
-        <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
@@ -43,3 +45,4 @@ const App = () => {
 };
 
 export default App;
+
