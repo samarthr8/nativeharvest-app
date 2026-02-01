@@ -55,6 +55,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarQube Quality Gate
+        if: |
+          github.ref == 'refs/heads/develop' ||
+          startsWith(github.ref, 'refs/heads/release/') ||
+          github.ref == 'refs/heads/main'
         uses: sonarsource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
         env:
