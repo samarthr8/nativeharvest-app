@@ -17,9 +17,18 @@ const Products = () => {
 
       {products.map(product => (
         <div key={product.slug} className="card">
+          {product.image_url && (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}
+            />
+          )}
+
           <h3>{product.name}</h3>
           <p>{product.description}</p>
           <p><strong>₹{product.price}</strong></p>
+
           <button onClick={() => addToCart(product)}>
             Add to Cart
           </button>
@@ -30,5 +39,3 @@ const Products = () => {
 };
 
 export default Products;
-
-
