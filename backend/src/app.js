@@ -5,6 +5,8 @@ const productRoutes = require("./routes/products");
 const adminRoutes = require("./routes/admin");
 const adminProductRoutes = require("./routes/admin-products");
 const adminUploadRoutes = require("./routes/admin-upload");
+const orderRoutes = require("./routes/orders");
+const adminOrderRoutes = require("./routes/admin-orders");
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminProductRoutes);
 app.use("/api/admin", adminUploadRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/admin", adminOrderRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
@@ -28,4 +32,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
