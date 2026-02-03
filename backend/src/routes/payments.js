@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const razorpay = require("../config/razorpay");
+const getRazorpayInstance = require("../config/razorpay");
 
 /*
  POST /api/payments/create
@@ -11,7 +11,6 @@ router.post("/create", async (req, res) => {
   try {
     const { order_id } = req.body;
 
-    // Fetch order
     const result = await db.query(
       "SELECT * FROM orders WHERE order_id = $1",
       [order_id]
@@ -27,7 +26,12 @@ router.post("/create", async (req, res) => {
       return res.status(400).json({ message: "Order already paid" });
     }
 
-    // Create Razorpay order (amount in paise)
+    const razorpay = getRazorpayInstance();
+
+    if (!razorpay) {
+      return res.status(500).json({ message: "Payments disabled in test mode" });
+    }
+
     const razorpayOrder = await razorpay.orders.create({
       amount: order.total_amount * 100,
       currency: "INR",
@@ -35,7 +39,6 @@ router.post("/create", async (req, res) => {
       payment_capture: 1
     });
 
-    // Save razorpay order id
     await db.query(
       "UPDATE orders SET razorpay_order_id = $1 WHERE order_id = $2",
       [razorpayOrder.id, order.order_id]
