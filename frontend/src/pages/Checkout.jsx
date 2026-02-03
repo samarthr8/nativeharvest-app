@@ -19,12 +19,11 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const startPayment = async () => {
+  const placeOrder = async () => {
     try {
       setLoading(true);
 
-      /* 1️⃣ Create Order */
-      const orderRes = await fetch("/api/orders", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -36,47 +35,13 @@ const Checkout = () => {
         })
       });
 
-      const orderData = await orderRes.json();
+      const data = await res.json();
 
-      /* 2️⃣ Create Razorpay Order */
-      const payRes = await fetch("/api/payments/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          order_id: orderData.order_id
-        })
-      });
-
-      const payData = await payRes.json();
-
-      /* 3️⃣ Open Razorpay */
-      const options = {
-        key: payData.key,
-        amount: payData.amount_paise,
-        currency: payData.currency,
-        name: "NativeHarvest",
-        description: "Farm Fresh Products",
-        order_id: payData.razorpay_order_id,
-        prefill: {
-          name: form.customer_name,
-          email: form.email,
-          contact: form.phone
-        },
-        handler: function () {
-          clearCart();
-          navigate(`/order/${orderData.order_id}`);
-        },
-        theme: {
-          color: "#2f6f4e"
-        }
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-
+      clearCart();
+      navigate(`/order/${data.order_id}`);
     } catch (err) {
       console.error(err);
-      alert("Payment initiation failed");
+      alert("Order creation failed");
     } finally {
       setLoading(false);
     }
@@ -89,10 +54,10 @@ const Checkout = () => {
       <input name="customer_name" placeholder="Name" onChange={handleChange} />
       <input name="phone" placeholder="Phone" onChange={handleChange} />
       <input name="email" placeholder="Email" onChange={handleChange} />
-      <textarea name="address" placeholder="Address" onChange={handleChange} />
+      <textarea name="address" placeholder="Address" />
 
-      <button onClick={startPayment} disabled={loading}>
-        {loading ? "Processing..." : "Pay Now"}
+      <button onClick={placeOrder} disabled={loading}>
+        {loading ? "Placing Order..." : "Place Order"}
       </button>
     </div>
   );
