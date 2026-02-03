@@ -7,6 +7,7 @@ const adminProductRoutes = require("./routes/admin-products");
 const adminUploadRoutes = require("./routes/admin-upload");
 const orderRoutes = require("./routes/orders");
 const adminOrderRoutes = require("./routes/admin-orders");
+const paymentRoutes = require("./routes/payments");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/api/admin", adminProductRoutes);
 app.use("/api/admin", adminUploadRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminOrderRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
