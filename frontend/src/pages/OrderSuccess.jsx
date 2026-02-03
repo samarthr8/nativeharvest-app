@@ -1,10 +1,15 @@
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 
 const OrderSuccess = () => {
   const { orderId } = useParams();
+  const [paymentStarted, setPaymentStarted] = useState(false);
+  const [paymentDone, setPaymentDone] = useState(false);
 
   const startPayment = async () => {
     try {
+      setPaymentStarted(true);
+
       const payRes = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,9 +25,19 @@ const OrderSuccess = () => {
         name: "NativeHarvest",
         description: "Farm Fresh Products",
         order_id: payData.razorpay_order_id,
+
         handler: function () {
-          alert("Payment successful!");
+          // ⚠️ DO NOT mark paid here
+          setPaymentDone(true);
         },
+
+        modal: {
+          ondismiss: function () {
+            // User closed popup manually
+            console.log("Razorpay popup closed");
+          }
+        },
+
         theme: {
           color: "#2f6f4e"
         }
@@ -34,6 +49,7 @@ const OrderSuccess = () => {
     } catch (err) {
       console.error(err);
       alert("Payment initiation failed");
+      setPaymentStarted(false);
     }
   };
 
@@ -43,13 +59,25 @@ const OrderSuccess = () => {
       <p>Your Order ID:</p>
       <h3>{orderId}</h3>
 
-      <button onClick={startPayment} style={{ marginTop: "20px" }}>
-        Pay Now
-      </button>
+      {!paymentStarted && (
+        <button onClick={startPayment} style={{ marginTop: "20px" }}>
+          Pay Now
+        </button>
+      )}
+
+      {paymentStarted && !paymentDone && (
+        <p style={{ marginTop: "20px" }}>
+          🔄 Payment in progress… Please complete payment in the popup.
+        </p>
+      )}
+
+      {paymentDone && (
+        <p style={{ marginTop: "20px", color: "green" }}>
+          ✅ Payment successful. We are verifying your payment.
+        </p>
+      )}
     </div>
   );
 };
 
 export default OrderSuccess;
-
-
