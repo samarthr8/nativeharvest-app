@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 
+/* 🔐 NEW — Needed for Razorpay webhook */
+const bodyParser = require("body-parser");
+
 const productRoutes = require("./routes/products");
 const adminRoutes = require("./routes/admin");
 const adminProductRoutes = require("./routes/admin-products");
@@ -9,9 +12,20 @@ const orderRoutes = require("./routes/orders");
 const adminOrderRoutes = require("./routes/admin-orders");
 const paymentRoutes = require("./routes/payments");
 
+/* 🔐 NEW — Webhook route */
+const webhookRoutes = require("./routes/webhooks");
+
 const app = express();
 
 app.use(cors());
+
+/* ✅ CRITICAL — Raw body ONLY for webhook */
+app.use(
+  "/api/webhooks/razorpay",
+  bodyParser.raw({ type: "application/json" })
+);
+
+/* Normal JSON parsing for rest */
 app.use(express.json());
 
 app.use("/api/products", productRoutes);
@@ -21,6 +35,9 @@ app.use("/api/admin", adminUploadRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminOrderRoutes);
 app.use("/api/payments", paymentRoutes);
+
+/* 🔐 NEW — register webhook */
+app.use("/api/webhooks", webhookRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
