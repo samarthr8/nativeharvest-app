@@ -35,6 +35,9 @@ router.post("/razorpay", async (req, res) => {
       console.error("❌ Webhook body is not a buffer");
       return res.status(400).send("Invalid body format");
     }
+    
+    console.log("Body is buffer:", Buffer.isBuffer(req.body));
+    console.log("Content-Type:", req.headers["content-type"]);
 
     // 🔐 Generate expected signature
     const expectedSignature = crypto
@@ -52,6 +55,8 @@ router.post("/razorpay", async (req, res) => {
     }
 
     console.log("✅ Signature verified");
+    console.log("Razorpay signature:", signature);
+    console.log("Expected signature:", expectedSignature);
 
     // Parse event AFTER verification
     const event = JSON.parse(rawBody.toString());
