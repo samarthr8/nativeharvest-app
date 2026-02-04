@@ -5,13 +5,21 @@ const db = require("../config/db");
 const router = express.Router();
 
 router.post("/razorpay", async (req, res) => {
+
+  console.log("🔥 Razorpay webhook received");
+
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
   const signature = req.headers["x-razorpay-signature"];
 
+  // 🔥 FORCE RAW BUFFER
+  const rawBody = Buffer.isBuffer(req.body)
+    ? req.body
+    : Buffer.from(JSON.stringify(req.body));
+
   const expectedSignature = crypto
     .createHmac("sha256", webhookSecret)
-    .update(req.body)
+    .update(rawBody)
     .digest("hex");
 
   if (signature !== expectedSignature) {
@@ -19,26 +27,31 @@ router.post("/razorpay", async (req, res) => {
     return res.status(400).send("Invalid signature");
   }
 
-  const event = JSON.parse(req.body.toString());
+  const event = JSON.parse(rawBody.toString());
+
+  console.log("Event:", event.event);
 
   if (event.event === "payment.captured") {
+
     const payment = event.payload.payment.entity;
     const razorpayOrderId = payment.order_id;
 
     try {
-      await db.query(
-        `
+
+      await db.query(`
         UPDATE orders
         SET payment_status = 'PAID'
         WHERE razorpay_order_id = $1
-        `,
-        [razorpayOrderId]
-      );
+        AND payment_status != 'PAID'
+      `, [razorpayOrderId]);
 
-      console.log("✅ Payment verified for order:", razorpayOrderId);
+      console.log("✅ Payment verified:", razorpayOrderId);
+
     } catch (err) {
+
       console.error("DB update failed", err);
       return res.status(500).send("DB error");
+
     }
   }
 
