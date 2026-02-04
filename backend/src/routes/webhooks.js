@@ -7,6 +7,8 @@ const router = express.Router();
 router.post("/razorpay", async (req, res) => {
   try {
 
+    console.log("Webhook hit from IP:", req.headers["x-forwarded-for"] || req.socket.remoteAddress);
+
     console.log("🔥 Razorpay webhook received");
 
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
