@@ -2,20 +2,26 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const OrderSuccess = () => {
+
   const { orderId } = useParams();
 
-  const [status, setStatus] = useState("CHECKING");
+  const [status, setStatus] = useState("LOADING");
+  const [paymentStarted, setPaymentStarted] = useState(false);
 
+  /**
+   * Poll payment status
+   */
   useEffect(() => {
 
     const checkStatus = async () => {
       try {
+
         const res = await fetch(`/api/orders/${orderId}/status`);
         const data = await res.json();
 
         setStatus(data.payment_status);
 
-        // stop polling if paid
+        // Stop polling once paid
         if (data.payment_status === "PAID") {
           clearInterval(interval);
         }
@@ -33,22 +39,102 @@ const OrderSuccess = () => {
 
   }, [orderId]);
 
+
+  /**
+   * Start Razorpay payment
+   */
+  const startPayment = async () => {
+
+    try {
+
+      setPaymentStarted(true);
+
+      const payRes = await fetch("/api/payments/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          order_id: orderId
+        })
+      });
+
+      const payData = await payRes.json();
+
+      if (!payData.razorpay_order_id) {
+        alert("Failed to initiate payment");
+        setPaymentStarted(false);
+        return;
+      }
+
+      const options = {
+        key: payData.key,
+        amount: payData.amount_paise,
+        currency: payData.currency,
+        name: "NativeHarvest",
+        description: "Farm Fresh Products",
+        order_id: payData.razorpay_order_id,
+
+        handler: function () {
+          // DO NOTHING
+          // webhook is source of truth
+        },
+
+        modal: {
+          ondismiss: function () {
+            setPaymentStarted(false);
+          }
+        },
+
+        theme: {
+          color: "#2f6f4e"
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (err) {
+
+      console.error(err);
+      alert("Payment initiation failed");
+      setPaymentStarted(false);
+
+    }
+  };
+
+
   return (
     <div>
+
       <h2>Order Created 🎉</h2>
       <p>Your Order ID:</p>
       <h3>{orderId}</h3>
 
-      {status === "CHECKING" && (
-        <p>🔄 Checking payment status...</p>
+      {/* STATE 1 — Payment not started */}
+      {status === "PENDING" && !paymentStarted && (
+        <button
+          onClick={startPayment}
+          style={{ marginTop: "20px" }}
+        >
+          Pay Now
+        </button>
       )}
 
-      {status === "PENDING" && (
-        <p>🕒 Waiting for payment confirmation...</p>
+      {/* STATE 2 */}
+      {paymentStarted && status !== "PAID" && (
+        <p style={{ marginTop: "20px" }}>
+          🔄 Waiting for payment confirmation...
+        </p>
       )}
 
+      {/* STATE 3 */}
       {status === "PAID" && (
-        <p style={{ color: "green", fontWeight: "bold" }}>
+        <p style={{
+          color: "green",
+          fontWeight: "bold",
+          marginTop: "20px"
+        }}>
           ✅ Payment Confirmed! Your order is being prepared.
         </p>
       )}
@@ -58,3 +144,4 @@ const OrderSuccess = () => {
 };
 
 export default OrderSuccess;
+
