@@ -13,6 +13,7 @@ const adminOrderRoutes = require("./routes/admin-orders");
 const paymentRoutes = require("./routes/payments");
 const orderStatusRoutes = require("./routes/order-status");
 const adminOrderStatusRoutes = require("./routes/admin-order-status");
+const orderTrackingRoutes = require("./routes/order-tracking");
 
 /* 🔐 NEW — Webhook route */
 const webhookRoutes = require("./routes/webhooks");
@@ -39,6 +40,7 @@ app.use("/api/admin", adminOrderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/orders", orderStatusRoutes);
 app.use("/api/admin", adminOrderStatusRoutes);
+app.use("/api/orders", orderTrackingRoutes);
 
 /* 🔐 NEW — register webhook */
 app.use("/api/webhooks", webhookRoutes);
