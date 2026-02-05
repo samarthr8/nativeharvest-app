@@ -3,9 +3,8 @@ import api from "../../services/api";
 
 export default function AdminDashboard() {
 
-  /* ---------------- PRODUCTS ---------------- */
-
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -18,95 +17,75 @@ export default function AdminDashboard() {
     api.get("/products").then(res => setProducts(res.data));
   };
 
+  const loadOrders = async () => {
+    const res = await api.get("/admin/orders");
+    setOrders(res.data);
+  };
+
   useEffect(() => {
     loadProducts();
-    loadOrders(); // ⭐ load orders too
+    loadOrders();
   }, []);
 
-  /* ---------------- ORDERS ---------------- */
+  /* UPDATE ORDER STATUS */
+  const updateOrderStatus = async (orderId, newStatus) => {
 
-  const [orders, setOrders] = useState([]);
-
-  const loadOrders = async () => {
     try {
-      const res = await api.get("/admin/orders");
-      setOrders(res.data);
+
+      await api.patch(`/admin/orders/${orderId}/status`, {
+        order_status: newStatus
+      });
+
+      loadOrders();
+
     } catch (err) {
-      console.error("Failed to fetch orders", err);
+      alert("Failed to update order status");
+      console.error(err);
     }
   };
 
   /* IMAGE UPLOAD */
   const uploadImage = async () => {
-    if (!file) {
-      alert("Please select an image");
-      return;
-    }
 
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
+    if (!file) return alert("Select an image");
 
-      const res = await api.post("/admin/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+    const formData = new FormData();
+    formData.append("image", file);
 
-      setImage(res.data.imageUrl);
-      alert("Image uploaded successfully");
+    const res = await api.post("/admin/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
 
-    } catch (err) {
-      alert("Image upload failed");
-      console.error(err);
-    }
+    setImage(res.data.imageUrl);
   };
 
-  /* ADD PRODUCT */
   const addProduct = async () => {
-    try {
-      await api.post("/admin/products", {
-        name,
-        slug,
-        price,
-        image,
-        description
-      });
 
-      setName("");
-      setSlug("");
-      setPrice("");
-      setDescription("");
-      setFile(null);
-      setImage("");
+    await api.post("/admin/products", {
+      name,
+      slug,
+      price,
+      image,
+      description
+    });
 
-      loadProducts();
-      alert("Product added successfully");
+    setName("");
+    setSlug("");
+    setPrice("");
+    setDescription("");
+    setImage("");
 
-    } catch (err) {
-      alert("Failed to add product");
-      console.error(err);
-    }
+    loadProducts();
   };
 
-  /* DELETE PRODUCT */
   const deleteProduct = async (slug) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
 
-    if (!confirmDelete) return;
+    if (!window.confirm("Delete product?")) return;
 
-    try {
-      await api.delete(`/admin/products/${slug}`);
-      loadProducts();
-      alert("Product deleted");
-
-    } catch (err) {
-      alert("Failed to delete product");
-      console.error(err);
-    }
+    await api.delete(`/admin/products/${slug}`);
+    loadProducts();
   };
 
-  /* LOGOUT */
   const logout = () => {
     localStorage.removeItem("adminToken");
     window.location.href = "/admin/login";
@@ -114,51 +93,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="container">
-      <h1>Admin Dashboard</h1>
 
+      <h1>Admin Dashboard</h1>
       <button onClick={logout}>Logout</button>
 
       <hr />
-
-      {/* ---------------- PRODUCTS UI ---------------- */}
 
       <h3>Upload Product Image</h3>
       <input type="file" onChange={e => setFile(e.target.files[0])} />
       <button onClick={uploadImage}>Upload</button>
 
-      {image && (
-        <p>
-          Image uploaded:
-          <br />
-          <img
-            src={image}
-            alt="Uploaded"
-            style={{ width: "120px", marginTop: "10px" }}
-          />
-        </p>
-      )}
+      {image && <img src={image} alt="" style={{ width: 120 }} />}
 
       <hr />
 
       <h3>Add Product</h3>
 
-      <input
-        placeholder="Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      /><br />
-
-      <input
-        placeholder="Slug"
-        value={slug}
-        onChange={e => setSlug(e.target.value)}
-      /><br />
-
-      <input
-        placeholder="Price"
-        value={price}
-        onChange={e => setPrice(e.target.value)}
-      /><br />
+      <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} /><br />
+      <input placeholder="Slug" value={slug} onChange={e => setSlug(e.target.value)} /><br />
+      <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} /><br />
 
       <textarea
         placeholder="Description"
@@ -174,76 +127,69 @@ export default function AdminDashboard() {
 
       <ul>
         {products.map(p => (
-          <li key={p.slug} style={{ marginBottom: "10px" }}>
+          <li key={p.slug}>
             <strong>{p.name}</strong> – ₹{p.price}
             <br />
-            {p.image && (
-              <img
-                src={p.image}
-                alt={p.name}
-                style={{ width: "80px", marginTop: "5px" }}
-              />
-            )}
+            {p.image && <img src={p.image} alt="" style={{ width: 80 }} />}
             <br />
-            <button
-              style={{ marginTop: "5px" }}
-              onClick={() => deleteProduct(p.slug)}
-            >
+            <button onClick={() => deleteProduct(p.slug)}>
               Delete
             </button>
           </li>
         ))}
       </ul>
 
-      {/* ---------------- ORDERS UI ---------------- */}
-
       <hr />
+
+      {/* ⭐ ORDERS SECTION */}
 
       <h2>Orders</h2>
 
-      <table
-        border="1"
-        cellPadding="10"
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          marginTop: "20px"
-        }}
-      >
-        <thead style={{ background: "#f5f5f5" }}>
+      <table border="1" cellPadding="10"
+        style={{ width: "100%", borderCollapse: "collapse" }}>
+
+        <thead>
           <tr>
-            <th>Order ID</th>
+            <th>Order</th>
             <th>Customer</th>
-            <th>Phone</th>
             <th>Amount</th>
             <th>Payment</th>
-            <th>Created</th>
+            <th>Status</th>
+            <th>Update</th>
           </tr>
         </thead>
 
         <tbody>
-          {orders.map(order => (
-            <tr key={order.id}>
-              <td>{order.order_id}</td>
-              <td>{order.customer_name}</td>
-              <td>{order.phone}</td>
-              <td>₹{order.total_amount}</td>
+          {orders.map(o => (
+            <tr key={o.id}>
+              <td>{o.order_id}</td>
+              <td>{o.customer_name}</td>
+              <td>₹{o.total_amount}</td>
 
-              <td
-                style={{
-                  color:
-                    order.payment_status === "PAID"
-                      ? "green"
-                      : "orange",
-                  fontWeight: "bold"
-                }}
-              >
-                {order.payment_status}
+              <td style={{
+                color: o.payment_status === "PAID" ? "green" : "orange",
+                fontWeight: "bold"
+              }}>
+                {o.payment_status}
               </td>
+
+              <td>{o.order_status}</td>
 
               <td>
-                {new Date(order.created_at).toLocaleString()}
+                <select
+                  value={o.order_status}
+                  onChange={(e) =>
+                    updateOrderStatus(o.order_id, e.target.value)
+                  }
+                >
+                  <option>CREATED</option>
+                  <option>PACKED</option>
+                  <option>SHIPPED</option>
+                  <option>DELIVERED</option>
+                  <option>CANCELLED</option>
+                </select>
               </td>
+
             </tr>
           ))}
         </tbody>
