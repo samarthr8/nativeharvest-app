@@ -76,8 +76,8 @@ const OrderSuccess = () => {
         order_id: payData.razorpay_order_id,
 
         handler: function () {
-          // DO NOTHING
-          // webhook is source of truth
+          // Do nothing
+          // Webhook is the source of truth
         },
 
         modal: {
@@ -105,13 +105,13 @@ const OrderSuccess = () => {
 
 
   return (
-    <div>
+    <div style={{ padding: "40px" }}>
 
       <h2>Order Created 🎉</h2>
       <p>Your Order ID:</p>
       <h3>{orderId}</h3>
 
-      {/* STATE 1 — Payment not started */}
+      {/* PAYMENT NOT STARTED */}
       {status === "PENDING" && !paymentStarted && (
         <button
           onClick={startPayment}
@@ -121,22 +121,37 @@ const OrderSuccess = () => {
         </button>
       )}
 
-      {/* STATE 2 */}
+      {/* WAITING */}
       {paymentStarted && status !== "PAID" && (
         <p style={{ marginTop: "20px" }}>
           🔄 Waiting for payment confirmation...
         </p>
       )}
 
-      {/* STATE 3 */}
+      {/* SUCCESS */}
       {status === "PAID" && (
-        <p style={{
-          color: "green",
-          fontWeight: "bold",
-          marginTop: "20px"
-        }}>
-          ✅ Payment Confirmed! Your order is being prepared.
-        </p>
+        <div style={{ marginTop: "20px" }}>
+
+          <p style={{
+            color: "green",
+            fontWeight: "bold",
+            fontSize: "18px"
+          }}>
+            ✅ Payment Confirmed! Your order is being prepared.
+          </p>
+
+          {/* ⭐ TRACK BUTTON ADDED HERE */}
+          <a href={`/order/${orderId}`}>
+            <button style={{
+              marginTop: "20px",
+              padding: "10px 20px",
+              cursor: "pointer"
+            }}>
+              Track Your Order
+            </button>
+          </a>
+
+        </div>
       )}
 
     </div>
@@ -144,4 +159,3 @@ const OrderSuccess = () => {
 };
 
 export default OrderSuccess;
-
