@@ -1,82 +1,89 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const crypto = require("crypto");
+const { v4: uuidv4 } = require("uuid");
 
-/*
-  POST /api/orders
-  Body:
-  {
-    customer_name,
-    phone,
-    email,
-    address,
-    items: [{ slug, qty }]
-  }
-*/
 router.post("/", async (req, res) => {
+
+  const client = await db.connect();
+
   try {
-    const { customer_name, phone, email, address, items } = req.body;
 
-    if (!items || items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
-    }
+    const {
+      customer_name,
+      phone,
+      email,
+      address,
+      items
+    } = req.body;
 
-    // Fetch products from DB
-    const slugs = items.map(i => i.slug);
-    const result = await db.query(
-      "SELECT slug, name, price FROM products WHERE slug = ANY($1)",
-      [slugs]
-    );
+    await client.query("BEGIN");
 
-    if (result.rows.length !== items.length) {
-      return res.status(400).json({ message: "Invalid product in cart" });
-    }
-
-    // Calculate total
     let total = 0;
-    const orderItems = result.rows.map(product => {
-      const cartItem = items.find(i => i.slug === product.slug);
-      const lineTotal = product.price * cartItem.qty;
-      total += lineTotal;
 
-      return {
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        qty: cartItem.qty
-      };
-    });
+    for (const item of items) {
 
-    const orderId = "NH-" + crypto.randomBytes(4).toString("hex").toUpperCase();
+      const productRes = await client.query(
+        "SELECT price, stock FROM products WHERE slug = $1",
+        [item.slug]
+      );
 
-    // Insert order
-    await db.query(
-      `INSERT INTO orders 
-       (order_id, customer_name, phone, email, address, total_amount, status)
-       VALUES ($1,$2,$3,$4,$5,$6,'CREATED')`,
-      [orderId, customer_name, phone, email, address, total]
-    );
+      if (productRes.rowCount === 0) {
+        throw new Error("Product not found");
+      }
 
-    // Insert order items
-    for (const item of orderItems) {
-      await db.query(
-        `INSERT INTO order_items
-         (order_id, product_slug, product_name, price, quantity)
-         VALUES ($1,$2,$3,$4,$5)`,
-        [orderId, item.slug, item.name, item.price, item.qty]
+      const product = productRes.rows[0];
+
+      // 🔥 CRITICAL STOCK CHECK
+      if (product.stock < item.qty) {
+        throw new Error(`Insufficient stock for ${item.slug}`);
+      }
+
+      total += product.price * item.qty;
+    }
+
+    // 🔥 Reduce stock
+    for (const item of items) {
+
+      await client.query(
+        `
+        UPDATE products
+        SET stock = stock - $1
+        WHERE slug = $2
+        `,
+        [item.qty, item.slug]
       );
     }
 
+    const orderId = "NH-" + uuidv4().slice(0,8).toUpperCase();
+
+    await client.query(
+      `
+      INSERT INTO orders
+      (order_id, customer_name, phone, email, address, total_amount)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      `,
+      [orderId, customer_name, phone, email, address, total]
+    );
+
+    await client.query("COMMIT");
+
     res.json({
-      order_id: orderId,
-      total_amount: total,
-      status: "CREATED"
+      order_id: orderId
     });
 
   } catch (err) {
+
+    await client.query("ROLLBACK");
+
     console.error(err);
-    res.status(500).json({ message: "Order creation failed" });
+
+    res.status(400).json({
+      message: err.message
+    });
+
+  } finally {
+    client.release();
   }
 });
 
