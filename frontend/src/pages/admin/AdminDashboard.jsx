@@ -19,12 +19,8 @@ export default function AdminDashboard() {
   };
 
   const loadOrders = async () => {
-    try {
-      const res = await api.get("/admin/orders");
-      setOrders(res.data);
-    } catch (err) {
-      console.error("Orders load failed", err);
-    }
+    const res = await api.get("/admin/orders");
+    setOrders(res.data);
   };
 
   useEffect(() => {
@@ -32,8 +28,7 @@ export default function AdminDashboard() {
     loadOrders();
   }, []);
 
-  /* ---------------- STOCK UPDATE (HARDENED) ---------------- */
-
+  /* STOCK UPDATE */
   const updateStock = async (slug, newStock) => {
 
     if (newStock === "") return;
@@ -47,14 +42,12 @@ export default function AdminDashboard() {
       loadProducts();
 
     } catch (err) {
-
-      console.error("Stock update error:", err.response?.data || err);
+      console.error(err);
       alert("Stock update failed");
     }
   };
 
-  /* ---------------- IMAGE ---------------- */
-
+  /* IMAGE */
   const uploadImage = async () => {
 
     if (!file) return alert("Select image");
@@ -69,8 +62,7 @@ export default function AdminDashboard() {
     setImage(res.data.imageUrl);
   };
 
-  /* ---------------- ADD PRODUCT ---------------- */
-
+  /* ADD PRODUCT */
   const addProduct = async () => {
 
     await api.post("/admin/products", {
@@ -92,8 +84,7 @@ export default function AdminDashboard() {
     loadProducts();
   };
 
-  /* ---------------- DELETE ---------------- */
-
+  /* DELETE */
   const deleteProduct = async (slug) => {
 
     if (!window.confirm("Delete product?")) return;
@@ -102,8 +93,7 @@ export default function AdminDashboard() {
     loadProducts();
   };
 
-  /* ---------------- ORDER STATUS ---------------- */
-
+  /* ORDER STATUS */
   const updateOrderStatus = async (orderId, newStatus) => {
 
     await api.patch(`/admin/orders/${orderId}/status`, {
@@ -112,8 +102,6 @@ export default function AdminDashboard() {
 
     loadOrders();
   };
-
-  /* ---------------- LOGOUT ---------------- */
 
   const logout = () => {
     localStorage.removeItem("adminToken");
@@ -128,7 +116,6 @@ export default function AdminDashboard() {
 
       <hr />
 
-      {/* IMAGE */}
       <h3>Upload Product Image</h3>
       <input type="file" onChange={e => setFile(e.target.files[0])} />
       <button onClick={uploadImage}>Upload</button>
@@ -137,7 +124,6 @@ export default function AdminDashboard() {
 
       <hr />
 
-      {/* ADD PRODUCT */}
       <h3>Add Product</h3>
 
       <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} /><br />
@@ -155,11 +141,11 @@ export default function AdminDashboard() {
 
       <hr />
 
-      {/* PRODUCTS */}
       <h3>Existing Products</h3>
 
       <ul style={{ listStyle: "none", padding: 0 }}>
         {products.map(p => (
+
           <li key={p.slug}
               style={{
                 marginBottom: "20px",
@@ -180,8 +166,33 @@ export default function AdminDashboard() {
                 <img src={p.image} alt="" style={{ width: 70 }} />
               )}
 
+              {/* ⭐ STOCK INDICATOR */}
               <div>
-                <div><strong>Stock:</strong> {p.stock}</div>
+
+                <div>
+                  <strong>Available Stock:</strong>{" "}
+                  <span style={{
+                    color:
+                      p.stock === 0
+                        ? "red"
+                        : p.stock < 5
+                        ? "orange"
+                        : "green",
+                    fontWeight: "bold"
+                  }}>
+                    {p.stock}
+                  </span>
+
+                  {p.stock === 0 && (
+                    <span style={{
+                      marginLeft: "8px",
+                      color: "red",
+                      fontWeight: "bold"
+                    }}>
+                      OUT OF STOCK
+                    </span>
+                  )}
+                </div>
 
                 <input
                   type="number"
@@ -189,6 +200,7 @@ export default function AdminDashboard() {
                   style={{ width: "80px", marginTop: "5px" }}
                   onBlur={(e) => updateStock(p.slug, e.target.value)}
                 />
+
               </div>
 
             </div>
@@ -206,15 +218,12 @@ export default function AdminDashboard() {
 
       <hr />
 
-      {/* ORDERS — NOW GUARANTEED VISIBLE */}
       <h2>Orders</h2>
 
       <div style={{ overflowX: "auto" }}>
-        <table
-          border="1"
-          cellPadding="10"
-          style={{ width: "100%", borderCollapse: "collapse" }}
-        >
+        <table border="1" cellPadding="10"
+               style={{ width: "100%", borderCollapse: "collapse" }}>
+
           <thead>
             <tr>
               <th>Order</th>
@@ -234,7 +243,9 @@ export default function AdminDashboard() {
                 <td>₹{o.total_amount}</td>
 
                 <td style={{
-                  color: o.payment_status === "PAID" ? "green" : "orange",
+                  color: o.payment_status === "PAID"
+                    ? "green"
+                    : "orange",
                   fontWeight: "bold"
                 }}>
                   {o.payment_status}
@@ -266,4 +277,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

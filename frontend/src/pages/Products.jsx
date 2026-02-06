@@ -1,52 +1,75 @@
 import { useEffect, useState } from "react";
+import api from "../services/api";
 import { useCart } from "../context/CartContext";
 
-const Products = () => {
+export default function Products() {
+
   const [products, setProducts] = useState([]);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    fetch("/api/products")
-      .then(res => res.json())
-      .then(data => {
-        console.log("Products API response:", data); // TEMP debug
-        setProducts(data);
-      });
+    api.get("/products").then(res => setProducts(res.data));
   }, []);
 
   return (
-    <div>
-      <h2>Products</h2>
+    <div className="container">
 
-      <div className="products-grid">
-        {products.map(product => {
-          const image =
-            product.image_url || product.imageUrl || product.image || null;
+      <h1>Products</h1>
 
-          return (
-            <div key={product.slug} className="product-card">
-              {image && (
-                <img
-                  src={image}
-                  alt={product.name}
-                  className="product-image"
-                />
-              )}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
+        gap: "20px"
+      }}>
 
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p><strong>₹{product.price}</strong></p>
+        {products.map(p => (
 
-              <button onClick={() => addToCart(product)}>
+          <div key={p.slug}
+               style={{
+                 border: "1px solid #ddd",
+                 padding: "15px"
+               }}>
+
+            <img
+              src={p.image}
+              alt={p.name}
+              style={{ width: "100%" }}
+            />
+
+            <h3>{p.name}</h3>
+            <p>{p.description}</p>
+            <strong>₹{p.price}</strong>
+
+            <br /><br />
+
+            {p.stock === 0 ? (
+
+              <button
+                disabled
+                style={{
+                  background: "#ccc",
+                  cursor: "not-allowed",
+                  padding: "8px"
+                }}>
+                Out of Stock
+              </button>
+
+            ) : (
+
+              <button
+                onClick={() => addToCart(p)}
+                style={{ padding: "8px" }}>
                 Add to Cart
               </button>
-            </div>
-          );
-        })}
+
+            )}
+
+          </div>
+
+        ))}
+
       </div>
+
     </div>
   );
-};
-
-export default Products;
-
+}
