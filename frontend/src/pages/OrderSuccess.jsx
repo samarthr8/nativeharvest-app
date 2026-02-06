@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const OrderSuccess = () => {
@@ -21,7 +21,6 @@ const OrderSuccess = () => {
 
         setStatus(data.payment_status);
 
-        // Stop polling once paid
         if (data.payment_status === "PAID") {
           clearInterval(interval);
         }
@@ -76,8 +75,7 @@ const OrderSuccess = () => {
         order_id: payData.razorpay_order_id,
 
         handler: function () {
-          // Do nothing
-          // Webhook is the source of truth
+          // webhook is source of truth
         },
 
         modal: {
@@ -113,10 +111,7 @@ const OrderSuccess = () => {
 
       {/* PAYMENT NOT STARTED */}
       {status === "PENDING" && !paymentStarted && (
-        <button
-          onClick={startPayment}
-          style={{ marginTop: "20px" }}
-        >
+        <button onClick={startPayment} style={{ marginTop: "20px" }}>
           Pay Now
         </button>
       )}
@@ -140,8 +135,8 @@ const OrderSuccess = () => {
             ✅ Payment Confirmed! Your order is being prepared.
           </p>
 
-          {/* ⭐ TRACK BUTTON ADDED HERE */}
-          <a href={`/order/${orderId}`}>
+          {/* ✅ FIXED — USING LINK */}
+          <Link to={`/order/${orderId}`}>
             <button style={{
               marginTop: "20px",
               padding: "10px 20px",
@@ -149,7 +144,7 @@ const OrderSuccess = () => {
             }}>
               Track Your Order
             </button>
-          </a>
+          </Link>
 
         </div>
       )}

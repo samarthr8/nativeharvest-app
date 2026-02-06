@@ -38,7 +38,10 @@ const Checkout = () => {
       const data = await res.json();
 
       clearCart();
-      navigate(`/order/${data.order_id}`);
+
+      /* ✅ ONLY CHANGE — SAFE ROUTE */
+      navigate(`/order-success/${data.order_id}`);
+
     } catch (err) {
       console.error(err);
       alert("Order creation failed");
@@ -54,7 +57,7 @@ const Checkout = () => {
       <input name="customer_name" placeholder="Name" onChange={handleChange} />
       <input name="phone" placeholder="Phone" onChange={handleChange} />
       <input name="email" placeholder="Email" onChange={handleChange} />
-      <textarea name="address" placeholder="Address" />
+      <textarea name="address" placeholder="Address" onChange={handleChange} />
 
       <button onClick={placeOrder} disabled={loading}>
         {loading ? "Placing Order..." : "Place Order"}

@@ -26,7 +26,8 @@ const App = () => {
       </nav>
 
       <Routes>
-        {/* ✅ HOME AS INDEX ROUTE */}
+
+        {/* HOME */}
         <Route index element={<Home />} />
 
         {/* Public */}
@@ -35,16 +36,18 @@ const App = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/order/:orderId" element={<OrderSuccess />} />
+
+        {/* ✅ FIXED ROUTES */}
+        <Route path="/order-success/:orderId" element={<OrderSuccess />} />
         <Route path="/order/:orderId" element={<OrderTracking />} />
 
         {/* Admin */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
       </Routes>
     </>
   );
 };
 
 export default App;
-
