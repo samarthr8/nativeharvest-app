@@ -24,10 +24,22 @@ export default function Products() {
 
         {products.map(p => {
 
-          const stockColor =
-            p.stock === 0 ? "red" :
-            p.stock < 5 ? "#ff9800" :
-            "green";
+          /* PROFESSIONAL STOCK LOGIC */
+          let stockText = "";
+          let stockColor = "";
+
+          if (p.stock === 0) {
+            stockText = "Out of Stock";
+            stockColor = "red";
+          } 
+          else if (p.stock <= 10) {
+            stockText = "Only Few Left";
+            stockColor = "#ff9800"; // orange
+          } 
+          else {
+            stockText = "In Stock";
+            stockColor = "green";
+          }
 
           return (
 
@@ -40,7 +52,7 @@ export default function Products() {
                 height: "100%"
               }}>
 
-              {/* FIXED IMAGE BOX */}
+              {/* FIXED IMAGE BOX — ensures uniform tiles */}
               <div style={{
                 width: "100%",
                 height: "220px",
@@ -67,15 +79,13 @@ export default function Products() {
 
               <strong>₹{p.price}</strong>
 
-              {/* STOCK */}
+              {/* CUSTOMER SAFE STOCK DISPLAY */}
               <p style={{
                 marginTop: "6px",
                 fontWeight: "bold",
                 color: stockColor
               }}>
-                {p.stock === 0
-                  ? "Out of Stock"
-                  : `Available: ${p.stock}`}
+                {stockText}
               </p>
 
               <br />
@@ -87,7 +97,9 @@ export default function Products() {
                   style={{
                     background: "#ccc",
                     cursor: "not-allowed",
-                    padding: "8px"
+                    padding: "8px",
+                    border: "none",
+                    borderRadius: "4px"
                   }}>
                   Out of Stock
                 </button>
@@ -96,7 +108,14 @@ export default function Products() {
 
                 <button
                   onClick={() => addToCart(p)}
-                  style={{ padding: "8px" }}>
+                  style={{
+                    padding: "8px",
+                    background: "#2f6f4e",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer"
+                  }}>
                   Add to Cart
                 </button>
 
