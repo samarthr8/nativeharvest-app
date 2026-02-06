@@ -18,55 +18,94 @@ export default function Products() {
 
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
-        gap: "20px"
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
+        gap: "24px"
       }}>
 
-        {products.map(p => (
+        {products.map(p => {
 
-          <div key={p.slug}
-               style={{
-                 border: "1px solid #ddd",
-                 padding: "15px"
-               }}>
+          const stockColor =
+            p.stock === 0 ? "red" :
+            p.stock < 5 ? "#ff9800" :
+            "green";
 
-            <img
-              src={p.image}
-              alt={p.name}
-              style={{ width: "100%" }}
-            />
+          return (
 
-            <h3>{p.name}</h3>
-            <p>{p.description}</p>
-            <strong>₹{p.price}</strong>
+            <div key={p.slug}
+              style={{
+                border: "1px solid #ddd",
+                padding: "15px",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%"
+              }}>
 
-            <br /><br />
+              {/* FIXED IMAGE BOX */}
+              <div style={{
+                width: "100%",
+                height: "220px",
+                overflow: "hidden",
+                borderRadius: "6px",
+                background: "#f7f7f7"
+              }}>
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                  }}
+                />
+              </div>
 
-            {p.stock === 0 ? (
+              <h3 style={{ marginTop: "12px" }}>{p.name}</h3>
 
-              <button
-                disabled
-                style={{
-                  background: "#ccc",
-                  cursor: "not-allowed",
-                  padding: "8px"
-                }}>
-                Out of Stock
-              </button>
+              <p style={{ flexGrow: 1 }}>
+                {p.description}
+              </p>
 
-            ) : (
+              <strong>₹{p.price}</strong>
 
-              <button
-                onClick={() => addToCart(p)}
-                style={{ padding: "8px" }}>
-                Add to Cart
-              </button>
+              {/* STOCK */}
+              <p style={{
+                marginTop: "6px",
+                fontWeight: "bold",
+                color: stockColor
+              }}>
+                {p.stock === 0
+                  ? "Out of Stock"
+                  : `Available: ${p.stock}`}
+              </p>
 
-            )}
+              <br />
 
-          </div>
+              {p.stock === 0 ? (
 
-        ))}
+                <button
+                  disabled
+                  style={{
+                    background: "#ccc",
+                    cursor: "not-allowed",
+                    padding: "8px"
+                  }}>
+                  Out of Stock
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={() => addToCart(p)}
+                  style={{ padding: "8px" }}>
+                  Add to Cart
+                </button>
+
+              )}
+
+            </div>
+
+          );
+        })}
 
       </div>
 

@@ -4,16 +4,40 @@ const db = require("../config/db");
 
 /* GET ALL PRODUCTS */
 router.get("/", async (req, res) => {
+
   const result = await db.query(
-    "SELECT name, slug, price, image, description FROM products ORDER BY id"
+    `
+    SELECT 
+      name,
+      slug,
+      price,
+      image,
+      description,
+      COALESCE(stock,0) as stock
+    FROM products
+    ORDER BY id
+    `
   );
+
   res.json(result.rows);
 });
 
+
 /* GET PRODUCT BY SLUG */
 router.get("/:slug", async (req, res) => {
+
   const result = await db.query(
-    "SELECT name, slug, price, image, description FROM products WHERE slug=$1",
+    `
+    SELECT 
+      name,
+      slug,
+      price,
+      image,
+      description,
+      COALESCE(stock,0) as stock
+    FROM products 
+    WHERE slug=$1
+    `,
     [req.params.slug]
   );
 
@@ -25,4 +49,3 @@ router.get("/:slug", async (req, res) => {
 });
 
 module.exports = router;
-
