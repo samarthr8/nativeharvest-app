@@ -101,9 +101,8 @@ jobs:
       #   exit-code: 1
 
       # ---------------- UPLOAD ARTIFACTS ----------------
-      - name: Upload reports to Nexus
-        run: |
-          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-          --upload-file backend/coverage/lcov.info \
-          ${{ secrets.NEXUS_URL }}/repository/nativeharvest-reports/backend-${IMAGE_TAG}.lcov
-
+      #- name: Upload reports to Nexus
+      #  run: |
+      #    curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+      #    --upload-file backend/coverage/lcov.info \
+      #    ${{ secrets.NEXUS_URL }}/repository/nativeharvest-reports/backend-${IMAGE_TAG}.lcov

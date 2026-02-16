@@ -161,3 +161,104 @@ Authentication: JWT (admin)
 
 Infrastructure: Docker, custom Docker network
 ```
+
+🔐 SSL Termination (Production Setup)
+```bash
+This project uses SSL termination at the EC2 host level, not inside Docker containers.
+This follows industry best practices for maintainability, security, and scalability.
+```
+🏗 Architecture Overview
+```bash
+Internet (HTTPS)
+   ↓
+EC2 Host Nginx (SSL termination)
+   ↓
+Docker containers (HTTP only)
+```
+SSL certificates are managed on the EC2 host
+
+Docker containers remain stateless and immutable
+
+No certificates are stored inside containers
+
+✅ Why SSL Is Terminated on Host Nginx
+```bash
+Easier certificate renewal (Certbot)
+
+No container rebuilds on certificate changes
+
+Prevents certificate loss on container recreation
+
+Production-grade and Kubernetes-ready design
+```
+🛠 Steps to Enable SSL Termination
+```bash
+1. Install Nginx on EC2 Host
+sudo apt update
+sudo apt install nginx -y
+```
+2. Create Nginx Reverse Proxy Configuration
+```bash
+sudo nano /etc/nginx/sites-available/nativeharvest
+```
+```bash
+server {
+    server_name nativeharvest.store www.nativeharvest.store;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+Enable the site:
+```bash
+sudo ln -s /etc/nginx/sites-available/nativeharvest /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+3. Install SSL Certificate (Let’s Encrypt)
+```bash
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d nativeharvest.store -d www.nativeharvest.store
+```
+
+Choose the option to redirect HTTP → HTTPS.
+
+4. Auto-Renew Certificates
+```bash
+sudo crontab -e
+```
+
+Add:
+```bash
+0 3 * * * certbot renew --quiet
+```
+
+🔒 Notes
+
+SSL is terminated at the edge (EC2 host)
+
+Docker containers continue to serve HTTP traffic internally
+
+Authorization headers must be explicitly forwarded for admin APIs
+
+✅ Result:
+The application is accessible securely via https://nativeharvest.store.
