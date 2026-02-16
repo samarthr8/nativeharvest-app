@@ -1,6 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const db = require("../config/db");
+const { sendOrderConfirmation } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -28,8 +29,6 @@ router.post("/razorpay", async (req, res) => {
     /**
      * VERY IMPORTANT:
      * req.body MUST be raw buffer
-     * configured via:
-     * bodyParser.raw({ type: "application/json" })
      */
     const rawBody = req.body;
 
@@ -77,20 +76,43 @@ router.post("/razorpay", async (req, res) => {
 
       /**
        * Idempotent update
-       * Prevents double webhook from changing state twice
        */
       const result = await db.query(`
         UPDATE orders
         SET payment_status = 'PAID'
         WHERE razorpay_order_id = $1
         AND payment_status != 'PAID'
-        RETURNING order_id;
+        RETURNING order_id, email, total_amount;
       `, [razorpayOrderId]);
 
       if (result.rowCount === 0) {
+
         console.log("ℹ️ Order already updated or not found.");
+
       } else {
+
         console.log("✅ Payment marked PAID for order:", result.rows[0].order_id);
+
+        /**
+         * 🔥 NEW FEATURE: Send Order Confirmation Email
+         * (Does NOT affect webhook logic)
+         */
+        try {
+
+          const order = result.rows[0];
+
+          await sendOrderConfirmation(order);
+
+          console.log("📧 Order confirmation email sent successfully");
+
+        } catch (emailErr) {
+
+          console.error("❌ Email sending failed:", emailErr);
+
+          // IMPORTANT:
+          // Do NOT throw error.
+          // Webhook must not fail because email failed.
+        }
       }
     }
 
@@ -106,10 +128,7 @@ router.post("/razorpay", async (req, res) => {
 
     console.error("🔥 Webhook handler crashed:", err);
 
-    // Always return 200 unless signature fails
-    // Otherwise Razorpay retries aggressively
     res.status(200).send("Received");
-
   }
 });
 
