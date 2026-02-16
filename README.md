@@ -260,5 +260,12 @@ Docker containers continue to serve HTTP traffic internally
 
 Authorization headers must be explicitly forwarded for admin APIs
 
+After SSL migration:
+```bash
+- Update Razorpay webhook to HTTPS
+- Verify webhook signature
+- Confirm DB payment_status updates
+```
+
 ✅ Result:
 The application is accessible securely via https://nativeharvest.store.
