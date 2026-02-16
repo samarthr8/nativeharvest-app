@@ -12,29 +12,58 @@ const transporter = nodemailer.createTransport({
 });
 
 /* ---------------------------------------------------
-   🧾 Generate Invoice PDF (NEW)
+   🧾 Generate Professional Invoice PDF (UPDATED)
 --------------------------------------------------- */
 function generateInvoice(order) {
 
   return new Promise((resolve, reject) => {
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ margin: 50 });
+
+    const fontPath = path.join(__dirname, "../../fonts/NotoSans-Regular.ttf");
+    doc.registerFont("NotoSans", fontPath);
+    doc.font("NotoSans");
+
     const filePath = path.join(__dirname, `../../temp-${order.order_id}.pdf`);
     const stream = fs.createWriteStream(filePath);
 
     doc.pipe(stream);
 
-    doc.fontSize(20).text("NativeHarvest Invoice", { align: "center" });
-    doc.moveDown();
+    /* Header */
+    doc.fontSize(22).text("NativeHarvest", { align: "center" });
+    doc.moveDown(0.5);
+    doc.fontSize(16).text("INVOICE", { align: "center" });
+    doc.moveDown(1.5);
 
-    doc.fontSize(12).text(`Order ID: ${order.order_id}`);
+    /* Order Details */
+    doc.fontSize(12);
+    doc.text(`Order ID: ${order.order_id}`);
     doc.text(`Customer: ${order.customer_name || ""}`);
     doc.text(`Email: ${order.email}`);
-    doc.text(`Total Amount: ₹${order.total_amount}`);
     doc.text(`Payment Status: PAID`);
     doc.moveDown();
 
-    doc.text("Thank you for shopping with NativeHarvest 🌾");
+    doc.moveTo(50, doc.y)
+       .lineTo(550, doc.y)
+       .stroke();
+
+    doc.moveDown();
+
+    /* Amount Section */
+    doc.fontSize(14).text("Order Summary", { underline: true });
+    doc.moveDown(0.5);
+
+    doc.fontSize(12).text(`Total Amount: ₹${order.total_amount}`, {
+      align: "right"
+    });
+
+    doc.moveDown(2);
+
+    /* Footer */
+    doc.fontSize(11).text(
+      "Thank you for shopping with NativeHarvest.",
+      { align: "center" }
+    );
 
     doc.end();
 
@@ -44,7 +73,7 @@ function generateInvoice(order) {
 }
 
 /* ---------------------------------------------------
-   📧 Customer Order Confirmation (UPDATED)
+   📧 Customer Order Confirmation
 --------------------------------------------------- */
 async function sendOrderConfirmation(order) {
 
@@ -81,7 +110,7 @@ async function sendOrderConfirmation(order) {
 }
 
 /* ---------------------------------------------------
-   🏢 Admin Notification Email (NEW)
+   🏢 Admin Notification Email
 --------------------------------------------------- */
 async function sendAdminNotification(order) {
 
@@ -104,7 +133,7 @@ async function sendAdminNotification(order) {
 }
 
 /* ---------------------------------------------------
-   🚚 Shipment Notification (NEW)
+   🚚 Shipment Notification
 --------------------------------------------------- */
 async function sendShipmentNotification(order) {
 
