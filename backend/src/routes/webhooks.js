@@ -1,7 +1,12 @@
 const express = require("express");
 const crypto = require("crypto");
 const db = require("../config/db");
-const { sendOrderConfirmation } = require("../services/emailService");
+
+/* 🔥 UPDATED: Added sendAdminNotification */
+const { 
+  sendOrderConfirmation,
+  sendAdminNotification
+} = require("../services/emailService");
 
 const router = express.Router();
 
@@ -9,7 +14,6 @@ router.post("/razorpay", async (req, res) => {
   try {
 
     console.log("Webhook hit from IP:", req.headers["x-forwarded-for"] || req.socket.remoteAddress);
-
     console.log("🔥 Razorpay webhook received");
 
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -75,14 +79,15 @@ router.post("/razorpay", async (req, res) => {
       console.log("Processing payment for:", razorpayOrderId);
 
       /**
-       * Idempotent update
+       * 🔥 UPDATED:
+       * Added customer_name in RETURNING
        */
       const result = await db.query(`
         UPDATE orders
         SET payment_status = 'PAID'
         WHERE razorpay_order_id = $1
         AND payment_status != 'PAID'
-        RETURNING order_id, email, total_amount;
+        RETURNING order_id, email, total_amount, customer_name;
       `, [razorpayOrderId]);
 
       if (result.rowCount === 0) {
@@ -93,17 +98,17 @@ router.post("/razorpay", async (req, res) => {
 
         console.log("✅ Payment marked PAID for order:", result.rows[0].order_id);
 
-        /**
-         * 🔥 NEW FEATURE: Send Order Confirmation Email
-         * (Does NOT affect webhook logic)
-         */
         try {
 
           const order = result.rows[0];
 
+          /* 🔥 EXISTING FEATURE */
           await sendOrderConfirmation(order);
-
           console.log("📧 Order confirmation email sent successfully");
+
+          /* 🔥 NEW FEATURE: Admin Notification */
+          await sendAdminNotification(order);
+          console.log("📩 Admin notification email sent successfully");
 
         } catch (emailErr) {
 
@@ -115,12 +120,6 @@ router.post("/razorpay", async (req, res) => {
         }
       }
     }
-
-    /**
-     * You can add more events later:
-     * payment.failed
-     * refund.created
-     */
 
     res.json({ status: "ok" });
 
