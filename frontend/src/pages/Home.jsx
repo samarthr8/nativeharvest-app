@@ -15,7 +15,7 @@ const slides = [
   {
     image:
       "https://images.unsplash.com/photo-1589308078055-eb6a4d16b6f2",
-    heading: "Authentic Pickles.",
+    heading: "Authentic Traditional Pickles.",
     sub: "Sun cured. Spice balanced. Naturally preserved."
   },
   {
@@ -311,4 +311,41 @@ const Newsletter = () => (
       <div>
         <h2>Stay Connected</h2>
         <p style={{ marginTop: "10px" }}>
-          Get updates
+          Get updates on new products and
+          seasonal batches.
+        </p>
+      </div>
+
+      <div style={{ display: "flex", gap: "15px" }}>
+        <input
+          placeholder="Enter your email"
+          style={{
+            borderRadius: "30px",
+            padding: "12px 18px",
+            border: "none",
+            flex: 1
+          }}
+        />
+
+        <button className="btn">
+          Subscribe
+        </button>
+      </div>
+    </div>
+  </section>
+);
+
+/* ----------------------------------
+   HOME EXPORT
+---------------------------------- */
+export default function Home() {
+  return (
+    <>
+      <HeroSection />
+      <TrustHighlights />
+      <FeaturedProducts />
+      <BrandStory />
+      <Newsletter />
+    </>
+  );
+}
