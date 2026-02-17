@@ -3,30 +3,59 @@ import api from "../services/api";
 import { Link } from "react-router-dom";
 
 /* ----------------------------------
-   Hero Section
+   HERO SLIDER
 ---------------------------------- */
+const slides = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+    heading: "Rooted in Indian Soil.",
+    sub: "Crafted in small batches using traditional methods."
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5",
+    heading: "Pure Mustard Oil.",
+    sub: "Cold pressed. Farm sourced. No shortcuts."
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1604908177522-040c2b54c68d",
+    heading: "Traditional Pickles.",
+    sub: "Sun cured. Spice balanced. Authentic taste."
+  }
+];
+
 const HeroSection = () => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const slide = slides[current];
+
   return (
     <section
       style={{
         height: "85vh",
-        background:
-          "linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092')",
+        background: `linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.2)), url(${slide.image})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
         alignItems: "center",
-        color: "white"
+        color: "white",
+        transition: "0.6s ease"
       }}
     >
       <div className="container">
-        <h1 style={{ maxWidth: "600px" }}>
-          Rooted in Indian Soil. Crafted in Small Batches.
-        </h1>
+        <h1 style={{ maxWidth: "600px" }}>{slide.heading}</h1>
 
         <p style={{ marginTop: "20px", maxWidth: "500px" }}>
-          Premium rural delicacies made with traditional methods and delivered
-          fresh to your home.
+          {slide.sub}
         </p>
 
         <div style={{ marginTop: "30px", display: "flex", gap: "20px" }}>
@@ -46,37 +75,52 @@ const HeroSection = () => {
             Learn More
           </Link>
         </div>
+
+        {/* Dots */}
+        <div style={{ marginTop: "40px", display: "flex", gap: "10px" }}>
+          {slides.map((_, i) => (
+            <div
+              key={i}
+              onClick={() => setCurrent(i)}
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                background: i === current ? "white" : "rgba(255,255,255,0.5)",
+                cursor: "pointer"
+              }}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
 /* ----------------------------------
-   Trust Highlights
+   TRUST STRIP
 ---------------------------------- */
-const TrustHighlights = () => {
-  return (
-    <section className="section">
-      <div
-        className="container"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))",
-          textAlign: "center",
-          gap: "40px"
-        }}
-      >
-        <div>🌾 Farm Fresh</div>
-        <div>🌿 No Preservatives</div>
-        <div>🥭 Traditional Methods</div>
-        <div>🚚 Pan India Delivery</div>
-      </div>
-    </section>
-  );
-};
+const TrustHighlights = () => (
+  <section className="section">
+    <div
+      className="container"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))",
+        textAlign: "center",
+        gap: "40px"
+      }}
+    >
+      <div>🌾 Farm Fresh</div>
+      <div>🌿 No Preservatives</div>
+      <div>🥭 Traditional Methods</div>
+      <div>🚚 Pan India Delivery</div>
+    </div>
+  </section>
+);
 
 /* ----------------------------------
-   Featured Products
+   FEATURED PRODUCTS
 ---------------------------------- */
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
@@ -114,8 +158,7 @@ const FeaturedProducts = () => {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
-                    transition: "0.4s ease"
+                    objectFit: "cover"
                   }}
                 />
               </div>
@@ -124,11 +167,9 @@ const FeaturedProducts = () => {
               <p style={{ fontSize: "14px", opacity: "0.7" }}>
                 {p.description}
               </p>
-
               <strong style={{ fontSize: "18px" }}>₹{p.price}</strong>
 
-              <br />
-              <br />
+              <br /><br />
 
               <Link to="/products" className="btn">
                 View Product
@@ -142,49 +183,90 @@ const FeaturedProducts = () => {
 };
 
 /* ----------------------------------
-   Why Section
+   BRAND STORY
 ---------------------------------- */
-const WhySection = () => {
-  return (
-    <section className="section">
-      <div className="container">
-        <h2 style={{ marginBottom: "40px" }}>Why NativeHarvest?</h2>
+const BrandStory = () => (
+  <section className="section" style={{ background: "var(--beige-light)" }}>
+    <div
+      className="container"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))",
+        alignItems: "center",
+        gap: "60px"
+      }}
+    >
+      <img
+        src="https://images.unsplash.com/photo-1506806732259-39c2d0268443"
+        alt="Farm"
+        style={{
+          width: "100%",
+          borderRadius: "16px"
+        }}
+      />
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
-            gap: "30px"
-          }}
-        >
-          <div className="card" style={{ padding: "30px" }}>
-            🌾 <strong>Farm Fresh</strong>
-            <p style={{ marginTop: "10px" }}>
-              Made directly on farms in small batches.
-            </p>
-          </div>
+      <div>
+        <h2>Preserving Traditional Taste</h2>
+        <p style={{ marginTop: "20px" }}>
+          Rooted in Indian soil. Crafted in small batches. NativeHarvest
+          brings authentic rural flavors directly to urban homes.
+        </p>
 
-          <div className="card" style={{ padding: "30px" }}>
-            🥭 <strong>Traditional Recipes</strong>
-            <p style={{ marginTop: "10px" }}>
-              Age-old methods preserved with care.
-            </p>
-          </div>
-
-          <div className="card" style={{ padding: "30px" }}>
-            🧡 <strong>Premium Quality</strong>
-            <p style={{ marginTop: "10px" }}>
-              No shortcuts. No mass production.
-            </p>
-          </div>
+        <div style={{ marginTop: "30px" }}>
+          <Link to="/about" className="btn">
+            Discover Our Story
+          </Link>
         </div>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 /* ----------------------------------
-   Home Page Export
+   NEWSLETTER
+---------------------------------- */
+const Newsletter = () => (
+  <section
+    className="section"
+    style={{
+      background: "var(--green-main)",
+      color: "white"
+    }}
+  >
+    <div
+      className="container"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))",
+        alignItems: "center",
+        gap: "40px"
+      }}
+    >
+      <div>
+        <h2>Stay Connected</h2>
+        <p style={{ marginTop: "10px" }}>
+          Get updates on new products and seasonal batches.
+        </p>
+      </div>
+
+      <div style={{ display: "flex", gap: "15px" }}>
+        <input
+          placeholder="Enter your email"
+          style={{
+            borderRadius: "30px",
+            padding: "12px 18px",
+            border: "none",
+            flex: 1
+          }}
+        />
+        <button className="btn">Subscribe</button>
+      </div>
+    </div>
+  </section>
+);
+
+/* ----------------------------------
+   HOME EXPORT
 ---------------------------------- */
 export default function Home() {
   return (
@@ -192,7 +274,8 @@ export default function Home() {
       <HeroSection />
       <TrustHighlights />
       <FeaturedProducts />
-      <WhySection />
+      <BrandStory />
+      <Newsletter />
     </>
   );
 }
