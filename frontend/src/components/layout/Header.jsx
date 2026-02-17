@@ -1,48 +1,57 @@
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo-horizontal.png";
+import logo from "../../assets/logo-horizontal.png"; 
+// 👆 Put your horizontal logo inside:
+// src/assets/logo-horizontal.png
 
 const Header = () => {
   return (
-    <header style={{
-      background: "#ffffff",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
-    }}>
-      <div style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        padding: "0 24px",
+    <header
+      style={{
+        background: "white",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         height: "75px",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }}>
-
-        {/* Logo */}
-        <Link to="/" style={{ display: "flex", alignItems: "center" }}>
+        alignItems: "center"
+      }}
+    >
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}
+      >
+        {/* LOGO */}
+        <Link to="/">
           <img
             src={logo}
             alt="NativeHarvest"
-            style={{ height: "42px" }}
+            style={{
+              height: "46px",   // 👈 bigger logo
+              objectFit: "contain"
+            }}
           />
         </Link>
 
-        {/* Navigation */}
-        <nav style={{
-          display: "flex",
-          gap: "32px",
-          fontSize: "16px",
-          fontWeight: "500"
-        }}>
-          <Link className="nav-link" to="/">Home</Link>
-          <Link className="nav-link" to="/products">Products</Link>
-          <Link className="nav-link" to="/about">About</Link>
-          <Link className="nav-link" to="/contact">Contact</Link>
-          <Link className="nav-link" to="/cart">Cart</Link>
+        {/* NAVIGATION */}
+        <nav
+          style={{
+            display: "flex",
+            gap: "32px",
+            fontWeight: 500
+          }}
+        >
+          <Link to="/">Home</Link>
+          <Link to="/products">Products</Link>
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/cart">Cart</Link>
         </nav>
-
       </div>
     </header>
   );
 };
 
 export default Header;
+
