@@ -1,4 +1,8 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+
+import AnnouncementBar from "./components/layout/AnnouncementBar";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
 
 /* Public pages */
 import Home from "./pages/Home";
@@ -17,35 +21,23 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 const App = () => {
   return (
     <>
-      <nav>
-        <Link to="/">Home</Link>
-        <Link to="/products">Products</Link>
-        <Link to="/cart">Cart</Link>
-        <Link to="/about">About</Link>
-        <Link to="/contact">Contact</Link>
-      </nav>
+      <AnnouncementBar />
+      <Header />
 
       <Routes>
-
-        {/* HOME */}
         <Route index element={<Home />} />
-
-        {/* Public */}
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-
-        {/* ✅ FIXED ROUTES */}
         <Route path="/order-success/:orderId" element={<OrderSuccess />} />
         <Route path="/order/:orderId" element={<OrderTracking />} />
-
-        {/* Admin */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
       </Routes>
+
+      <Footer />
     </>
   );
 };
