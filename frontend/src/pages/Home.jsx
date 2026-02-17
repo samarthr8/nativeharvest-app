@@ -8,19 +8,19 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=2000&auto=format&fit=crop",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
   {
     image:
-      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5",
+      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?q=80&w=2000&auto=format&fit=crop",
     heading: "Pure Mustard Oil.",
     sub: "Cold pressed. Farm sourced. No shortcuts."
   },
   {
     image:
-      "https://images.unsplash.com/photo-1604908177522-040c2b54c68d",
+      "https://images.unsplash.com/photo-1604908177522-040c2b54c68d?q=80&w=2000&auto=format&fit=crop",
     heading: "Traditional Pickles.",
     sub: "Sun cured. Spice balanced. Authentic taste."
   }
@@ -41,7 +41,8 @@ const HeroSection = () => {
   return (
     <section
       style={{
-        height: "85vh",
+        height: "70vh",
+        minHeight: "520px",
         background: `linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.2)), url(${slide.image})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -52,24 +53,48 @@ const HeroSection = () => {
       }}
     >
       <div className="container">
-        <h1 style={{ maxWidth: "600px" }}>{slide.heading}</h1>
+        <h1
+          style={{
+            maxWidth: "650px",
+            fontFamily: "Playfair Display, serif",
+            fontSize: "56px",
+            lineHeight: "1.1"
+          }}
+        >
+          {slide.heading}
+        </h1>
 
-        <p style={{ marginTop: "20px", maxWidth: "500px" }}>
+        <p
+          style={{
+            marginTop: "20px",
+            maxWidth: "520px",
+            fontSize: "18px",
+            opacity: "0.9"
+          }}
+        >
           {slide.sub}
         </p>
 
-        <div style={{ marginTop: "30px", display: "flex", gap: "20px" }}>
+        <div
+          style={{
+            marginTop: "35px",
+            display: "flex",
+            gap: "20px"
+          }}
+        >
           <Link to="/products" className="btn">
             Shop Now
           </Link>
+
           <Link
             to="/about"
             style={{
               border: "1px solid white",
-              padding: "12px 24px",
+              padding: "12px 26px",
               borderRadius: "30px",
               color: "white",
-              textDecoration: "none"
+              textDecoration: "none",
+              fontWeight: "500"
             }}
           >
             Learn More
@@ -77,7 +102,7 @@ const HeroSection = () => {
         </div>
 
         {/* Dots */}
-        <div style={{ marginTop: "40px", display: "flex", gap: "10px" }}>
+        <div style={{ marginTop: "50px", display: "flex", gap: "12px" }}>
           {slides.map((_, i) => (
             <div
               key={i}
@@ -86,8 +111,9 @@ const HeroSection = () => {
                 width: "10px",
                 height: "10px",
                 borderRadius: "50%",
-                background: i === current ? "white" : "rgba(255,255,255,0.5)",
-                cursor: "pointer"
+                background: i === current ? "white" : "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                transition: "0.3s"
               }}
             />
           ))}
@@ -108,7 +134,9 @@ const TrustHighlights = () => (
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))",
         textAlign: "center",
-        gap: "40px"
+        gap: "40px",
+        fontSize: "16px",
+        fontWeight: "500"
       }}
     >
       <div>🌾 Farm Fresh</div>
@@ -134,17 +162,25 @@ const FeaturedProducts = () => {
   return (
     <section className="section" style={{ background: "var(--beige-light)" }}>
       <div className="container">
-        <h2 style={{ marginBottom: "40px" }}>Our Best Sellers</h2>
+        <h2
+          style={{
+            marginBottom: "50px",
+            fontFamily: "Playfair Display, serif",
+            fontSize: "36px"
+          }}
+        >
+          Our Best Sellers
+        </h2>
 
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))",
-            gap: "30px"
+            gap: "32px"
           }}
         >
           {products.map((p) => (
-            <div key={p.slug} className="card" style={{ padding: "20px" }}>
+            <div key={p.slug} className="card" style={{ padding: "24px" }}>
               <div
                 style={{
                   height: "240px",
@@ -158,15 +194,17 @@ const FeaturedProducts = () => {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover"
+                    objectFit: "cover",
+                    transition: "0.4s"
                   }}
                 />
               </div>
 
-              <h3 style={{ marginTop: "20px" }}>{p.name}</h3>
+              <h3 style={{ marginTop: "22px" }}>{p.name}</h3>
               <p style={{ fontSize: "14px", opacity: "0.7" }}>
                 {p.description}
               </p>
+
               <strong style={{ fontSize: "18px" }}>₹{p.price}</strong>
 
               <br /><br />
@@ -193,11 +231,11 @@ const BrandStory = () => (
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))",
         alignItems: "center",
-        gap: "60px"
+        gap: "70px"
       }}
     >
       <img
-        src="https://images.unsplash.com/photo-1506806732259-39c2d0268443"
+        src="https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=1200&auto=format&fit=crop"
         alt="Farm"
         style={{
           width: "100%",
@@ -206,13 +244,16 @@ const BrandStory = () => (
       />
 
       <div>
-        <h2>Preserving Traditional Taste</h2>
-        <p style={{ marginTop: "20px" }}>
+        <h2 style={{ fontFamily: "Playfair Display, serif" }}>
+          Preserving Traditional Taste
+        </h2>
+
+        <p style={{ marginTop: "20px", lineHeight: "1.7" }}>
           Rooted in Indian soil. Crafted in small batches. NativeHarvest
           brings authentic rural flavors directly to urban homes.
         </p>
 
-        <div style={{ marginTop: "30px" }}>
+        <div style={{ marginTop: "35px" }}>
           <Link to="/about" className="btn">
             Discover Our Story
           </Link>
@@ -243,7 +284,10 @@ const Newsletter = () => (
       }}
     >
       <div>
-        <h2>Stay Connected</h2>
+        <h2 style={{ fontFamily: "Playfair Display, serif" }}>
+          Stay Connected
+        </h2>
+
         <p style={{ marginTop: "10px" }}>
           Get updates on new products and seasonal batches.
         </p>

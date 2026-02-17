@@ -1,35 +1,43 @@
 import { Link } from "react-router-dom";
+import logo from "../../assets/logo-horizontal.png";
 
 const Header = () => {
   return (
     <header style={{
-      height: "75px",
-      display: "flex",
-      alignItems: "center",
-      background: "white",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.05)"
+      background: "#ffffff",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
     }}>
-      <div className="container" style={{
+      <div style={{
+        maxWidth: "1200px",
+        margin: "0 auto",
+        padding: "0 24px",
+        height: "75px",
         display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "space-between"
       }}>
 
-        <Link to="/" style={{
-          fontFamily: "Playfair Display",
-          fontSize: "22px",
-          textDecoration: "none",
-          color: "var(--text-dark)"
-        }}>
-          NativeHarvest
+        {/* Logo */}
+        <Link to="/" style={{ display: "flex", alignItems: "center" }}>
+          <img
+            src={logo}
+            alt="NativeHarvest"
+            style={{ height: "42px" }}
+          />
         </Link>
 
-        <nav style={{ display: "flex", gap: "30px" }}>
-          <Link to="/">Home</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
-          <Link to="/cart">Cart</Link>
+        {/* Navigation */}
+        <nav style={{
+          display: "flex",
+          gap: "32px",
+          fontSize: "16px",
+          fontWeight: "500"
+        }}>
+          <Link className="nav-link" to="/">Home</Link>
+          <Link className="nav-link" to="/products">Products</Link>
+          <Link className="nav-link" to="/about">About</Link>
+          <Link className="nav-link" to="/contact">Contact</Link>
+          <Link className="nav-link" to="/cart">Cart</Link>
         </nav>
 
       </div>
