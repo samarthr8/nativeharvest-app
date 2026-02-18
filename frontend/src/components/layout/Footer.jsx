@@ -60,12 +60,15 @@ const Footer = () => {
             <Link to="/" style={{ color: "white", opacity: 0.9 }}>
               Home
             </Link>
+
             <Link to="/products" style={{ color: "white", opacity: 0.9 }}>
               Products
             </Link>
+
             <Link to="/about" style={{ color: "white", opacity: 0.9 }}>
               About
             </Link>
+
             <Link to="/contact" style={{ color: "white", opacity: 0.9 }}>
               Contact
             </Link>
@@ -91,19 +94,21 @@ const Footer = () => {
               Chhatarpur, Madhya Pradesh
             </p>
 
-            {/* ✅ MOBILE SAFE EMAIL ALIGNMENT */}
+            {/* ✅ Properly aligned single-line email */}
             <div
               style={{
                 display: "flex",
-                alignItems: "flex-start",
+                alignItems: "center",
                 gap: "6px",
-                opacity: 0.9
+                opacity: 0.9,
+                flexWrap: "nowrap"
               }}
             >
-              <span style={{ minWidth: "50px" }}>Email:</span>
+              <span>Email:</span>
               <span
                 style={{
-                  wordBreak: "break-word"
+                  whiteSpace: "nowrap",
+                  wordBreak: "keep-all"
                 }}
               >
                 nativeharvestindia@gmail.com
