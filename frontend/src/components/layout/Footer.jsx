@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../../assets/NH-Logo-Old-Transparent-Cropped.jpg";
+import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
 const Footer = () => {
   return (
@@ -32,7 +32,7 @@ const Footer = () => {
               src={logo}
               alt="NativeHarvest India"
               style={{
-                height: "40px",   // 🔥 Increased from 40px → 70px → 100px then Decreased back to 40px
+                height: "50px",   // 🔥 Increased from 40px → 70px → 100px then Decreased back to 50px
                 width: "auto"
               }}
             />
