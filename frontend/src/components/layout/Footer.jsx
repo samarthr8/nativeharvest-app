@@ -32,7 +32,7 @@ const Footer = () => {
               src={logo}
               alt="NativeHarvest India"
               style={{
-                height: "40px",
+                height: "70px",   // 🔥 Increased from 40px → 70px
                 width: "auto"
               }}
             />
