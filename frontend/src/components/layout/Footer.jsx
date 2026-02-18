@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "../../assets/logo-horizontal.png";
 
 const Footer = () => {
   return (
@@ -17,55 +18,24 @@ const Footer = () => {
           gap: "40px"
         }}
       >
-        {/* BRAND SECTION */}
+        {/* BRAND COLUMN */}
         <div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "12px"
+              marginBottom: "16px"
             }}
           >
-            {/* Inline SVG Logo */}
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 100 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ flexShrink: 0 }}
-            >
-              <circle
-                cx="50"
-                cy="50"
-                r="48"
-                stroke="white"
-                strokeWidth="3"
-              />
-              <path
-                d="M25 55C35 45 65 45 75 55"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              <path
-                d="M25 65C40 55 60 55 75 65"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              <circle cx="50" cy="40" r="6" fill="white" />
-            </svg>
-
-            <h3
+            <img
+              src={logo}
+              alt="NativeHarvest India"
               style={{
-                margin: 0,
-                fontFamily: "Playfair Display, serif"
+                height: "40px",
+                width: "auto"
               }}
-            >
-              NativeHarvest
-            </h3>
+            />
           </div>
 
           <p>
@@ -75,28 +45,60 @@ const Footer = () => {
 
         {/* QUICK LINKS */}
         <div>
-          <h4>Quick Links</h4>
-          <p><Link to="/">Home</Link></p>
-          <p><Link to="/products">Products</Link></p>
-          <p><Link to="/about">About</Link></p>
-          <p><Link to="/contact">Contact</Link></p>
+          <h4 style={{ marginBottom: "16px" }}>Quick Links</h4>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <Link
+              to="/"
+              style={{ color: "white", opacity: 0.9 }}
+            >
+              Home
+            </Link>
+
+            <Link
+              to="/products"
+              style={{ color: "white", opacity: 0.9 }}
+            >
+              Products
+            </Link>
+
+            <Link
+              to="/about"
+              style={{ color: "white", opacity: 0.9 }}
+            >
+              About
+            </Link>
+
+            <Link
+              to="/contact"
+              style={{ color: "white", opacity: 0.9 }}
+            >
+              Contact
+            </Link>
+          </div>
         </div>
 
         {/* POLICIES */}
         <div>
-          <h4>Policies</h4>
-          <p>Privacy Policy</p>
-          <p>Terms & Conditions</p>
+          <h4 style={{ marginBottom: "16px" }}>Policies</h4>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <p style={{ opacity: 0.9 }}>Privacy Policy</p>
+            <p style={{ opacity: 0.9 }}>Terms & Conditions</p>
+          </div>
         </div>
 
         {/* STORE INFO */}
         <div>
-          <h4>Our Store</h4>
-          <p>Chhatarpur, Madhya Pradesh</p>
-          <p>Email: nativeharvestindia@gmail.com</p>
+          <h4 style={{ marginBottom: "16px" }}>Our Store</h4>
+          <p style={{ opacity: 0.9 }}>Chhatarpur, Madhya Pradesh</p>
+          <p style={{ opacity: 0.9 }}>
+            Email: nativeharvestindia@gmail.com
+          </p>
         </div>
       </div>
 
+      {/* COPYRIGHT */}
       <div
         style={{
           textAlign: "center",
