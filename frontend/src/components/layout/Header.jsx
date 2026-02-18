@@ -1,27 +1,44 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Header() {
   const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  /* Detect scroll for transparency effect */
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
     { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
-    { name: "Cart", path: "/cart" }
+    { name: "Contact", path: "/contact" }
   ];
 
   return (
     <header
       style={{
         height: "75px",
-        background: "#ffffff",
         display: "flex",
         alignItems: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         position: "sticky",
         top: 0,
-        zIndex: 1000
+        zIndex: 1000,
+        transition: "all 0.3s ease",
+        backdropFilter: "blur(10px)",
+        background: scrolled
+          ? "rgba(255,255,255,0.95)"
+          : "rgba(255,255,255,0.75)",
+        boxShadow: scrolled
+          ? "0 2px 10px rgba(0,0,0,0.06)"
+          : "none"
       }}
     >
       <div
@@ -35,7 +52,7 @@ export default function Header() {
           alignItems: "center"
         }}
       >
-        {/* PREMIUM TEXT LOGO */}
+        {/* BRAND LOGO (Micro animation) */}
         <Link
           to="/"
           style={{
@@ -47,13 +64,20 @@ export default function Header() {
             textDecoration: "none",
             display: "flex",
             flexDirection: "column",
-            lineHeight: "1.1"
+            lineHeight: "1.1",
+            transition: "transform 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0px)";
           }}
         >
           NativeHarvest
           <span
             style={{
-              fontSize: "14px",
+              fontSize: "13px",
               letterSpacing: "4px",
               fontWeight: "500",
               marginTop: "2px",
@@ -87,13 +111,21 @@ export default function Header() {
                     : "#1e1e1e",
                   textDecoration: "none",
                   position: "relative",
-                  paddingBottom: "4px",
-                  transition: "0.2s ease"
+                  paddingBottom: "6px",
+                  transition: "color 0.3s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--green-main)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = isActive
+                    ? "var(--green-dark)"
+                    : "#1e1e1e";
                 }}
               >
                 {item.name}
 
-                {/* Underline Animation */}
+                {/* Animated underline */}
                 <span
                   style={{
                     position: "absolute",
@@ -102,12 +134,34 @@ export default function Header() {
                     width: isActive ? "100%" : "0%",
                     height: "2px",
                     background: "var(--green-dark)",
-                    transition: "0.3s ease"
+                    transition: "width 0.3s ease"
                   }}
+                  className="nav-underline"
                 />
               </Link>
             );
           })}
+
+          {/* CART ICON */}
+          <Link
+            to="/cart"
+            style={{
+              fontSize: "20px",
+              color: "#1e1e1e",
+              textDecoration: "none",
+              transition: "transform 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.1)";
+              e.currentTarget.style.color = "var(--green-main)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.color = "#1e1e1e";
+            }}
+          >
+            🛒
+          </Link>
         </nav>
       </div>
     </header>
