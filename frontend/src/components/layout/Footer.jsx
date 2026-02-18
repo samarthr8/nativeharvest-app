@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo-horizontal.png";
+import logo from "../../assets/NH-Logo-Old-Transparent.png";
 
 const Footer = () => {
   return (
