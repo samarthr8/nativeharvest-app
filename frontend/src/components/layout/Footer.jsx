@@ -25,14 +25,14 @@ const Footer = () => {
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "22px" // 🔥 slightly increased spacing under logo
+              marginBottom: "22px"
             }}
           >
             <img
               src={logo}
               alt="NativeHarvest India"
               style={{
-                height: "60px", // 🔥 increased to 60px
+                height: "60px",
                 width: "auto",
                 transition: "0.3s ease",
                 cursor: "pointer"
@@ -94,18 +94,31 @@ const Footer = () => {
               Chhatarpur, Madhya Pradesh
             </p>
 
-            {/* 🔥 Clean single-line email */}
-            <p style={{ opacity: 0.9 }}>
-              Email:{" "}
-              <span style={{ whiteSpace: "nowrap" }}>
+            {/* ✅ Properly aligned single-line email */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                opacity: 0.9,
+                flexWrap: "nowrap"
+              }}
+            >
+              <span>Email:</span>
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  wordBreak: "keep-all"
+                }}
+              >
                 nativeharvestindia@gmail.com
               </span>
-            </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 🔥 Thin Divider */}
+      {/* Thin Divider */}
       <div
         style={{
           height: "1px",
