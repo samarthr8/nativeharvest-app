@@ -29,6 +29,7 @@ body {
   background-color: var(--white);
   color: var(--text-dark);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* -------------------------------
@@ -40,17 +41,9 @@ h1, h2, h3 {
   margin: 0;
 }
 
-h1 {
-  font-size: 56px;
-}
-
-h2 {
-  font-size: 36px;
-}
-
-h3 {
-  font-size: 20px;
-}
+h1 { font-size: 56px; }
+h2 { font-size: 36px; }
+h3 { font-size: 20px; }
 
 p {
   font-size: 16px;
@@ -63,6 +56,40 @@ p {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* -------------------------------
+   NAVIGATION ENHANCEMENTS
+--------------------------------*/
+nav a {
+  position: relative;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%;
+  height: 2px;
+  background: var(--green-dark);
+  transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+/* Mega menu links */
+nav div a {
+  display: block;
+  padding: 4px 0;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+nav div a:hover {
+  color: var(--green-main);
 }
 
 /* -------------------------------
@@ -134,4 +161,22 @@ input:focus, textarea:focus {
 img {
   max-width: 100%;
   display: block;
+}
+
+/* -------------------------------
+   PAGE TRANSITIONS
+--------------------------------*/
+.page-transition {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -1,23 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useCart } from "../../context/CartContext";
 
 export default function Header() {
   const location = useLocation();
+  const { cart } = useCart();
   const [scrolled, setScrolled] = useState(false);
+  const [showMega, setShowMega] = useState(false);
 
-  /* Detect scroll for transparency effect */
+  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Products", path: "/products" },
+    { name: "Products", path: "/products", mega: true },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" }
   ];
@@ -34,10 +37,10 @@ export default function Header() {
         transition: "all 0.3s ease",
         backdropFilter: "blur(10px)",
         background: scrolled
-          ? "rgba(255,255,255,0.95)"
+          ? "rgba(255,255,255,0.96)"
           : "rgba(255,255,255,0.75)",
         boxShadow: scrolled
-          ? "0 2px 10px rgba(0,0,0,0.06)"
+          ? "0 2px 12px rgba(0,0,0,0.06)"
           : "none"
       }}
     >
@@ -52,7 +55,7 @@ export default function Header() {
           alignItems: "center"
         }}
       >
-        {/* BRAND LOGO (Micro animation) */}
+        {/* BRAND */}
         <Link
           to="/"
           style={{
@@ -93,74 +96,129 @@ export default function Header() {
           style={{
             display: "flex",
             gap: "32px",
-            alignItems: "center"
+            alignItems: "center",
+            position: "relative"
           }}
         >
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
 
             return (
-              <Link
+              <div
                 key={item.name}
-                to={item.path}
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "500",
-                  color: isActive
-                    ? "var(--green-dark)"
-                    : "#1e1e1e",
-                  textDecoration: "none",
-                  position: "relative",
-                  paddingBottom: "6px",
-                  transition: "color 0.3s ease"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "var(--green-main)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = isActive
-                    ? "var(--green-dark)"
-                    : "#1e1e1e";
-                }}
+                style={{ position: "relative" }}
+                onMouseEnter={() =>
+                  item.mega && setShowMega(true)
+                }
+                onMouseLeave={() =>
+                  item.mega && setShowMega(false)
+                }
               >
-                {item.name}
-
-                {/* Animated underline */}
-                <span
+                <Link
+                  to={item.path}
                   style={{
-                    position: "absolute",
-                    left: 0,
-                    bottom: 0,
-                    width: isActive ? "100%" : "0%",
-                    height: "2px",
-                    background: "var(--green-dark)",
-                    transition: "width 0.3s ease"
+                    fontSize: "15px",
+                    fontWeight: "500",
+                    color: isActive
+                      ? "var(--green-dark)"
+                      : "#1e1e1e",
+                    textDecoration: "none",
+                    position: "relative",
+                    paddingBottom: "6px",
+                    transition: "color 0.3s ease"
                   }}
-                  className="nav-underline"
-                />
-              </Link>
+                >
+                  {item.name}
+
+                  {/* Animated underline */}
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      bottom: 0,
+                      width: isActive ? "100%" : "0%",
+                      height: "2px",
+                      background: "var(--green-dark)",
+                      transition: "width 0.3s ease"
+                    }}
+                  />
+                </Link>
+
+                {/* MEGA MENU */}
+                {item.mega && showMega && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "40px",
+                      left: "-100px",
+                      width: "400px",
+                      background: "white",
+                      padding: "30px",
+                      borderRadius: "16px",
+                      boxShadow:
+                        "0 15px 40px rgba(0,0,0,0.08)",
+                      display: "grid",
+                      gap: "10px"
+                    }}
+                  >
+                    <Link to="/products">Pickles</Link>
+                    <Link to="/products">Cold Pressed Oil</Link>
+                    <Link to="/products">Sattu</Link>
+                  </div>
+                )}
+              </div>
             );
           })}
 
-          {/* CART ICON */}
+          {/* CART SVG ICON */}
           <Link
             to="/cart"
             style={{
-              fontSize: "20px",
-              color: "#1e1e1e",
-              textDecoration: "none",
-              transition: "transform 0.2s ease"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.1)";
-              e.currentTarget.style.color = "var(--green-main)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.color = "#1e1e1e";
+              position: "relative",
+              display: "flex",
+              alignItems: "center"
             }}
           >
-            🛒
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              style={{
+                transition: "transform 0.2s ease",
+                color: "#1e1e1e"
+              }}
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L23 6H6" />
+            </svg>
+
+            {/* BADGE */}
+            {cartCount > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-6px",
+                  right: "-8px",
+                  background: "var(--green-dark)",
+                  color: "white",
+                  borderRadius: "50%",
+                  width: "18px",
+                  height: "18px",
+                  fontSize: "11px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "600"
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
           </Link>
         </nav>
       </div>

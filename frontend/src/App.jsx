@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import AnnouncementBar from "./components/layout/AnnouncementBar";
 import Header from "./components/layout/Header";
@@ -19,23 +19,27 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
+  const location = useLocation();
+
   return (
     <>
       <AnnouncementBar />
       <Header />
 
-      <Routes>
-        <Route index element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/order-success/:orderId" element={<OrderSuccess />} />
-        <Route path="/order/:orderId" element={<OrderTracking />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      </Routes>
+      <div key={location.pathname} className="page-transition">
+        <Routes>
+          <Route index element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/order-success/:orderId" element={<OrderSuccess />} />
+          <Route path="/order/:orderId" element={<OrderTracking />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        </Routes>
+      </div>
 
       <Footer />
     </>
