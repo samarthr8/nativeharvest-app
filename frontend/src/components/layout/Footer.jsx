@@ -25,15 +25,24 @@ const Footer = () => {
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "16px"
+              marginBottom: "22px" // 🔥 slightly increased spacing under logo
             }}
           >
             <img
               src={logo}
               alt="NativeHarvest India"
               style={{
-                height: "50px",   // 🔥 Increased from 40px → 70px → 100px then Decreased back to 50px
-                width: "auto"
+                height: "60px", // 🔥 increased to 60px
+                width: "auto",
+                transition: "0.3s ease",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 0 8px rgba(255,255,255,0.35))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.filter = "none";
               }}
             />
           </div>
@@ -48,31 +57,19 @@ const Footer = () => {
           <h4 style={{ marginBottom: "16px" }}>Quick Links</h4>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <Link
-              to="/"
-              style={{ color: "white", opacity: 0.9 }}
-            >
+            <Link to="/" style={{ color: "white", opacity: 0.9 }}>
               Home
             </Link>
 
-            <Link
-              to="/products"
-              style={{ color: "white", opacity: 0.9 }}
-            >
+            <Link to="/products" style={{ color: "white", opacity: 0.9 }}>
               Products
             </Link>
 
-            <Link
-              to="/about"
-              style={{ color: "white", opacity: 0.9 }}
-            >
+            <Link to="/about" style={{ color: "white", opacity: 0.9 }}>
               About
             </Link>
 
-            <Link
-              to="/contact"
-              style={{ color: "white", opacity: 0.9 }}
-            >
+            <Link to="/contact" style={{ color: "white", opacity: 0.9 }}>
               Contact
             </Link>
           </div>
@@ -91,18 +88,37 @@ const Footer = () => {
         {/* STORE INFO */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Our Store</h4>
-          <p style={{ opacity: 0.9 }}>Chhatarpur, Madhya Pradesh</p>
-          <p style={{ opacity: 0.9 }}>
-            Email: nativeharvestindia@gmail.com
-          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <p style={{ opacity: 0.9 }}>
+              Chhatarpur, Madhya Pradesh
+            </p>
+
+            {/* 🔥 Clean single-line email */}
+            <p style={{ opacity: 0.9 }}>
+              Email:{" "}
+              <span style={{ whiteSpace: "nowrap" }}>
+                nativeharvestindia@gmail.com
+              </span>
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* 🔥 Thin Divider */}
+      <div
+        style={{
+          height: "1px",
+          background: "rgba(255,255,255,0.15)",
+          marginTop: "40px"
+        }}
+      />
 
       {/* COPYRIGHT */}
       <div
         style={{
           textAlign: "center",
-          marginTop: "40px",
+          marginTop: "20px",
           opacity: "0.7",
           fontSize: "14px"
         }}
