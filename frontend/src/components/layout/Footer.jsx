@@ -1,7 +1,23 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
 const Footer = () => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e) => {
+    e.preventDefault(); // prevent immediate mailto trigger
+    try {
+      await navigator.clipboard.writeText(
+        "nativeharvestindia@gmail.com"
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
   return (
     <footer
       style={{
@@ -60,15 +76,12 @@ const Footer = () => {
             <Link to="/" style={{ color: "white", opacity: 0.9 }}>
               Home
             </Link>
-
             <Link to="/products" style={{ color: "white", opacity: 0.9 }}>
               Products
             </Link>
-
             <Link to="/about" style={{ color: "white", opacity: 0.9 }}>
               About
             </Link>
-
             <Link to="/contact" style={{ color: "white", opacity: 0.9 }}>
               Contact
             </Link>
@@ -78,7 +91,6 @@ const Footer = () => {
         {/* POLICIES */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Policies</h4>
-
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <p style={{ opacity: 0.9 }}>Privacy Policy</p>
             <p style={{ opacity: 0.9 }}>Terms & Conditions</p>
@@ -94,25 +106,80 @@ const Footer = () => {
               Chhatarpur, Madhya Pradesh
             </p>
 
-            {/* ✅ Properly aligned single-line email */}
+            {/* Premium Email Interaction */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
-                opacity: 0.9,
-                flexWrap: "nowrap"
+                gap: "8px",
+                opacity: 0.9
               }}
             >
-              <span>Email:</span>
-              <span
+              {/* Mail Icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                style={{ opacity: 0.8 }}
+              >
+                <path d="M4 4h16v16H4z" stroke="none" />
+                <path d="M4 4l8 7 8-7" />
+              </svg>
+
+              <a
+                href="mailto:nativeharvestindia@gmail.com"
+                onClick={handleCopy}
                 style={{
+                  color: "white",
+                  textDecoration: "none",
+                  position: "relative",
                   whiteSpace: "nowrap",
-                  wordBreak: "keep-all"
+                  cursor: "pointer",
+                  transition: "0.3s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.filter =
+                    "drop-shadow(0 0 6px rgba(255,255,255,0.5))";
+                  e.currentTarget.querySelector("span").style.width = "100%";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.filter = "none";
+                  e.currentTarget.querySelector("span").style.width = "0%";
                 }}
               >
                 nativeharvestindia@gmail.com
-              </span>
+
+                {/* Animated Underline */}
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: "-2px",
+                    height: "1px",
+                    width: "0%",
+                    background: "white",
+                    transition: "width 0.3s ease"
+                  }}
+                />
+              </a>
+
+              {/* Copied Feedback */}
+              {copied && (
+                <span
+                  style={{
+                    fontSize: "12px",
+                    opacity: 0.8,
+                    marginLeft: "6px",
+                    transition: "0.3s ease"
+                  }}
+                >
+                  Copied!
+                </span>
+              )}
             </div>
           </div>
         </div>
