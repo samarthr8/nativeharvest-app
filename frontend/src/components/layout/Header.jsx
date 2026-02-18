@@ -1,37 +1,67 @@
-import { Link } from "react-router-dom";
-import logo from "../../assets/logo-horizontal.png"; 
-// 👆 Put your horizontal logo inside:
-// src/assets/logo-horizontal.png
+import { Link, useLocation } from "react-router-dom";
 
-const Header = () => {
+export default function Header() {
+  const location = useLocation();
+
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Products", path: "/products" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+    { name: "Cart", path: "/cart" }
+  ];
+
   return (
     <header
       style={{
-        background: "white",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         height: "75px",
+        background: "#ffffff",
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000
       }}
     >
       <div
-        className="container"
         style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "0 20px",
+          width: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          alignItems: "center"
         }}
       >
-        {/* LOGO */}
-        <Link to="/">
-          <img
-            src={logo}
-            alt="NativeHarvest"
+        {/* PREMIUM TEXT LOGO */}
+        <Link
+          to="/"
+          style={{
+            fontFamily: "Playfair Display, serif",
+            fontSize: "28px",
+            fontWeight: "600",
+            letterSpacing: "1px",
+            color: "var(--green-dark)",
+            textDecoration: "none",
+            display: "flex",
+            flexDirection: "column",
+            lineHeight: "1.1"
+          }}
+        >
+          NativeHarvest
+          <span
             style={{
-              height: "46px",   // 👈 bigger logo
-              objectFit: "contain"
+              fontSize: "14px",
+              letterSpacing: "4px",
+              fontWeight: "500",
+              marginTop: "2px",
+              color: "#8b6f5c"
             }}
-          />
+          >
+            INDIA
+          </span>
         </Link>
 
         {/* NAVIGATION */}
@@ -39,19 +69,47 @@ const Header = () => {
           style={{
             display: "flex",
             gap: "32px",
-            fontWeight: 500
+            alignItems: "center"
           }}
         >
-          <Link to="/">Home</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
-          <Link to="/cart">Cart</Link>
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: "500",
+                  color: isActive
+                    ? "var(--green-dark)"
+                    : "#1e1e1e",
+                  textDecoration: "none",
+                  position: "relative",
+                  paddingBottom: "4px",
+                  transition: "0.2s ease"
+                }}
+              >
+                {item.name}
+
+                {/* Underline Animation */}
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: 0,
+                    width: isActive ? "100%" : "0%",
+                    height: "2px",
+                    background: "var(--green-dark)",
+                    transition: "0.3s ease"
+                  }}
+                />
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
   );
-};
-
-export default Header;
-
+}

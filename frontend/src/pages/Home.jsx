@@ -3,8 +3,9 @@ import api from "../services/api";
 import { Link } from "react-router-dom";
 
 /* ----------------------------------
-   HERO SLIDER (REFINED HEIGHT)
+   HERO SLIDER (REFINED PROPORTIONS)
 ---------------------------------- */
+
 const slides = [
   {
     image:
@@ -33,6 +34,7 @@ const HeroSection = () => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 5000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -40,9 +42,9 @@ const HeroSection = () => {
 
   return (
     <section
+      className="hero"
       style={{
-        height: "65vh",
-        minHeight: "480px",
+        height: "clamp(600px, 65vh, 750px)",
         background: `linear-gradient(
           to right,
           rgba(0,0,0,0.45),
@@ -52,15 +54,22 @@ const HeroSection = () => {
         backgroundPosition: "center",
         display: "flex",
         alignItems: "center",
-        color: "white",
-        transition: "0.6s ease"
+        transition: "0.6s ease",
+        color: "white"
       }}
     >
-      <div className="container">
+      <div
+        className="hero-content"
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "0 20px"
+        }}
+      >
         <h1
           style={{
-            maxWidth: "650px",
             fontSize: "48px",
+            maxWidth: "650px",
             lineHeight: "1.2"
           }}
         >
@@ -69,16 +78,22 @@ const HeroSection = () => {
 
         <p
           style={{
-            marginTop: "18px",
-            maxWidth: "500px",
             fontSize: "18px",
+            marginTop: "18px",
+            maxWidth: "520px",
             lineHeight: "1.6"
           }}
         >
           {slide.sub}
         </p>
 
-        <div style={{ marginTop: "28px", display: "flex", gap: "18px" }}>
+        <div
+          style={{
+            marginTop: "28px",
+            display: "flex",
+            gap: "18px"
+          }}
+        >
           <Link to="/products" className="btn">
             Shop Now
           </Link>
@@ -97,8 +112,14 @@ const HeroSection = () => {
           </Link>
         </div>
 
-        {/* Dots */}
-        <div style={{ marginTop: "32px", display: "flex", gap: "10px" }}>
+        {/* Slider Dots */}
+        <div
+          style={{
+            marginTop: "30px",
+            display: "flex",
+            gap: "10px"
+          }}
+        >
           {slides.map((_, i) => (
             <div
               key={i}
@@ -124,13 +145,15 @@ const HeroSection = () => {
 /* ----------------------------------
    TRUST STRIP
 ---------------------------------- */
+
 const TrustHighlights = () => (
   <section className="section">
     <div
       className="container"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))",
+        gridTemplateColumns:
+          "repeat(auto-fit, minmax(200px,1fr))",
         textAlign: "center",
         gap: "40px",
         fontSize: "15px"
@@ -147,6 +170,7 @@ const TrustHighlights = () => (
 /* ----------------------------------
    FEATURED PRODUCTS
 ---------------------------------- */
+
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
 
@@ -196,8 +220,7 @@ const FeaturedProducts = () => {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 0.4s ease"
+                    objectFit: "cover"
                   }}
                 />
               </div>
@@ -216,21 +239,14 @@ const FeaturedProducts = () => {
                 {p.description}
               </p>
 
-              <strong
-                style={{
-                  fontSize: "18px"
-                }}
-              >
+              <strong style={{ fontSize: "18px" }}>
                 ₹{p.price}
               </strong>
 
               <br />
               <br />
 
-              <Link
-                to="/products"
-                className="btn"
-              >
+              <Link to="/products" className="btn">
                 View Product
               </Link>
             </div>
@@ -244,6 +260,7 @@ const FeaturedProducts = () => {
 /* ----------------------------------
    BRAND STORY
 ---------------------------------- */
+
 const BrandStory = () => (
   <section
     className="section"
@@ -290,6 +307,7 @@ const BrandStory = () => (
 /* ----------------------------------
    NEWSLETTER
 ---------------------------------- */
+
 const Newsletter = () => (
   <section
     className="section"
@@ -326,7 +344,6 @@ const Newsletter = () => (
             flex: 1
           }}
         />
-
         <button className="btn">
           Subscribe
         </button>
@@ -336,8 +353,9 @@ const Newsletter = () => (
 );
 
 /* ----------------------------------
-   HOME EXPORT
+   EXPORT
 ---------------------------------- */
+
 export default function Home() {
   return (
     <>
