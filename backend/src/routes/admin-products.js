@@ -6,23 +6,44 @@ const verifyAdmin = require("../middleware/auth");
 /* ADD PRODUCT */
 router.post("/products", verifyAdmin, async (req, res) => {
   try {
-    const { name, slug, price, image, description, stock } = req.body;
+
+    const {
+      name,
+      slug,
+      price,
+      image,
+      description,
+      stock,
+      images = [],
+      variants = []
+    } = req.body;
 
     await db.query(
       `
       INSERT INTO products
-      (name, slug, price, image, description, stock)
-      VALUES ($1,$2,$3,$4,$5,$6)
+      (name, slug, price, image, description, stock, images, variants)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       `,
-      [name, slug, price, image, description, stock || 0]
+      [
+        name,
+        slug,
+        price,
+        image,
+        description,
+        stock || 0,
+        JSON.stringify(images),
+        JSON.stringify(variants)
+      ]
     );
 
     res.json({ success: true, message: "Product added successfully" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Failed to add product" });
   }
 });
+
 
 /* UPDATE STOCK */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
@@ -39,15 +60,18 @@ router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
     );
 
     res.json({ success: true, message: "Stock updated" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Stock update failed" });
   }
 });
 
+
 /* DELETE PRODUCT */
 router.delete("/products/:slug", verifyAdmin, async (req, res) => {
   try {
+
     await db.query(
       `
       DELETE FROM products
@@ -57,6 +81,7 @@ router.delete("/products/:slug", verifyAdmin, async (req, res) => {
     );
 
     res.json({ success: true, message: "Product deleted successfully" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Delete failed" });
