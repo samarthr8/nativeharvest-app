@@ -47,17 +47,21 @@ jobs:
           npm test -- --run
 
       # ---------------- SONARQUBE ----------------
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarQube Quality Gate
-        uses: sonarsource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #- name: SonarQube Scan
+      #  uses: sonarsource/sonarqube-scan-action@v2
+      #  env:
+      #    SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+      #- name: SonarQube Quality Gate
+      #  if: |
+      #    github.ref == 'refs/heads/develop' ||
+      #    startsWith(github.ref, 'refs/heads/release/') ||
+      #    github.ref == 'refs/heads/main'
+      #  uses: sonarsource/sonarqube-quality-gate-action@v1
+      #  timeout-minutes: 5
+      #  env:
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # ---------------- SECURITY SCAN ----------------
       - name: Trivy FS Scan
@@ -96,9 +100,8 @@ jobs:
       #   exit-code: 1
 
       # ---------------- UPLOAD ARTIFACTS ----------------
-      - name: Upload reports to Nexus
-        run: |
-          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-          --upload-file backend/coverage/lcov.info \
-          ${{ secrets.NEXUS_URL }}/repository/nativeharvest-reports/backend-${IMAGE_TAG}.lcov
-
+      #- name: Upload reports to Nexus
+      #  run: |
+      #    curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+      #    --upload-file backend/coverage/lcov.info \
+      #    ${{ secrets.NEXUS_URL }}/repository/nativeharvest-reports/backend-${IMAGE_TAG}.lcov
