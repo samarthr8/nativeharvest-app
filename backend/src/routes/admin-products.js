@@ -5,36 +5,62 @@ const verifyAdmin = require("../middleware/auth");
 
 /* ADD PRODUCT */
 router.post("/products", verifyAdmin, async (req, res) => {
+  try {
+    const { name, slug, price, image, description, stock } = req.body;
 
-  const { name, slug, price, image, description, stock } = req.body;
+    await db.query(
+      `
+      INSERT INTO products
+      (name, slug, price, image, description, stock)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      `,
+      [name, slug, price, image, description, stock || 0]
+    );
 
-  await db.query(
-    `
-    INSERT INTO products
-    (name, slug, price, image, description, stock)
-    VALUES ($1,$2,$3,$4,$5,$6)
-    `,
-    [name, slug, price, image, description, stock || 0]
-  );
-
-  res.json({ message: "Product added" });
+    res.json({ success: true, message: "Product added successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to add product" });
+  }
 });
 
 /* UPDATE STOCK */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
+  try {
+    const { stock } = req.body;
 
-  const { stock } = req.body;
+    await db.query(
+      `
+      UPDATE products
+      SET stock = $1
+      WHERE slug = $2
+      `,
+      [stock, req.params.slug]
+    );
 
-  await db.query(
-    `
-    UPDATE products
-    SET stock = $1
-    WHERE slug = $2
-    `,
-    [stock, req.params.slug]
-  );
+    res.json({ success: true, message: "Stock updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Stock update failed" });
+  }
+});
 
-  res.json({ message: "Stock updated" });
+/* DELETE PRODUCT */
+router.delete("/products/:slug", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(
+      `
+      DELETE FROM products
+      WHERE slug = $1
+      `,
+      [req.params.slug]
+    );
+
+    res.json({ success: true, message: "Product deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Delete failed" });
+  }
 });
 
 module.exports = router;

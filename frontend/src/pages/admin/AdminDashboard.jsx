@@ -39,11 +39,12 @@ export default function AdminDashboard() {
         stock: parseInt(newStock, 10)
       });
 
+      alert("Stock updated successfully ✅");
       loadProducts();
 
     } catch (err) {
       console.error(err);
-      alert("Stock update failed");
+      alert("Stock update failed ❌");
     }
   };
 
@@ -52,36 +53,53 @@ export default function AdminDashboard() {
 
     if (!file) return alert("Select image");
 
-    const formData = new FormData();
-    formData.append("image", file);
+    try {
 
-    const res = await api.post("/admin/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
+      const formData = new FormData();
+      formData.append("image", file);
 
-    setImage(res.data.imageUrl);
+      const res = await api.post("/admin/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      setImage(res.data.imageUrl);
+      alert("Image uploaded successfully ✅");
+
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed ❌");
+    }
   };
 
   /* ADD PRODUCT */
   const addProduct = async () => {
 
-    await api.post("/admin/products", {
-      name,
-      slug,
-      price,
-      stock: parseInt(stock || 0, 10),
-      image,
-      description
-    });
+    try {
 
-    setName("");
-    setSlug("");
-    setPrice("");
-    setStock("");
-    setDescription("");
-    setImage("");
+      const res = await api.post("/admin/products", {
+        name,
+        slug,
+        price,
+        stock: parseInt(stock || 0, 10),
+        image,
+        description
+      });
 
-    loadProducts();
+      alert(res.data.message || "Product added successfully ✅");
+
+      setName("");
+      setSlug("");
+      setPrice("");
+      setStock("");
+      setDescription("");
+      setImage("");
+
+      loadProducts();
+
+    } catch (err) {
+      console.error(err);
+      alert("Product creation failed ❌");
+    }
   };
 
   /* DELETE */
@@ -89,18 +107,36 @@ export default function AdminDashboard() {
 
     if (!window.confirm("Delete product?")) return;
 
-    await api.delete(`/admin/products/${slug}`);
-    loadProducts();
+    try {
+
+      const res = await api.delete(`/admin/products/${slug}`);
+
+      alert(res.data.message || "Product deleted successfully ✅");
+
+      loadProducts();
+
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed ❌");
+    }
   };
 
   /* ORDER STATUS */
   const updateOrderStatus = async (orderId, newStatus) => {
 
-    await api.patch(`/admin/orders/${orderId}/status`, {
-      order_status: newStatus
-    });
+    try {
 
-    loadOrders();
+      await api.patch(`/admin/orders/${orderId}/status`, {
+        order_status: newStatus
+      });
+
+      alert("Order status updated ✅");
+      loadOrders();
+
+    } catch (err) {
+      console.error(err);
+      alert("Order update failed ❌");
+    }
   };
 
   const logout = () => {
@@ -166,7 +202,6 @@ export default function AdminDashboard() {
                 <img src={p.image} alt="" style={{ width: 70 }} />
               )}
 
-              {/* ⭐ STOCK INDICATOR */}
               <div>
 
                 <div>

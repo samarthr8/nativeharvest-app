@@ -5,11 +5,19 @@ import { useCart } from "../context/CartContext";
 export default function Products() {
 
   const [products, setProducts] = useState([]);
+  const [expanded, setExpanded] = useState({});
   const { addToCart } = useCart();
 
   useEffect(() => {
     api.get("/products").then(res => setProducts(res.data));
   }, []);
+
+  const toggleReadMore = (slug) => {
+    setExpanded(prev => ({
+      ...prev,
+      [slug]: !prev[slug]
+    }));
+  };
 
   return (
     <div className="container">
@@ -24,7 +32,6 @@ export default function Products() {
 
         {products.map(p => {
 
-          /* PROFESSIONAL STOCK LOGIC */
           let stockText = "";
           let stockColor = "";
 
@@ -34,12 +41,18 @@ export default function Products() {
           } 
           else if (p.stock <= 10) {
             stockText = "Only Few Left";
-            stockColor = "#ff9800"; // orange
+            stockColor = "#ff9800";
           } 
           else {
             stockText = "In Stock";
             stockColor = "green";
           }
+
+          const isExpanded = expanded[p.slug];
+          const shortText =
+            p.description && p.description.length > 120
+              ? p.description.substring(0, 120) + "..."
+              : p.description;
 
           return (
 
@@ -52,7 +65,7 @@ export default function Products() {
                 height: "100%"
               }}>
 
-              {/* FIXED IMAGE BOX — ensures uniform tiles */}
+              {/* IMAGE */}
               <div style={{
                 width: "100%",
                 height: "220px",
@@ -73,13 +86,27 @@ export default function Products() {
 
               <h3 style={{ marginTop: "12px" }}>{p.name}</h3>
 
+              {/* DESCRIPTION WITH READ MORE */}
               <p style={{ flexGrow: 1 }}>
-                {p.description}
+                {isExpanded ? p.description : shortText}
+
+                {p.description && p.description.length > 120 && (
+                  <span
+                    onClick={() => toggleReadMore(p.slug)}
+                    style={{
+                      color: "#2f6f4e",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      marginLeft: "6px"
+                    }}
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </span>
+                )}
               </p>
 
               <strong>₹{p.price}</strong>
 
-              {/* CUSTOMER SAFE STOCK DISPLAY */}
               <p style={{
                 marginTop: "6px",
                 fontWeight: "bold",
