@@ -6,7 +6,6 @@ const verifyAdmin = require("../middleware/auth");
 /* ADD PRODUCT */
 router.post("/products", verifyAdmin, async (req, res) => {
   try {
-
     const {
       name,
       slug,
@@ -28,27 +27,31 @@ router.post("/products", verifyAdmin, async (req, res) => {
         name,
         slug,
         price,
-        image,
-        images || null,
-        variants || null,
+        image || null,
+        images ? JSON.stringify(images) : null,
+        variants ? JSON.stringify(variants) : null,
         description,
         stock || 0
       ]
     );
 
-    res.json({ success: true, message: "Product added successfully" });
+    res.json({
+      success: true,
+      message: "Product added successfully"
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Failed to add product" });
+    console.error("ADD PRODUCT ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to add product"
+    });
   }
 });
-
 
 /* UPDATE STOCK */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
   try {
-
     const { stock } = req.body;
 
     await db.query(
@@ -60,19 +63,23 @@ router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
       [stock, req.params.slug]
     );
 
-    res.json({ success: true, message: "Stock updated" });
+    res.json({
+      success: true,
+      message: "Stock updated"
+    });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Stock update failed" });
+    res.status(500).json({
+      success: false,
+      message: "Stock update failed"
+    });
   }
 });
-
 
 /* DELETE PRODUCT */
 router.delete("/products/:slug", verifyAdmin, async (req, res) => {
   try {
-
     await db.query(
       `
       DELETE FROM products
@@ -81,12 +88,19 @@ router.delete("/products/:slug", verifyAdmin, async (req, res) => {
       [req.params.slug]
     );
 
-    res.json({ success: true, message: "Product deleted successfully" });
+    res.json({
+      success: true,
+      message: "Product deleted successfully"
+    });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Delete failed" });
+    res.status(500).json({
+      success: false,
+      message: "Delete failed"
+    });
   }
 });
 
 module.exports = router;
+
