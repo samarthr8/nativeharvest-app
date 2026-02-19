@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
+import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
 export default function Header() {
   const location = useLocation();
@@ -52,10 +53,11 @@ export default function Header() {
           width: "100%",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center"
+          alignItems: "center",
+          position: "relative" // 🔥 Needed for absolute center logo
         }}
       >
-        {/* BRAND */}
+        {/* LEFT TEXT BRAND (UNCHANGED) */}
         <Link
           to="/"
           style={{
@@ -91,7 +93,37 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* NAVIGATION */}
+        {/* 🔥 CENTER LOGO */}
+        <Link
+          to="/"
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            alignItems: "center"
+          }}
+        >
+          <img
+            src={logo}
+            alt="NativeHarvest Logo"
+            style={{
+              height: "70px",
+              width: "auto",
+              transition: "0.3s ease",
+              cursor: "pointer"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.filter =
+                "drop-shadow(0 0 10px rgba(52,122,87,0.35))";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = "none";
+            }}
+          />
+        </Link>
+
+        {/* RIGHT NAVIGATION */}
         <nav
           style={{
             display: "flex",
@@ -107,12 +139,8 @@ export default function Header() {
               <div
                 key={item.name}
                 style={{ position: "relative" }}
-                onMouseEnter={() =>
-                  item.mega && setShowMega(true)
-                }
-                onMouseLeave={() =>
-                  item.mega && setShowMega(false)
-                }
+                onMouseEnter={() => item.mega && setShowMega(true)}
+                onMouseLeave={() => item.mega && setShowMega(false)}
               >
                 <Link
                   to={item.path}
@@ -144,7 +172,6 @@ export default function Header() {
                   />
                 </Link>
 
-                {/* MEGA MENU */}
                 {item.mega && showMega && (
                   <div
                     style={{
@@ -170,7 +197,7 @@ export default function Header() {
             );
           })}
 
-          {/* CART SVG ICON */}
+          {/* CART */}
           <Link
             to="/cart"
             style={{
@@ -187,17 +214,13 @@ export default function Header() {
               stroke="currentColor"
               strokeWidth="2"
               viewBox="0 0 24 24"
-              style={{
-                transition: "transform 0.2s ease",
-                color: "#1e1e1e"
-              }}
+              style={{ color: "#1e1e1e" }}
             >
               <circle cx="9" cy="21" r="1" />
               <circle cx="20" cy="21" r="1" />
               <path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L23 6H6" />
             </svg>
 
-            {/* BADGE */}
             {cartCount > 0 && (
               <span
                 style={{

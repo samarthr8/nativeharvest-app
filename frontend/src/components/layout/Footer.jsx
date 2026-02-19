@@ -4,15 +4,16 @@ import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
 const Footer = () => {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async (e) => {
-    e.preventDefault(); // prevent immediate mailto trigger
+    e.preventDefault();
     try {
       await navigator.clipboard.writeText(
         "nativeharvestindia@gmail.com"
       );
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), 1600);
     } catch (err) {
       console.error("Copy failed", err);
     }
@@ -53,13 +54,13 @@ const Footer = () => {
                 transition: "0.3s ease",
                 cursor: "pointer"
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 0 8px rgba(255,255,255,0.35))";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.filter = "none";
-              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.filter =
+                  "drop-shadow(0 0 8px rgba(255,255,255,0.35))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.filter = "none")
+              }
             />
           </div>
 
@@ -71,7 +72,6 @@ const Footer = () => {
         {/* QUICK LINKS */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Quick Links</h4>
-
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <Link to="/" style={{ color: "white", opacity: 0.9 }}>
               Home
@@ -106,13 +106,13 @@ const Footer = () => {
               Chhatarpur, Madhya Pradesh
             </p>
 
-            {/* Premium Email Interaction */}
+            {/* Premium Email */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
-                opacity: 0.9
+                gap: "10px",
+                position: "relative"
               }}
             >
               {/* Mail Icon */}
@@ -130,25 +130,22 @@ const Footer = () => {
                 <path d="M4 4l8 7 8-7" />
               </svg>
 
+              {/* Email Link */}
               <a
                 href="mailto:nativeharvestindia@gmail.com"
                 onClick={handleCopy}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
                 style={{
                   color: "white",
                   textDecoration: "none",
                   position: "relative",
                   whiteSpace: "nowrap",
                   cursor: "pointer",
-                  transition: "0.3s ease"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.filter =
-                    "drop-shadow(0 0 6px rgba(255,255,255,0.5))";
-                  e.currentTarget.querySelector("span").style.width = "100%";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.filter = "none";
-                  e.currentTarget.querySelector("span").style.width = "0%";
+                  transition: "0.3s ease",
+                  filter: hovered
+                    ? "drop-shadow(0 0 6px rgba(255,255,255,0.6))"
+                    : "none"
                 }}
               >
                 nativeharvestindia@gmail.com
@@ -160,32 +157,61 @@ const Footer = () => {
                     left: 0,
                     bottom: "-2px",
                     height: "1px",
-                    width: "0%",
+                    width: hovered ? "100%" : "0%",
                     background: "white",
                     transition: "width 0.3s ease"
                   }}
                 />
               </a>
 
-              {/* Copied Feedback */}
-              {copied && (
-                <span
+              {/* Copy Icon */}
+              <svg
+                onClick={handleCopy}
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                style={{
+                  cursor: "pointer",
+                  opacity: 0.7,
+                  transition: "0.3s ease"
+                }}
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+
+              {/* Tooltip */}
+              {(hovered || copied) && (
+                <div
                   style={{
+                    position: "absolute",
+                    top: "-34px",
+                    left: "0",
+                    background: "rgba(0,0,0,0.85)",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
                     fontSize: "12px",
-                    opacity: 0.8,
-                    marginLeft: "6px",
-                    transition: "0.3s ease"
+                    whiteSpace: "nowrap",
+                    opacity: copied ? 1 : 0.9,
+                    transform: copied
+                      ? "translateY(-4px)"
+                      : "translateY(0)",
+                    transition: "all 0.25s ease"
                   }}
                 >
-                  Copied!
-                </span>
+                  {copied ? "✓ Copied to clipboard" : "Click to copy"}
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Thin Divider */}
+      {/* Divider */}
       <div
         style={{
           height: "1px",
