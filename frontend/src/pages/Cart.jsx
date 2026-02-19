@@ -2,6 +2,7 @@ import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
+
   const { cart, removeFromCart, updateQty } = useCart();
 
   const total = cart.reduce(
@@ -10,20 +11,23 @@ const Cart = () => {
   );
 
   if (cart.length === 0) {
-    return <p>Your cart is empty.</p>;
+    return <p className="container">Your cart is empty.</p>;
   }
 
   return (
-    <div>
+    <div className="container">
+
       <h2>Your Cart</h2>
 
       {cart.map(item => (
-        <div key={item.key} className="card">
+
+        <div key={item.slug + item.variantKey} className="card" style={{ padding: "20px", marginBottom: "15px" }}>
+
           <h4>{item.name}</h4>
 
-          {item.weight && (
+          {item.variantKey && (
             <p style={{ fontSize: "14px", opacity: 0.7 }}>
-              Weight: {item.weight}
+              Weight: {item.variantKey}
             </p>
           )}
 
@@ -34,23 +38,30 @@ const Cart = () => {
             min="1"
             value={item.qty}
             onChange={(e) =>
-              updateQty(item.key, Number(e.target.value))
+              updateQty(item.slug, item.variantKey, Number(e.target.value))
             }
           />
 
-          <button onClick={() => removeFromCart(item.key)}>
+          <button
+            onClick={() => removeFromCart(item.slug, item.variantKey)}
+            style={{ marginLeft: "10px" }}
+          >
             Remove
           </button>
+
         </div>
       ))}
 
-      <div className="total">Total: ₹{total}</div>
+      <div className="total" style={{ marginTop: "20px", fontWeight: "bold" }}>
+        Total: ₹{total}
+      </div>
 
       <Link to="/checkout">
         <button style={{ marginTop: "10px" }}>
           Proceed to Checkout
         </button>
       </Link>
+
     </div>
   );
 };

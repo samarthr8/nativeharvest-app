@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
+
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem("cart");
     return saved ? JSON.parse(saved) : [];
@@ -12,19 +13,21 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ADD TO CART (WITH VARIANT SUPPORT) */
+  /* ADD TO CART WITH VARIANT SUPPORT */
   const addToCart = (product, selectedVariant = null) => {
+
+    const variantKey = selectedVariant?.weight || null;
+    const price = selectedVariant?.price || product.price;
+
     setCart((prev) => {
 
-      const uniqueKey = selectedVariant
-        ? `${product.slug}-${selectedVariant.weight}`
-        : product.slug;
-
-      const existing = prev.find(p => p.key === uniqueKey);
+      const existing = prev.find(
+        p => p.slug === product.slug && p.variantKey === variantKey
+      );
 
       if (existing) {
         return prev.map(p =>
-          p.key === uniqueKey
+          p.slug === product.slug && p.variantKey === variantKey
             ? { ...p, qty: p.qty + 1 }
             : p
         );
@@ -34,23 +37,26 @@ export const CartProvider = ({ children }) => {
         ...prev,
         {
           ...product,
-          key: uniqueKey,
-          weight: selectedVariant?.weight || null,
-          price: selectedVariant?.price || product.price,
+          price,
+          variantKey,
           qty: 1
         }
       ];
     });
   };
 
-  const removeFromCart = (key) => {
-    setCart(prev => prev.filter(p => p.key !== key));
+  const removeFromCart = (slug, variantKey = null) => {
+    setCart(prev =>
+      prev.filter(p => !(p.slug === slug && p.variantKey === variantKey))
+    );
   };
 
-  const updateQty = (key, qty) => {
+  const updateQty = (slug, variantKey, qty) => {
     setCart(prev =>
       prev.map(p =>
-        p.key === key ? { ...p, qty } : p
+        p.slug === slug && p.variantKey === variantKey
+          ? { ...p, qty }
+          : p
       )
     );
   };
@@ -68,6 +74,8 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
+  if (!ctx) {
+    throw new Error("useCart must be used inside CartProvider");
+  }
   return ctx;
 };
