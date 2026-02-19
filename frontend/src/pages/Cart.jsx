@@ -18,8 +18,15 @@ const Cart = () => {
       <h2>Your Cart</h2>
 
       {cart.map(item => (
-        <div key={item.slug} className="card">
+        <div key={item.key} className="card">
           <h4>{item.name}</h4>
+
+          {item.weight && (
+            <p style={{ fontSize: "14px", opacity: 0.7 }}>
+              Weight: {item.weight}
+            </p>
+          )}
+
           <p>₹{item.price}</p>
 
           <input
@@ -27,11 +34,11 @@ const Cart = () => {
             min="1"
             value={item.qty}
             onChange={(e) =>
-              updateQty(item.slug, Number(e.target.value))
+              updateQty(item.key, Number(e.target.value))
             }
           />
 
-          <button onClick={() => removeFromCart(item.slug)}>
+          <button onClick={() => removeFromCart(item.key)}>
             Remove
           </button>
         </div>
@@ -49,5 +56,3 @@ const Cart = () => {
 };
 
 export default Cart;
-
-
