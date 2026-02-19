@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 export default function Products() {
 
   const [products, setProducts] = useState([]);
+  const [expanded, setExpanded] = useState({});
   const [addedSlug, setAddedSlug] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState({});
   const { addToCart } = useCart();
@@ -13,6 +14,15 @@ export default function Products() {
     api.get("/products").then(res => setProducts(res.data));
   }, []);
 
+  /* READ MORE */
+  const toggleReadMore = (slug) => {
+    setExpanded(prev => ({
+      ...prev,
+      [slug]: !prev[slug]
+    }));
+  };
+
+  /* ADD TO CART */
   const handleAddToCart = (product) => {
     addToCart(product);
     setAddedSlug(product.slug);
@@ -53,11 +63,21 @@ export default function Products() {
           }
 
           /* MULTI IMAGE SUPPORT */
-          const images = Array.isArray(p.images) && p.images.length > 0
-            ? p.images
-            : [p.image];
+          const images =
+            Array.isArray(p.images) && p.images.length > 0
+              ? p.images
+              : p.image
+              ? [p.image]
+              : [];
 
           const currentIndex = activeImageIndex[p.slug] || 0;
+
+          /* READ MORE LOGIC */
+          const isExpanded = expanded[p.slug];
+          const shortText =
+            p.description && p.description.length > 120
+              ? p.description.substring(0, 120) + "..."
+              : p.description;
 
           return (
 
@@ -79,16 +99,19 @@ export default function Products() {
                 background: "#f7f7f7",
                 position: "relative"
               }}>
-                <img
-                  src={images[currentIndex]}
-                  alt={p.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "0.4s ease"
-                  }}
-                />
+
+                {images.length > 0 && (
+                  <img
+                    src={images[currentIndex]}
+                    alt={p.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      transition: "0.4s ease"
+                    }}
+                  />
+                )}
 
                 {/* IMAGE TOGGLE DOTS */}
                 {images.length > 1 && (
@@ -127,8 +150,23 @@ export default function Products() {
 
               <h3 style={{ marginTop: "12px" }}>{p.name}</h3>
 
+              {/* DESCRIPTION WITH READ MORE */}
               <p style={{ flexGrow: 1 }}>
-                {p.description}
+                {isExpanded ? p.description : shortText}
+
+                {p.description && p.description.length > 120 && (
+                  <span
+                    onClick={() => toggleReadMore(p.slug)}
+                    style={{
+                      color: "#2f6f4e",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      marginLeft: "6px"
+                    }}
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </span>
+                )}
               </p>
 
               <strong>₹{p.price}</strong>
