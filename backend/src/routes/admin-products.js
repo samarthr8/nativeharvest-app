@@ -12,16 +12,16 @@ router.post("/products", verifyAdmin, async (req, res) => {
       slug,
       price,
       image,
+      images,
+      variants,
       description,
-      stock,
-      images = [],
-      variants = []
+      stock
     } = req.body;
 
     await db.query(
       `
       INSERT INTO products
-      (name, slug, price, image, description, stock, images, variants)
+      (name, slug, price, image, images, variants, description, stock)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       `,
       [
@@ -29,10 +29,10 @@ router.post("/products", verifyAdmin, async (req, res) => {
         slug,
         price,
         image,
+        images || null,
+        variants || null,
         description,
-        stock || 0,
-        JSON.stringify(images),
-        JSON.stringify(variants)
+        stock || 0
       ]
     );
 
@@ -48,6 +48,7 @@ router.post("/products", verifyAdmin, async (req, res) => {
 /* UPDATE STOCK */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
   try {
+
     const { stock } = req.body;
 
     await db.query(

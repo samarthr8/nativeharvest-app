@@ -12,10 +12,10 @@ router.get("/", async (req, res) => {
       slug,
       price,
       image,
+      images,
+      variants,
       description,
-      COALESCE(stock,0) as stock,
-      COALESCE(images,'[]') as images,
-      COALESCE(variants,'[]') as variants
+      COALESCE(stock,0) as stock
     FROM products
     ORDER BY id
     `
@@ -35,10 +35,10 @@ router.get("/:slug", async (req, res) => {
       slug,
       price,
       image,
+      images,
+      variants,
       description,
-      COALESCE(stock,0) as stock,
-      COALESCE(images,'[]') as images,
-      COALESCE(variants,'[]') as variants
+      COALESCE(stock,0) as stock
     FROM products 
     WHERE slug=$1
     `,

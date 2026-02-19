@@ -14,6 +14,10 @@ export default function AdminDashboard() {
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
 
+  /* ✅ NEW STATES (added only) */
+  const [extraImages, setExtraImages] = useState("");
+  const [variantsInput, setVariantsInput] = useState("");
+
   const loadProducts = () => {
     api.get("/products").then(res => setProducts(res.data));
   };
@@ -76,12 +80,32 @@ export default function AdminDashboard() {
 
     try {
 
+      /* ✅ Parse extra images */
+      const imagesArray = extraImages
+        ? extraImages.split(",").map(i => i.trim())
+        : null;
+
+      /* ✅ Parse variants */
+      let variantsArray = null;
+
+      if (variantsInput) {
+        variantsArray = variantsInput.split(",").map(v => {
+          const [weight, price] = v.split(":");
+          return {
+            weight: weight.trim(),
+            price: Number(price.trim())
+          };
+        });
+      }
+
       const res = await api.post("/admin/products", {
         name,
         slug,
         price,
         stock: parseInt(stock || 0, 10),
         image,
+        images: imagesArray,
+        variants: variantsArray,
         description
       });
 
@@ -93,6 +117,8 @@ export default function AdminDashboard() {
       setStock("");
       setDescription("");
       setImage("");
+      setExtraImages("");
+      setVariantsInput("");
 
       loadProducts();
 
@@ -164,13 +190,27 @@ export default function AdminDashboard() {
 
       <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} /><br />
       <input placeholder="Slug" value={slug} onChange={e => setSlug(e.target.value)} /><br />
-      <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} /><br />
+      <input placeholder="Base Price" value={price} onChange={e => setPrice(e.target.value)} /><br />
       <input placeholder="Stock" value={stock} onChange={e => setStock(e.target.value)} /><br />
 
       <textarea
         placeholder="Description"
         value={description}
         onChange={e => setDescription(e.target.value)}
+      /><br />
+
+      {/* ✅ NEW FIELD — Extra Images */}
+      <input
+        placeholder="Extra Image URLs (comma separated)"
+        value={extraImages}
+        onChange={e => setExtraImages(e.target.value)}
+      /><br />
+
+      {/* ✅ NEW FIELD — Variants */}
+      <input
+        placeholder="Variants (250gm:120,500gm:220,1kg:400)"
+        value={variantsInput}
+        onChange={e => setVariantsInput(e.target.value)}
       /><br />
 
       <button onClick={addProduct}>Add Product</button>
