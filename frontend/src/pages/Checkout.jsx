@@ -30,16 +30,22 @@ const Checkout = () => {
           ...form,
           items: cart.map(item => ({
             slug: item.slug,
-            qty: item.qty
+            qty: item.qty,
+            price: item.price   // ✅ CRITICAL FIX
           }))
         })
       });
 
       const data = await res.json();
 
+      if (!data.order_id) {
+        alert(data.message || "Order creation failed");
+        setLoading(false);
+        return;
+      }
+
       clearCart();
 
-      /* ✅ ONLY CHANGE — SAFE ROUTE */
       navigate(`/order-success/${data.order_id}`);
 
     } catch (err) {
