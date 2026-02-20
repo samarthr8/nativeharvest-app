@@ -21,7 +21,11 @@ const Cart = () => {
 
       {cart.map(item => (
 
-        <div key={item.slug + item.variantKey} className="card" style={{ padding: "20px", marginBottom: "15px" }}>
+        <div
+          key={`${item.slug}-${item.variantKey || "base"}`}
+          className="card"
+          style={{ padding: "20px", marginBottom: "15px" }}
+        >
 
           <h4>{item.name}</h4>
 
@@ -38,12 +42,18 @@ const Cart = () => {
             min="1"
             value={item.qty}
             onChange={(e) =>
-              updateQty(item.slug, item.variantKey, Number(e.target.value))
+              updateQty(
+                item.slug,
+                item.variantKey,
+                Number(e.target.value)
+              )
             }
           />
 
           <button
-            onClick={() => removeFromCart(item.slug, item.variantKey)}
+            onClick={() =>
+              removeFromCart(item.slug, item.variantKey)
+            }
             style={{ marginLeft: "10px" }}
           >
             Remove

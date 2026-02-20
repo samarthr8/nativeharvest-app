@@ -14,10 +14,29 @@ export default function ProductDetail() {
 
   useEffect(() => {
     api.get(`/products/${slug}`).then(res => {
-      setProduct(res.data);
 
-      if (res.data.variants && res.data.variants.length > 0) {
-        setSelectedVariant(res.data.variants[0]);
+      const data = res.data;
+
+      /* ✅ NORMALIZE VARIANTS */
+      let normalizedVariants = [];
+
+      if (Array.isArray(data.variants)) {
+        normalizedVariants = data.variants;
+      } else if (data.variants && typeof data.variants === "object") {
+        normalizedVariants = Object.entries(data.variants).map(
+          ([weight, price]) => ({
+            weight,
+            price
+          })
+        );
+      }
+
+      data.variants = normalizedVariants;
+
+      setProduct(data);
+
+      if (normalizedVariants.length > 0) {
+        setSelectedVariant(normalizedVariants[0]);
       }
     });
   }, [slug]);
@@ -33,6 +52,19 @@ export default function ProductDetail() {
 
   const price = selectedVariant?.price || product.price;
 
+  /* ✅ ARROW NAVIGATION */
+  const nextImage = () => {
+    setActiveImage(prev =>
+      prev === images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    setActiveImage(prev =>
+      prev === 0 ? images.length - 1 : prev - 1
+    );
+  };
+
   return (
     <div className="container">
 
@@ -44,13 +76,23 @@ export default function ProductDetail() {
 
       {/* IMAGE GALLERY */}
       {images.length > 0 && (
-        <>
+        <div style={{ position: "relative", maxWidth: "400px" }}>
+
           <img
             src={images[activeImage]}
             alt={product.name}
             style={detailImage}
           />
 
+          {/* ✅ OVERLAY ARROWS */}
+          {images.length > 1 && (
+            <>
+              <button onClick={prevImage} style={arrowStyle("left")}>‹</button>
+              <button onClick={nextImage} style={arrowStyle("right")}>›</button>
+            </>
+          )}
+
+          {/* THUMBNAILS (kept unchanged) */}
           {images.length > 1 && (
             <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
               {images.map((img, i) => (
@@ -74,11 +116,10 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
 
       <h1>{product.name}</h1>
-
       <p>{product.description}</p>
 
       {/* VARIANT SELECTOR */}
@@ -136,3 +177,16 @@ const detailImage = {
   borderRadius: "12px",
   marginBottom: "20px"
 };
+
+const arrowStyle = (side) => ({
+  position: "absolute",
+  top: "40%",
+  [side]: "10px",
+  background: "rgba(255,255,255,0.6)",
+  border: "none",
+  borderRadius: "50%",
+  width: "32px",
+  height: "32px",
+  cursor: "pointer",
+  fontSize: "20px"
+});
