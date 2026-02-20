@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useCart } from "../context/CartContext";
 
@@ -8,13 +9,25 @@ export default function Products() {
   const [expanded, setExpanded] = useState({});
   const [addedSlug, setAddedSlug] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState({});
+  const [selectedVariants, setSelectedVariants] = useState({});
+
   const { addToCart } = useCart();
 
   useEffect(() => {
-    api.get("/products").then(res => setProducts(res.data));
+    api.get("/products").then(res => {
+      setProducts(res.data);
+
+      /* auto select first variant if exists */
+      const defaults = {};
+      res.data.forEach(p => {
+        if (p.variants && p.variants.length > 0) {
+          defaults[p.slug] = p.variants[0];
+        }
+      });
+      setSelectedVariants(defaults);
+    });
   }, []);
 
-  /* READ MORE */
   const toggleReadMore = (slug) => {
     setExpanded(prev => ({
       ...prev,
@@ -22,9 +35,12 @@ export default function Products() {
     }));
   };
 
-  /* ADD TO CART */
   const handleAddToCart = (product) => {
-    addToCart(product);
+
+    const selectedVariant = selectedVariants[product.slug] || null;
+
+    addToCart(product, selectedVariant);
+
     setAddedSlug(product.slug);
 
     setTimeout(() => {
@@ -45,7 +61,6 @@ export default function Products() {
 
         {products.map(p => {
 
-          /* STOCK LOGIC */
           let stockText = "";
           let stockColor = "";
 
@@ -62,7 +77,6 @@ export default function Products() {
             stockColor = "green";
           }
 
-          /* MULTI IMAGE SUPPORT */
           const images =
             Array.isArray(p.images) && p.images.length > 0
               ? p.images
@@ -72,12 +86,14 @@ export default function Products() {
 
           const currentIndex = activeImageIndex[p.slug] || 0;
 
-          /* READ MORE LOGIC */
           const isExpanded = expanded[p.slug];
           const shortText =
             p.description && p.description.length > 120
               ? p.description.substring(0, 120) + "..."
               : p.description;
+
+          const selectedVariant = selectedVariants[p.slug];
+          const displayPrice = selectedVariant?.price || p.price;
 
           return (
 
@@ -87,7 +103,8 @@ export default function Products() {
                 padding: "15px",
                 display: "flex",
                 flexDirection: "column",
-                height: "100%"
+                height: "100%",
+                position: "relative"
               }}>
 
               {/* IMAGE BOX */}
@@ -101,56 +118,83 @@ export default function Products() {
               }}>
 
                 {images.length > 0 && (
-                  <img
-                    src={images[currentIndex]}
-                    alt={p.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      transition: "0.4s ease"
-                    }}
-                  />
+                  <Link to={`/products/${p.slug}`}>
+                    <img
+                      src={images[currentIndex]}
+                      alt={p.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover"
+                      }}
+                    />
+                  </Link>
                 )}
 
-                {/* IMAGE TOGGLE DOTS */}
+                {/* LEFT ARROW */}
                 {images.length > 1 && (
-                  <div style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    display: "flex",
-                    gap: "6px"
-                  }}>
-                    {images.map((_, i) => (
-                      <div
-                        key={i}
-                        onClick={() =>
-                          setActiveImageIndex(prev => ({
-                            ...prev,
-                            [p.slug]: i
-                          }))
-                        }
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          background:
-                            i === currentIndex
-                              ? "white"
-                              : "rgba(255,255,255,0.6)",
-                          cursor: "pointer"
-                        }}
-                      />
-                    ))}
+                  <div
+                    onClick={() =>
+                      setActiveImageIndex(prev => ({
+                        ...prev,
+                        [p.slug]:
+                          currentIndex === 0
+                            ? images.length - 1
+                            : currentIndex - 1
+                      }))
+                    }
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "10px",
+                      transform: "translateY(-50%)",
+                      fontSize: "22px",
+                      color: "white",
+                      cursor: "pointer",
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "4px 8px",
+                      borderRadius: "50%"
+                    }}
+                  >
+                    ‹
                   </div>
                 )}
+
+                {/* RIGHT ARROW */}
+                {images.length > 1 && (
+                  <div
+                    onClick={() =>
+                      setActiveImageIndex(prev => ({
+                        ...prev,
+                        [p.slug]:
+                          currentIndex === images.length - 1
+                            ? 0
+                            : currentIndex + 1
+                      }))
+                    }
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      right: "10px",
+                      transform: "translateY(-50%)",
+                      fontSize: "22px",
+                      color: "white",
+                      cursor: "pointer",
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "4px 8px",
+                      borderRadius: "50%"
+                    }}
+                  >
+                    ›
+                  </div>
+                )}
+
               </div>
 
-              <h3 style={{ marginTop: "12px" }}>{p.name}</h3>
+              <Link to={`/products/${p.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+                <h3 style={{ marginTop: "12px" }}>{p.name}</h3>
+              </Link>
 
-              {/* DESCRIPTION WITH READ MORE */}
               <p style={{ flexGrow: 1 }}>
                 {isExpanded ? p.description : shortText}
 
@@ -169,7 +213,42 @@ export default function Products() {
                 )}
               </p>
 
-              <strong>₹{p.price}</strong>
+              {/* VARIANT SELECTOR */}
+              {p.variants && p.variants.length > 0 && (
+                <div style={{ marginBottom: "10px" }}>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {p.variants.map((variant, i) => (
+                      <button
+                        key={i}
+                        onClick={() =>
+                          setSelectedVariants(prev => ({
+                            ...prev,
+                            [p.slug]: variant
+                          }))
+                        }
+                        style={{
+                          padding: "5px 10px",
+                          borderRadius: "20px",
+                          border:
+                            selectedVariant?.weight === variant.weight
+                              ? "2px solid #2f6f4e"
+                              : "1px solid #ccc",
+                          background:
+                            selectedVariant?.weight === variant.weight
+                              ? "#f0f8f5"
+                              : "white",
+                          cursor: "pointer",
+                          fontSize: "12px"
+                        }}
+                      >
+                        {variant.weight}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <strong>₹{displayPrice}</strong>
 
               <p style={{
                 marginTop: "6px",
@@ -183,8 +262,7 @@ export default function Products() {
 
               {p.stock === 0 ? (
 
-                <button
-                  disabled
+                <button disabled
                   style={{
                     background: "#ccc",
                     cursor: "not-allowed",
@@ -208,23 +286,12 @@ export default function Products() {
                       border: "none",
                       borderRadius: "4px",
                       cursor: "pointer",
-                      transition: "0.3s ease",
-                      boxShadow: "0 0 0 rgba(0,0,0,0)"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow =
-                        "0 0 12px rgba(47,111,78,0.6)";
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.transform = "translateY(0)";
+                      transition: "0.3s ease"
                     }}
                   >
                     Add to Cart
                   </button>
 
-                  {/* CONFIRMATION TOOLTIP */}
                   {addedSlug === p.slug && (
                     <div style={{
                       position: "absolute",
@@ -235,9 +302,7 @@ export default function Products() {
                       color: "white",
                       padding: "6px 10px",
                       borderRadius: "6px",
-                      fontSize: "12px",
-                      opacity: 0.95,
-                      animation: "fadeIn 0.3s ease"
+                      fontSize: "12px"
                     }}>
                       Added to cart ✓
                     </div>
@@ -253,16 +318,6 @@ export default function Products() {
         })}
 
       </div>
-
-      {/* FADE ANIMATION */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(5px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-          }
-        `}
-      </style>
 
     </div>
   );
