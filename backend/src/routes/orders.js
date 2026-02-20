@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
     for (const item of items) {
 
       const productRes = await client.query(
-        "SELECT price, stock FROM products WHERE slug = $1",
+        "SELECT stock FROM products WHERE slug = $1",
         [item.slug]
       );
 
@@ -34,12 +34,15 @@ router.post("/", async (req, res) => {
 
       const product = productRes.rows[0];
 
-      // 🔥 CRITICAL STOCK CHECK
+      // 🔥 STOCK CHECK
       if (product.stock < item.qty) {
         throw new Error(`Insufficient stock for ${item.slug}`);
       }
 
-      total += product.price * item.qty;
+      // ✅ USE FRONTEND PRICE (variant price if exists)
+      const itemPrice = item.price;
+
+      total += itemPrice * item.qty;
     }
 
     // 🔥 Reduce stock

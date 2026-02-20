@@ -21,7 +21,13 @@ router.get("/", async (req, res) => {
     `
   );
 
-  res.json(result.rows);
+  const products = result.rows.map(p => ({
+    ...p,
+    images: p.images || [],
+    variants: p.variants || []
+  }));
+
+  res.json(products);
 });
 
 
@@ -49,7 +55,13 @@ router.get("/:slug", async (req, res) => {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  res.json(result.rows[0]);
+  const product = result.rows[0];
+
+  res.json({
+    ...product,
+    images: product.images || [],
+    variants: product.variants || []
+  });
 });
 
 module.exports = router;
