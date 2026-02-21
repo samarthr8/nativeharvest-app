@@ -49,6 +49,60 @@ router.post("/products", verifyAdmin, async (req, res) => {
   }
 });
 
+/* ================= UPDATE PRODUCT (NEW) ================= */
+router.put("/products/:slug", verifyAdmin, async (req, res) => {
+  try {
+
+    const { slug } = req.params;
+
+    const {
+      name,
+      price,
+      image,
+      images,
+      variants,
+      description,
+      stock
+    } = req.body;
+
+    await db.query(
+      `
+      UPDATE products
+      SET name = $1,
+          price = $2,
+          image = $3,
+          images = $4,
+          variants = $5,
+          description = $6,
+          stock = $7
+      WHERE slug = $8
+      `,
+      [
+        name,
+        price,
+        image || null,
+        images ? JSON.stringify(images) : null,
+        variants ? JSON.stringify(variants) : null,
+        description,
+        stock || 0,
+        slug
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: "Product updated successfully"
+    });
+
+  } catch (err) {
+    console.error("UPDATE PRODUCT ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Product update failed"
+    });
+  }
+});
+
 /* UPDATE STOCK */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
   try {
@@ -103,4 +157,3 @@ router.delete("/products/:slug", verifyAdmin, async (req, res) => {
 });
 
 module.exports = router;
-

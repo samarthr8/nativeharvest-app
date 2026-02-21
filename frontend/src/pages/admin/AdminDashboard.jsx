@@ -7,6 +7,8 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [visibleOrders, setVisibleOrders] = useState(15);
 
+  const [editingSlug, setEditingSlug] = useState(null); // ✅ NEW
+
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("");
@@ -14,7 +16,7 @@ export default function AdminDashboard() {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
-  const [extraImages, setExtraImages] = useState("");   // ✅ RESTORED
+  const [extraImages, setExtraImages] = useState("");
   const [variantsInput, setVariantsInput] = useState("");
 
   useEffect(() => {
@@ -54,7 +56,24 @@ export default function AdminDashboard() {
     alert("Image uploaded ✅");
   };
 
-  const addProduct = async () => {
+  // ✅ NEW: Load product data into form
+  const handleEdit = (product) => {
+    setEditingSlug(product.slug);
+    setName(product.name);
+    setSlug(product.slug);
+    setPrice(product.price);
+    setStock(product.stock);
+    setDescription(product.description || "");
+    setImage(product.image || "");
+    setExtraImages(product.images ? product.images.join(",") : "");
+    setVariantsInput(
+      product.variants
+        ? product.variants.map(v => `${v.weight}:${v.price}`).join(",")
+        : ""
+    );
+  };
+
+  const saveProduct = async () => {
 
     let variantsArray = null;
     if (variantsInput) {
@@ -64,32 +83,47 @@ export default function AdminDashboard() {
       });
     }
 
-    // ✅ RESTORED extra images parsing
     let imagesArray = null;
     if (extraImages) {
       imagesArray = extraImages.split(",").map(i => i.trim());
     }
 
-    await api.post("/admin/products", {
-      name,
-      slug,
-      price,
-      stock: parseInt(stock || 0, 10),
-      image,
-      images: imagesArray,        // ✅ RESTORED
-      variants: variantsArray,
-      description
-    });
+    if (editingSlug) {
+      // ✅ UPDATE PRODUCT
+      await api.put(`/admin/products/${editingSlug}`, {
+        name,
+        price,
+        stock: parseInt(stock || 0, 10),
+        image,
+        images: imagesArray,
+        variants: variantsArray,
+        description
+      });
+      alert("Product updated ✅");
+      setEditingSlug(null);
+    } else {
+      // ✅ ADD PRODUCT
+      await api.post("/admin/products", {
+        name,
+        slug,
+        price,
+        stock: parseInt(stock || 0, 10),
+        image,
+        images: imagesArray,
+        variants: variantsArray,
+        description
+      });
+      alert("Product added ✅");
+    }
 
-    alert("Product added ✅");
-
+    // Reset form
     setName("");
     setSlug("");
     setPrice("");
     setStock("");
     setDescription("");
     setImage("");
-    setExtraImages("");            // ✅ RESET restored
+    setExtraImages("");
     setVariantsInput("");
 
     loadProducts();
@@ -134,25 +168,14 @@ export default function AdminDashboard() {
       {/* ================= PRODUCTS SECTION ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
 
-        <h3>Upload Product Image</h3>
-        <input type="file" onChange={e => setFile(e.target.files[0])} />
-        <button
-          style={{ ...greenBtn, marginLeft: "10px" }}
-          onMouseOver={(e)=>glow(e,true)}
-          onMouseOut={(e)=>glow(e,false)}
-          onClick={uploadImage}
-        >
-          Upload
-        </button>
-
-        {image && <img src={image} alt="" style={{ width: 100, marginTop: "10px" }} />}
-
-        <hr />
-
-        <h3>Add Product</h3>
+        <h3>{editingSlug ? "Edit Product" : "Add Product"}</h3>
 
         <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} /><br/>
-        <input placeholder="Slug" value={slug} onChange={e=>setSlug(e.target.value)} /><br/>
+
+        {!editingSlug && (
+          <input placeholder="Slug" value={slug} onChange={e=>setSlug(e.target.value)} /><br/>
+        )}
+
         <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} /><br/>
         <input placeholder="Stock" value={stock} onChange={e=>setStock(e.target.value)} /><br/>
 
@@ -160,7 +183,6 @@ export default function AdminDashboard() {
                   value={description}
                   onChange={e=>setDescription(e.target.value)} /><br/>
 
-        {/* ✅ RESTORED MULTIPLE IMAGES FIELD */}
         <input
           placeholder="Extra Image URLs (comma separated)"
           value={extraImages}
@@ -175,10 +197,29 @@ export default function AdminDashboard() {
           style={greenBtn}
           onMouseOver={(e)=>glow(e,true)}
           onMouseOut={(e)=>glow(e,false)}
-          onClick={addProduct}
+          onClick={saveProduct}
         >
-          Add Product
+          {editingSlug ? "Update Product" : "Add Product"}
         </button>
+
+        {editingSlug && (
+          <button
+            style={{ ...greenBtn, marginLeft: "10px", background: "#777" }}
+            onClick={() => {
+              setEditingSlug(null);
+              setName("");
+              setSlug("");
+              setPrice("");
+              setStock("");
+              setDescription("");
+              setImage("");
+              setExtraImages("");
+              setVariantsInput("");
+            }}
+          >
+            Cancel
+          </button>
+        )}
 
         <hr />
 
@@ -200,9 +241,14 @@ export default function AdminDashboard() {
               <div>Stock: {p.stock}</div>
 
               <button
-                style={{ ...greenBtn, marginTop: "5px" }}
-                onMouseOver={(e)=>glow(e,true)}
-                onMouseOut={(e)=>glow(e,false)}
+                style={{ ...greenBtn, marginTop: "5px", marginRight: "10px" }}
+                onClick={()=>handleEdit(p)}
+              >
+                Edit
+              </button>
+
+              <button
+                style={greenBtn}
                 onClick={()=>deleteProduct(p.slug)}
               >
                 Delete
@@ -216,7 +262,6 @@ export default function AdminDashboard() {
 
       {/* ================= ORDERS SECTION (unchanged) ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
-
         <h3>Orders</h3>
 
         <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px" }}>
