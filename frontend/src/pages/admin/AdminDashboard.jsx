@@ -14,14 +14,21 @@ export default function AdminDashboard() {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
-
   const [extraImages, setExtraImages] = useState("");
   const [variantsInput, setVariantsInput] = useState("");
 
   useEffect(() => {
-    api.get("/products").then(res => setProducts(res.data));
-    api.get("/admin/orders").then(res => setOrders(res.data));
+    loadProducts();
+    loadOrders();
   }, []);
+
+  const loadProducts = () => {
+    api.get("/products").then(res => setProducts(res.data));
+  };
+
+  const loadOrders = () => {
+    api.get("/admin/orders").then(res => setOrders(res.data));
+  };
 
   const greenBtn = {
     background: "#2f6f4e",
@@ -35,7 +42,7 @@ export default function AdminDashboard() {
   };
 
   const glow = (e, on) => {
-    e.target.style.boxShadow = on ? "0 0 12px #2f6f4e" : "none";
+    e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
   const copyAddress = (address) => {
@@ -47,7 +54,6 @@ export default function AdminDashboard() {
     const res = await api.get(`/admin/orders/${orderId}/invoice`, {
       responseType: "blob"
     });
-
     const url = window.URL.createObjectURL(new Blob([res.data]));
     const link = document.createElement("a");
     link.href = url;
@@ -57,89 +63,172 @@ export default function AdminDashboard() {
     link.remove();
   };
 
+  const updateOrderStatus = async (orderId, newStatus) => {
+    await api.patch(`/admin/orders/${orderId}/status`, {
+      order_status: newStatus
+    });
+    loadOrders();
+  };
+
+  const uploadImage = async () => {
+    if (!file) return alert("Select image");
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await api.post("/admin/upload", formData);
+    setImage(res.data.imageUrl);
+    alert("Image uploaded ✅");
+  };
+
+  const addProduct = async () => {
+    let variantsArray = null;
+
+    if (variantsInput) {
+      variantsArray = variantsInput.split(",").map(v => {
+        const [weight, price] = v.split(":");
+        return { weight: weight.trim(), price: Number(price.trim()) };
+      });
+    }
+
+    await api.post("/admin/products", {
+      name,
+      slug,
+      price,
+      stock: parseInt(stock || 0, 10),
+      image,
+      variants: variantsArray,
+      description
+    });
+
+    alert("Product added ✅");
+    setName(""); setSlug(""); setPrice("");
+    setStock(""); setDescription("");
+    setImage(""); setVariantsInput("");
+    loadProducts();
+  };
+
+  const deleteProduct = async (slug) => {
+    if (!window.confirm("Delete product?")) return;
+    await api.delete(`/admin/products/${slug}`);
+    loadProducts();
+  };
+
   return (
     <div style={{ padding: "30px", background: "#f5f7f6" }}>
 
-      <h1 style={{ marginBottom: "20px" }}>Admin Dashboard</h1>
+      <h1>Admin Dashboard</h1>
 
-      {/* PRODUCTS SECTION */}
-      <div style={{
-        background: "white",
-        padding: "20px",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-        marginBottom: "30px"
-      }}>
+      {/* ================= PRODUCTS SECTION ================= */}
+      <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
+
+        <h3>Upload Product Image</h3>
+        <input type="file" onChange={e => setFile(e.target.files[0])} />
+        <button
+          style={{ ...greenBtn, marginLeft: "10px" }}
+          onMouseOver={(e)=>glow(e,true)}
+          onMouseOut={(e)=>glow(e,false)}
+          onClick={uploadImage}
+        >
+          Upload
+        </button>
+
+        {image && <img src={image} alt="" style={{ width: 100, marginTop: "10px" }} />}
+
+        <hr />
+
+        <h3>Add Product</h3>
+
+        <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} /><br/>
+        <input placeholder="Slug" value={slug} onChange={e=>setSlug(e.target.value)} /><br/>
+        <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} /><br/>
+        <input placeholder="Stock" value={stock} onChange={e=>setStock(e.target.value)} /><br/>
+
+        <textarea placeholder="Description"
+                  value={description}
+                  onChange={e=>setDescription(e.target.value)} /><br/>
+
+        <input placeholder="Variants (250gm:120,500gm:220)"
+               value={variantsInput}
+               onChange={e=>setVariantsInput(e.target.value)} /><br/>
+
+        <button
+          style={greenBtn}
+          onMouseOver={(e)=>glow(e,true)}
+          onMouseOut={(e)=>glow(e,false)}
+          onClick={addProduct}
+        >
+          Add Product
+        </button>
+
+        <hr />
+
         <h3>Existing Products</h3>
 
-        <div style={{
-          maxHeight: "350px",
-          overflowY: "auto",
-          marginTop: "15px"
-        }}>
-          {products.slice(0, 5).map(p => (
+        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+          {products.map(p => (
             <div key={p.slug}
-                 style={{
-                   padding: "10px",
-                   borderBottom: "1px solid #eee"
-                 }}>
+                 style={{ borderBottom: "1px solid #eee", padding: "10px 0" }}>
+
               <strong>{p.name}</strong> — ₹{p.price}
-              <div style={{ fontSize: "13px", color: "#777" }}>
-                Stock: {p.stock}
-              </div>
+
+              {p.image && (
+                <div>
+                  <img src={p.image} alt="" style={{ width: 80, marginTop: "5px" }} />
+                </div>
+              )}
+
+              <div>Stock: {p.stock}</div>
+
+              <button
+                style={{ ...greenBtn, marginTop: "5px" }}
+                onMouseOver={(e)=>glow(e,true)}
+                onMouseOut={(e)=>glow(e,false)}
+                onClick={()=>deleteProduct(p.slug)}
+              >
+                Delete
+              </button>
+
             </div>
           ))}
         </div>
+
       </div>
 
-      {/* ORDERS SECTION */}
-      <div style={{
-        background: "white",
-        padding: "20px",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-      }}>
+      {/* ================= ORDERS SECTION ================= */}
+
+      <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
 
         <h3>Orders</h3>
 
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "15px"
-          }}
-        >
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px" }}>
           <thead>
             <tr style={{ background: "#f0f4f2" }}>
+              <th>#</th>
               <th>Order</th>
               <th>Customer</th>
               <th>Amount</th>
               <th>Address</th>
               <th>Payment</th>
               <th>Status</th>
-              <th>Items</th>
+              <th>Order Items</th>
               <th>Invoice</th>
             </tr>
           </thead>
 
           <tbody>
-            {orders.slice(0, visibleOrders).map(o => (
+            {orders.slice(0, visibleOrders).map((o, index) => (
               <tr key={o.order_id} style={{ borderBottom: "1px solid #eee" }}>
 
+                <td>{index + 1}</td>
                 <td>{o.order_id}</td>
                 <td>{o.customer_name}</td>
                 <td>₹{o.total_amount}</td>
 
                 <td title={o.address}>
-                  {o.address.length > 25
-                    ? o.address.substring(0, 25) + "..."
-                    : o.address}
+                  {o.address.length > 25 ? o.address.substring(0,25)+"..." : o.address}
                   <span
                     style={{ cursor: "pointer", marginLeft: "5px" }}
-                    onClick={() => copyAddress(o.address)}
-                  >
-                    📋
-                  </span>
+                    onClick={()=>copyAddress(o.address)}
+                  >📋</span>
                 </td>
 
                 <td style={{
@@ -149,7 +238,18 @@ export default function AdminDashboard() {
                   {o.payment_status}
                 </td>
 
-                <td>{o.order_status}</td>
+                <td>
+                  <select
+                    value={o.order_status}
+                    onChange={(e)=>updateOrderStatus(o.order_id, e.target.value)}
+                  >
+                    <option>CREATED</option>
+                    <option>PACKED</option>
+                    <option>SHIPPED</option>
+                    <option>DELIVERED</option>
+                    <option>CANCELLED</option>
+                  </select>
+                </td>
 
                 <td
                   title={
@@ -161,7 +261,7 @@ export default function AdminDashboard() {
                   }
                   style={{ cursor: "help", color: "#2f6f4e" }}
                 >
-                  Hover
+                  Order Items
                 </td>
 
                 <td>
@@ -169,7 +269,7 @@ export default function AdminDashboard() {
                     style={greenBtn}
                     onMouseOver={(e)=>glow(e,true)}
                     onMouseOut={(e)=>glow(e,false)}
-                    onClick={() => downloadInvoice(o.order_id)}
+                    onClick={()=>downloadInvoice(o.order_id)}
                   >
                     PDF
                   </button>
@@ -182,12 +282,19 @@ export default function AdminDashboard() {
 
         {visibleOrders < orders.length && (
           <button
-            style={{ ...greenBtn, marginTop: "20px" }}
-            onMouseOver={(e)=>glow(e,true)}
-            onMouseOut={(e)=>glow(e,false)}
-            onClick={() => setVisibleOrders(prev => prev + 15)}
+            style={{ ...greenBtn, marginTop: "15px" }}
+            onClick={()=>setVisibleOrders(prev=>prev+15)}
           >
-            Load 15 More Orders
+            Load 15 More
+          </button>
+        )}
+
+        {visibleOrders > 15 && (
+          <button
+            style={{ ...greenBtn, marginLeft: "10px", marginTop: "15px" }}
+            onClick={()=>setVisibleOrders(15)}
+          >
+            Show Less
           </button>
         )}
 
