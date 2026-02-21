@@ -2,18 +2,17 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const auth = require("../middleware/auth");
+const PDFDocument = require("pdfkit");
 
 router.get("/orders", auth, async (req, res) => {
   try {
-
     const ordersRes = await db.query(
-      "SELECT * FROM orders ORDER BY created_at DESC"
+      "SELECT * FROM orders ORDER BY created_at DESC LIMIT 100"
     );
 
     const orders = ordersRes.rows;
 
     for (let order of orders) {
-
       const itemsRes = await db.query(
         `
         SELECT product_slug, product_name, price, quantity, variant_key
@@ -35,7 +34,7 @@ router.get("/orders", auth, async (req, res) => {
 });
 
 
-/* 🔥 NEW: Download Invoice (JSON) */
+/* 🔥 REAL PDF INVOICE */
 router.get("/orders/:orderId/invoice", auth, async (req, res) => {
 
   try {
@@ -62,17 +61,46 @@ router.get("/orders/:orderId/invoice", auth, async (req, res) => {
       [orderId]
     );
 
-    const invoiceData = {
-      order,
-      items: itemsRes.rows
-    };
+    const items = itemsRes.rows;
 
+    const doc = new PDFDocument({ margin: 40 });
+
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=${orderId}-invoice.json`
+      `attachment; filename=${orderId}-invoice.pdf`
     );
 
-    res.json(invoiceData);
+    doc.pipe(res);
+
+    doc.fontSize(18).text("NativeHarvest India", { align: "center" });
+    doc.moveDown();
+    doc.fontSize(14).text(`Invoice: ${orderId}`);
+    doc.text(`Customer: ${order.customer_name}`);
+    doc.text(`Phone: ${order.phone}`);
+    doc.text(`Email: ${order.email}`);
+    doc.moveDown();
+    doc.text("Shipping Address:");
+    doc.text(order.address);
+    doc.moveDown();
+
+    doc.text("Items:");
+    doc.moveDown(0.5);
+
+    items.forEach(item => {
+      doc.text(
+        `${item.product_name} ${
+          item.variant_key ? `(${item.variant_key})` : ""
+        } - ₹${item.price} x ${item.quantity}`
+      );
+    });
+
+    doc.moveDown();
+    doc.fontSize(14).text(`Total: ₹${order.total_amount}`, {
+      align: "right"
+    });
+
+    doc.end();
 
   } catch (err) {
     console.error("Invoice generation failed:", err);
