@@ -14,7 +14,6 @@ export default function AdminDashboard() {
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
 
-  /* ✅ NEW STATES (added only) */
   const [extraImages, setExtraImages] = useState("");
   const [variantsInput, setVariantsInput] = useState("");
 
@@ -32,13 +31,10 @@ export default function AdminDashboard() {
     loadOrders();
   }, []);
 
-  /* STOCK UPDATE */
   const updateStock = async (slug, newStock) => {
-
     if (newStock === "") return;
 
     try {
-
       await api.patch(`/admin/products/${slug}/stock`, {
         stock: parseInt(newStock, 10)
       });
@@ -52,13 +48,10 @@ export default function AdminDashboard() {
     }
   };
 
-  /* IMAGE */
   const uploadImage = async () => {
-
     if (!file) return alert("Select image");
 
     try {
-
       const formData = new FormData();
       formData.append("image", file);
 
@@ -75,17 +68,14 @@ export default function AdminDashboard() {
     }
   };
 
-  /* ADD PRODUCT */
   const addProduct = async () => {
 
     try {
 
-      /* ✅ Parse extra images */
       const imagesArray = extraImages
         ? extraImages.split(",").map(i => i.trim())
         : null;
 
-      /* ✅ Parse variants */
       let variantsArray = null;
 
       if (variantsInput) {
@@ -128,7 +118,6 @@ export default function AdminDashboard() {
     }
   };
 
-  /* DELETE */
   const deleteProduct = async (slug) => {
 
     if (!window.confirm("Delete product?")) return;
@@ -147,7 +136,6 @@ export default function AdminDashboard() {
     }
   };
 
-  /* ORDER STATUS */
   const updateOrderStatus = async (orderId, newStatus) => {
 
     try {
@@ -199,14 +187,12 @@ export default function AdminDashboard() {
         onChange={e => setDescription(e.target.value)}
       /><br />
 
-      {/* ✅ NEW FIELD — Extra Images */}
       <input
         placeholder="Extra Image URLs (comma separated)"
         value={extraImages}
         onChange={e => setExtraImages(e.target.value)}
       /><br />
 
-      {/* ✅ NEW FIELD — Variants */}
       <input
         placeholder="Variants (250gm:120,500gm:220,1kg:400)"
         value={variantsInput}
@@ -221,7 +207,6 @@ export default function AdminDashboard() {
 
       <ul style={{ listStyle: "none", padding: 0 }}>
         {products.map(p => (
-
           <li key={p.slug}
               style={{
                 marginBottom: "20px",
@@ -257,16 +242,6 @@ export default function AdminDashboard() {
                   }}>
                     {p.stock}
                   </span>
-
-                  {p.stock === 0 && (
-                    <span style={{
-                      marginLeft: "8px",
-                      color: "red",
-                      fontWeight: "bold"
-                    }}>
-                      OUT OF STOCK
-                    </span>
-                  )}
                 </div>
 
                 <input
@@ -312,37 +287,57 @@ export default function AdminDashboard() {
 
           <tbody>
             {orders.map(o => (
-              <tr key={o.id}>
-                <td>{o.order_id}</td>
-                <td>{o.customer_name}</td>
-                <td>₹{o.total_amount}</td>
+              <>
+                <tr key={o.id}>
+                  <td>{o.order_id}</td>
+                  <td>{o.customer_name}</td>
+                  <td>₹{o.total_amount}</td>
 
-                <td style={{
-                  color: o.payment_status === "PAID"
-                    ? "green"
-                    : "orange",
-                  fontWeight: "bold"
-                }}>
-                  {o.payment_status}
-                </td>
+                  <td style={{
+                    color: o.payment_status === "PAID"
+                      ? "green"
+                      : "orange",
+                    fontWeight: "bold"
+                  }}>
+                    {o.payment_status}
+                  </td>
 
-                <td>{o.order_status}</td>
+                  <td>{o.order_status}</td>
 
-                <td>
-                  <select
-                    value={o.order_status}
-                    onChange={(e) =>
-                      updateOrderStatus(o.order_id, e.target.value)
-                    }
-                  >
-                    <option>CREATED</option>
-                    <option>PACKED</option>
-                    <option>SHIPPED</option>
-                    <option>DELIVERED</option>
-                    <option>CANCELLED</option>
-                  </select>
-                </td>
-              </tr>
+                  <td>
+                    <select
+                      value={o.order_status}
+                      onChange={(e) =>
+                        updateOrderStatus(o.order_id, e.target.value)
+                      }
+                    >
+                      <option>CREATED</option>
+                      <option>PACKED</option>
+                      <option>SHIPPED</option>
+                      <option>DELIVERED</option>
+                      <option>CANCELLED</option>
+                    </select>
+                  </td>
+                </tr>
+
+                {/* NEW: Order Items Display */}
+                {o.items && o.items.length > 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ background: "#f9f9f9" }}>
+                      <strong>Items:</strong>
+                      <ul style={{ marginTop: "8px" }}>
+                        {o.items.map((item, index) => (
+                          <li key={index}>
+                            {item.product_name}
+                            {item.variant_key && ` (${item.variant_key})`}
+                            {" – "}₹{item.price} × {item.quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
 
