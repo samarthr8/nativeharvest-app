@@ -173,7 +173,14 @@ export default function AdminDashboard() {
         <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} /><br/>
 
         {!editingSlug && (
-          <input placeholder="Slug" value={slug} onChange={e=>setSlug(e.target.value)} /><br/>
+          <>
+            <input
+              placeholder="Slug"
+              value={slug}
+              onChange={e => setSlug(e.target.value)}
+            />
+            <br/>
+          </>
         )}
 
         <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} /><br/>
