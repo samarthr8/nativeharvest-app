@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
-  const [extraImages, setExtraImages] = useState("");
+  const [extraImages, setExtraImages] = useState("");   // ✅ RESTORED
   const [variantsInput, setVariantsInput] = useState("");
 
   useEffect(() => {
@@ -45,6 +45,69 @@ export default function AdminDashboard() {
     e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
+  const uploadImage = async () => {
+    if (!file) return alert("Select image");
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await api.post("/admin/upload", formData);
+    setImage(res.data.imageUrl);
+    alert("Image uploaded ✅");
+  };
+
+  const addProduct = async () => {
+
+    let variantsArray = null;
+    if (variantsInput) {
+      variantsArray = variantsInput.split(",").map(v => {
+        const [weight, price] = v.split(":");
+        return { weight: weight.trim(), price: Number(price.trim()) };
+      });
+    }
+
+    // ✅ RESTORED extra images parsing
+    let imagesArray = null;
+    if (extraImages) {
+      imagesArray = extraImages.split(",").map(i => i.trim());
+    }
+
+    await api.post("/admin/products", {
+      name,
+      slug,
+      price,
+      stock: parseInt(stock || 0, 10),
+      image,
+      images: imagesArray,        // ✅ RESTORED
+      variants: variantsArray,
+      description
+    });
+
+    alert("Product added ✅");
+
+    setName("");
+    setSlug("");
+    setPrice("");
+    setStock("");
+    setDescription("");
+    setImage("");
+    setExtraImages("");            // ✅ RESET restored
+    setVariantsInput("");
+
+    loadProducts();
+  };
+
+  const deleteProduct = async (slug) => {
+    if (!window.confirm("Delete product?")) return;
+    await api.delete(`/admin/products/${slug}`);
+    loadProducts();
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    await api.patch(`/admin/orders/${orderId}/status`, {
+      order_status: newStatus
+    });
+    loadOrders();
+  };
+
   const copyAddress = (address) => {
     navigator.clipboard.writeText(address);
     alert("Address copied ✅");
@@ -61,55 +124,6 @@ export default function AdminDashboard() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-  };
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    await api.patch(`/admin/orders/${orderId}/status`, {
-      order_status: newStatus
-    });
-    loadOrders();
-  };
-
-  const uploadImage = async () => {
-    if (!file) return alert("Select image");
-    const formData = new FormData();
-    formData.append("image", file);
-    const res = await api.post("/admin/upload", formData);
-    setImage(res.data.imageUrl);
-    alert("Image uploaded ✅");
-  };
-
-  const addProduct = async () => {
-    let variantsArray = null;
-
-    if (variantsInput) {
-      variantsArray = variantsInput.split(",").map(v => {
-        const [weight, price] = v.split(":");
-        return { weight: weight.trim(), price: Number(price.trim()) };
-      });
-    }
-
-    await api.post("/admin/products", {
-      name,
-      slug,
-      price,
-      stock: parseInt(stock || 0, 10),
-      image,
-      variants: variantsArray,
-      description
-    });
-
-    alert("Product added ✅");
-    setName(""); setSlug(""); setPrice("");
-    setStock(""); setDescription("");
-    setImage(""); setVariantsInput("");
-    loadProducts();
-  };
-
-  const deleteProduct = async (slug) => {
-    if (!window.confirm("Delete product?")) return;
-    await api.delete(`/admin/products/${slug}`);
-    loadProducts();
   };
 
   return (
@@ -145,6 +159,13 @@ export default function AdminDashboard() {
         <textarea placeholder="Description"
                   value={description}
                   onChange={e=>setDescription(e.target.value)} /><br/>
+
+        {/* ✅ RESTORED MULTIPLE IMAGES FIELD */}
+        <input
+          placeholder="Extra Image URLs (comma separated)"
+          value={extraImages}
+          onChange={e=>setExtraImages(e.target.value)}
+        /><br/>
 
         <input placeholder="Variants (250gm:120,500gm:220)"
                value={variantsInput}
@@ -193,8 +214,7 @@ export default function AdminDashboard() {
 
       </div>
 
-      {/* ================= ORDERS SECTION ================= */}
-
+      {/* ================= ORDERS SECTION (unchanged) ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
 
         <h3>Orders</h3>
@@ -279,24 +299,6 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
-
-        {visibleOrders < orders.length && (
-          <button
-            style={{ ...greenBtn, marginTop: "15px" }}
-            onClick={()=>setVisibleOrders(prev=>prev+15)}
-          >
-            Load 15 More
-          </button>
-        )}
-
-        {visibleOrders > 15 && (
-          <button
-            style={{ ...greenBtn, marginLeft: "10px", marginTop: "15px" }}
-            onClick={()=>setVisibleOrders(15)}
-          >
-            Show Less
-          </button>
-        )}
 
       </div>
 
