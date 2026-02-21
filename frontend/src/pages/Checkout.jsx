@@ -31,7 +31,8 @@ const Checkout = () => {
           items: cart.map(item => ({
             slug: item.slug,
             qty: item.qty,
-            price: item.price   // ✅ CRITICAL FIX
+            price: item.price,        // existing logic (variant price already handled)
+            variantKey: item.variantKey || null   // ✅ NEW: send selected weight variant
           }))
         })
       });
@@ -60,10 +61,29 @@ const Checkout = () => {
     <div>
       <h2>Checkout</h2>
 
-      <input name="customer_name" placeholder="Name" onChange={handleChange} />
-      <input name="phone" placeholder="Phone" onChange={handleChange} />
-      <input name="email" placeholder="Email" onChange={handleChange} />
-      <textarea name="address" placeholder="Address" onChange={handleChange} />
+      <input
+        name="customer_name"
+        placeholder="Name"
+        onChange={handleChange}
+      />
+
+      <input
+        name="phone"
+        placeholder="Phone"
+        onChange={handleChange}
+      />
+
+      <input
+        name="email"
+        placeholder="Email"
+        onChange={handleChange}
+      />
+
+      <textarea
+        name="address"
+        placeholder="Address"
+        onChange={handleChange}
+      />
 
       <button onClick={placeOrder} disabled={loading}>
         {loading ? "Placing Order..." : "Place Order"}

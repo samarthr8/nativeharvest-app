@@ -42,7 +42,6 @@ router.post("/", async (req, res) => {
 
       const product = productRes.rows[0];
 
-      // Stock check
       if (product.stock < item.qty) {
         throw new Error(`Insufficient stock for ${item.slug}`);
       }
@@ -55,7 +54,8 @@ router.post("/", async (req, res) => {
         slug: item.slug,
         name: product.name,
         price: itemPrice,
-        qty: item.qty
+        qty: item.qty,
+        variantKey: item.variantKey || null
       });
     }
 
@@ -77,7 +77,7 @@ router.post("/", async (req, res) => {
     const orderId = "NH-" + uuidv4().slice(0, 8).toUpperCase();
 
     // -----------------------------
-    // Insert into orders table
+    // Insert into orders
     // -----------------------------
     await client.query(
       `
@@ -89,22 +89,23 @@ router.post("/", async (req, res) => {
     );
 
     // -----------------------------
-    // Insert into order_items table
+    // Insert into order_items
     // -----------------------------
     for (const item of detailedItems) {
 
       await client.query(
         `
         INSERT INTO order_items
-        (order_id, product_slug, product_name, price, quantity)
-        VALUES ($1,$2,$3,$4,$5)
+        (order_id, product_slug, product_name, price, quantity, variant_key)
+        VALUES ($1,$2,$3,$4,$5,$6)
         `,
         [
           orderId,
           item.slug,
           item.name,
           item.price,
-          item.qty
+          item.qty,
+          item.variantKey
         ]
       );
     }
