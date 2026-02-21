@@ -7,7 +7,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [visibleOrders, setVisibleOrders] = useState(15);
 
-  const [editingSlug, setEditingSlug] = useState(null); // ✅ NEW
+  const [editingSlug, setEditingSlug] = useState(null);
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -47,16 +47,21 @@ export default function AdminDashboard() {
     e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
+  // ✅ IMAGE UPLOAD RESTORED
   const uploadImage = async () => {
     if (!file) return alert("Select image");
+
     const formData = new FormData();
     formData.append("image", file);
-    const res = await api.post("/admin/upload", formData);
+
+    const res = await api.post("/admin/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
     setImage(res.data.imageUrl);
     alert("Image uploaded ✅");
   };
 
-  // ✅ NEW: Load product data into form
   const handleEdit = (product) => {
     setEditingSlug(product.slug);
     setName(product.name);
@@ -89,7 +94,6 @@ export default function AdminDashboard() {
     }
 
     if (editingSlug) {
-      // ✅ UPDATE PRODUCT
       await api.put(`/admin/products/${editingSlug}`, {
         name,
         price,
@@ -99,10 +103,12 @@ export default function AdminDashboard() {
         variants: variantsArray,
         description
       });
+
       alert("Product updated ✅");
       setEditingSlug(null);
+
     } else {
-      // ✅ ADD PRODUCT
+
       await api.post("/admin/products", {
         name,
         slug,
@@ -113,6 +119,7 @@ export default function AdminDashboard() {
         variants: variantsArray,
         description
       });
+
       alert("Product added ✅");
     }
 
@@ -151,6 +158,7 @@ export default function AdminDashboard() {
     const res = await api.get(`/admin/orders/${orderId}/invoice`, {
       responseType: "blob"
     });
+
     const url = window.URL.createObjectURL(new Blob([res.data]));
     const link = document.createElement("a");
     link.href = url;
@@ -170,6 +178,25 @@ export default function AdminDashboard() {
 
         <h3>{editingSlug ? "Edit Product" : "Add Product"}</h3>
 
+        {/* ✅ IMAGE UPLOAD SECTION RESTORED */}
+        <input type="file" onChange={e => setFile(e.target.files[0])} />
+        <button
+          style={{ ...greenBtn, marginLeft: "10px" }}
+          onMouseOver={(e)=>glow(e,true)}
+          onMouseOut={(e)=>glow(e,false)}
+          onClick={uploadImage}
+        >
+          Upload
+        </button>
+
+        {image && (
+          <div>
+            <img src={image} alt="" style={{ width: 100, marginTop: "10px" }} />
+          </div>
+        )}
+
+        <hr />
+
         <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} /><br/>
 
         {!editingSlug && (
@@ -177,7 +204,7 @@ export default function AdminDashboard() {
             <input
               placeholder="Slug"
               value={slug}
-              onChange={e => setSlug(e.target.value)}
+              onChange={e=>setSlug(e.target.value)}
             />
             <br/>
           </>
@@ -186,9 +213,11 @@ export default function AdminDashboard() {
         <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} /><br/>
         <input placeholder="Stock" value={stock} onChange={e=>setStock(e.target.value)} /><br/>
 
-        <textarea placeholder="Description"
-                  value={description}
-                  onChange={e=>setDescription(e.target.value)} /><br/>
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={e=>setDescription(e.target.value)}
+        /><br/>
 
         <input
           placeholder="Extra Image URLs (comma separated)"
@@ -196,9 +225,11 @@ export default function AdminDashboard() {
           onChange={e=>setExtraImages(e.target.value)}
         /><br/>
 
-        <input placeholder="Variants (250gm:120,500gm:220)"
-               value={variantsInput}
-               onChange={e=>setVariantsInput(e.target.value)} /><br/>
+        <input
+          placeholder="Variants (250gm:120,500gm:220)"
+          value={variantsInput}
+          onChange={e=>setVariantsInput(e.target.value)}
+        /><br/>
 
         <button
           style={greenBtn}
@@ -267,7 +298,7 @@ export default function AdminDashboard() {
 
       </div>
 
-      {/* ================= ORDERS SECTION (unchanged) ================= */}
+      {/* ================= ORDERS SECTION ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
         <h3>Orders</h3>
 
@@ -289,27 +320,21 @@ export default function AdminDashboard() {
           <tbody>
             {orders.slice(0, visibleOrders).map((o, index) => (
               <tr key={o.order_id} style={{ borderBottom: "1px solid #eee" }}>
-
                 <td>{index + 1}</td>
                 <td>{o.order_id}</td>
                 <td>{o.customer_name}</td>
                 <td>₹{o.total_amount}</td>
-
                 <td title={o.address}>
                   {o.address.length > 25 ? o.address.substring(0,25)+"..." : o.address}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "5px" }}
-                    onClick={()=>copyAddress(o.address)}
-                  >📋</span>
+                  <span style={{ cursor: "pointer", marginLeft: "5px" }}
+                        onClick={()=>copyAddress(o.address)}>📋</span>
                 </td>
-
                 <td style={{
                   color: o.payment_status === "PAID" ? "green" : "orange",
                   fontWeight: "bold"
                 }}>
                   {o.payment_status}
                 </td>
-
                 <td>
                   <select
                     value={o.order_status}
@@ -322,7 +347,6 @@ export default function AdminDashboard() {
                     <option>CANCELLED</option>
                   </select>
                 </td>
-
                 <td
                   title={
                     o.items.map(item =>
@@ -335,7 +359,6 @@ export default function AdminDashboard() {
                 >
                   Order Items
                 </td>
-
                 <td>
                   <button
                     style={greenBtn}
@@ -346,7 +369,6 @@ export default function AdminDashboard() {
                     PDF
                   </button>
                 </td>
-
               </tr>
             ))}
           </tbody>
