@@ -17,36 +17,52 @@ router.post("/", async (req, res) => {
       items
     } = req.body;
 
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      throw new Error("Order items are required");
+    }
+
     await client.query("BEGIN");
 
     let total = 0;
+    const detailedItems = [];
 
+    // -----------------------------
+    // Validate stock + calculate total
+    // -----------------------------
     for (const item of items) {
 
       const productRes = await client.query(
-        "SELECT stock FROM products WHERE slug = $1",
+        "SELECT name, stock FROM products WHERE slug = $1",
         [item.slug]
       );
 
       if (productRes.rowCount === 0) {
-        throw new Error("Product not found");
+        throw new Error(`Product not found: ${item.slug}`);
       }
 
       const product = productRes.rows[0];
 
-      // 🔥 STOCK CHECK
+      // Stock check
       if (product.stock < item.qty) {
         throw new Error(`Insufficient stock for ${item.slug}`);
       }
 
-      // ✅ USE FRONTEND PRICE (variant price if exists)
       const itemPrice = item.price;
 
       total += itemPrice * item.qty;
+
+      detailedItems.push({
+        slug: item.slug,
+        name: product.name,
+        price: itemPrice,
+        qty: item.qty
+      });
     }
 
-    // 🔥 Reduce stock
-    for (const item of items) {
+    // -----------------------------
+    // Reduce stock
+    // -----------------------------
+    for (const item of detailedItems) {
 
       await client.query(
         `
@@ -58,8 +74,11 @@ router.post("/", async (req, res) => {
       );
     }
 
-    const orderId = "NH-" + uuidv4().slice(0,8).toUpperCase();
+    const orderId = "NH-" + uuidv4().slice(0, 8).toUpperCase();
 
+    // -----------------------------
+    // Insert into orders table
+    // -----------------------------
     await client.query(
       `
       INSERT INTO orders
@@ -68,6 +87,27 @@ router.post("/", async (req, res) => {
       `,
       [orderId, customer_name, phone, email, address, total]
     );
+
+    // -----------------------------
+    // Insert into order_items table
+    // -----------------------------
+    for (const item of detailedItems) {
+
+      await client.query(
+        `
+        INSERT INTO order_items
+        (order_id, product_slug, product_name, price, quantity)
+        VALUES ($1,$2,$3,$4,$5)
+        `,
+        [
+          orderId,
+          item.slug,
+          item.name,
+          item.price,
+          item.qty
+        ]
+      );
+    }
 
     await client.query("COMMIT");
 
@@ -79,7 +119,7 @@ router.post("/", async (req, res) => {
 
     await client.query("ROLLBACK");
 
-    console.error(err);
+    console.error("Order creation failed:", err);
 
     res.status(400).json({
       message: err.message
