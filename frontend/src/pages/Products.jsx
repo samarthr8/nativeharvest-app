@@ -42,9 +42,7 @@ export default function Products() {
     setTimeout(() => setAddedSlug(null), 1500);
   };
 
-  /* -------------------------------
-     CATEGORY GROUPING (UI ONLY)
-  ---------------------------------*/
+  /* ------------------ CATEGORY GROUPING ------------------ */
   const groupedProducts = {
     royal: [],
     orchard: [],
@@ -70,11 +68,14 @@ export default function Products() {
   });
 
   const renderGrid = (list) => (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
-      gap: "28px"
-    }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 280px))",
+        justifyContent: "center",
+        gap: "28px"
+      }}
+    >
       {list.map(p => {
 
         let stockText = "";
@@ -109,14 +110,15 @@ export default function Products() {
         const displayPrice = selectedVariant?.price || p.price;
 
         return (
-          <div key={p.slug}
+          <div
+            key={p.slug}
             style={{
+              width: "280px",
               border: "1px solid #eaeaea",
               padding: "18px",
               borderRadius: "10px",
               display: "flex",
               flexDirection: "column",
-              height: "100%",
               background: "white",
               boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
               transition: "all 0.25s ease"
@@ -125,15 +127,17 @@ export default function Products() {
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
           >
 
-            <div style={{
-              width: "100%",
-              height: "220px",
-              overflow: "hidden",
-              borderRadius: "8px",
-              background: "#f8f8f8",
-              position: "relative"
-            }}>
-
+            {/* IMAGE BOX */}
+            <div
+              style={{
+                width: "100%",
+                height: "220px",
+                overflow: "hidden",
+                borderRadius: "8px",
+                background: "#f8f8f8",
+                position: "relative"
+              }}
+            >
               {images.length > 0 && (
                 <Link to={`/products/${p.slug}`}>
                   <img
@@ -146,6 +150,64 @@ export default function Products() {
                     }}
                   />
                 </Link>
+              )}
+
+              {/* LEFT ARROW */}
+              {images.length > 1 && (
+                <div
+                  onClick={() =>
+                    setActiveImageIndex(prev => ({
+                      ...prev,
+                      [p.slug]:
+                        currentIndex === 0
+                          ? images.length - 1
+                          : currentIndex - 1
+                    }))
+                  }
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "8px",
+                    transform: "translateY(-50%)",
+                    fontSize: "18px",
+                    color: "#fff",
+                    cursor: "pointer",
+                    background: "rgba(0,0,0,0.35)",
+                    padding: "6px 10px",
+                    borderRadius: "50%"
+                  }}
+                >
+                  ‹
+                </div>
+              )}
+
+              {/* RIGHT ARROW */}
+              {images.length > 1 && (
+                <div
+                  onClick={() =>
+                    setActiveImageIndex(prev => ({
+                      ...prev,
+                      [p.slug]:
+                        currentIndex === images.length - 1
+                          ? 0
+                          : currentIndex + 1
+                    }))
+                  }
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "8px",
+                    transform: "translateY(-50%)",
+                    fontSize: "18px",
+                    color: "#fff",
+                    cursor: "pointer",
+                    background: "rgba(0,0,0,0.35)",
+                    padding: "6px 10px",
+                    borderRadius: "50%"
+                  }}
+                >
+                  ›
+                </div>
               )}
             </div>
 
@@ -216,7 +278,6 @@ export default function Products() {
             </p>
 
             <div style={{ marginTop: "12px", position: "relative" }}>
-
               {p.stock === 0 ? (
                 <button disabled
                   style={{
@@ -224,7 +285,8 @@ export default function Products() {
                     cursor: "not-allowed",
                     padding: "10px",
                     border: "none",
-                    borderRadius: "6px"
+                    borderRadius: "6px",
+                    width: "100%"
                   }}>
                   Out of Stock
                 </button>
@@ -240,8 +302,7 @@ export default function Products() {
                       borderRadius: "6px",
                       cursor: "pointer",
                       fontWeight: "500",
-                      width: "100%",
-                      transition: "0.25s ease"
+                      width: "100%"
                     }}
                   >
                     Add to Cart
@@ -264,7 +325,6 @@ export default function Products() {
                   )}
                 </>
               )}
-
             </div>
 
           </div>
@@ -282,21 +342,12 @@ export default function Products() {
         background: altBackground ? "#fafcfb" : "transparent"
       }}>
         <div className="container">
-          <h2 style={{
-            fontSize: "28px",
-            marginBottom: "6px",
-            fontWeight: "600"
-          }}>
+          <h2 style={{ fontSize: "28px", marginBottom: "6px", fontWeight: "600" }}>
             {title}
           </h2>
-          <p style={{
-            marginBottom: "30px",
-            color: "#666",
-            fontSize: "14px"
-          }}>
+          <p style={{ marginBottom: "30px", color: "#666", fontSize: "14px" }}>
             {subtitle}
           </p>
-
           {renderGrid(list)}
         </div>
       </section>
@@ -307,52 +358,33 @@ export default function Products() {
     <div>
 
       <div className="container" style={{ paddingTop: "40px" }}>
-        <h1 style={{
-          fontSize: "34px",
-          fontWeight: "600",
-          marginBottom: "8px"
-        }}>
+        <h1 style={{ fontSize: "34px", fontWeight: "600", marginBottom: "8px" }}>
           Our Collection
         </h1>
-        <p style={{
-          color: "#666",
-          marginBottom: "40px"
-        }}>
+        <p style={{ color: "#666", marginBottom: "40px" }}>
           Crafted with tradition. Curated for modern homes.
         </p>
       </div>
 
-      {renderSection(
-        "The Royal Achaar Collection",
+      {renderSection("The Royal Achaar Collection",
         "Traditional pickles prepared using age-old family recipes.",
-        groupedProducts.royal
-      )}
+        groupedProducts.royal)}
 
-      {renderSection(
-        "Orchard Preserves",
+      {renderSection("Orchard Preserves",
         "Fruits slow-cooked into rich, natural preserves.",
-        groupedProducts.orchard,
-        true
-      )}
+        groupedProducts.orchard, true)}
 
-      {renderSection(
-        "Cold-Pressed & Pure Essentials",
+      {renderSection("Cold-Pressed & Pure Essentials",
         "Extracted naturally to retain purity and nutrition.",
-        groupedProducts.coldPressed
-      )}
+        groupedProducts.coldPressed)}
 
-      {renderSection(
-        "Heritage Staples",
+      {renderSection("Heritage Staples",
         "Wholesome pantry essentials rooted in Indian tradition.",
-        groupedProducts.heritage,
-        true
-      )}
+        groupedProducts.heritage, true)}
 
-      {renderSection(
-        "Wholesome Indulgence",
+      {renderSection("Wholesome Indulgence",
         "Healthy delights crafted for mindful enjoyment.",
-        groupedProducts.indulgence
-      )}
+        groupedProducts.indulgence)}
 
     </div>
   );
