@@ -170,7 +170,28 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: "30px", background: "#f5f7f6" }}>
 
-      <h1>Admin Dashboard</h1>
+      {/* ===== BEAUTIFIED TITLE ===== */}
+      <div style={{ marginBottom: "25px" }}>
+        <h1
+          style={{
+            fontSize: "30px",
+            fontWeight: "600",
+            letterSpacing: "0.6px",
+            marginBottom: "6px",
+            color: "#1f2d2a"
+          }}
+        >
+          Admin Dashboard
+        </h1>
+        <div
+          style={{
+            width: "70px",
+            height: "3px",
+            background: "#2f6f4e",
+            borderRadius: "2px"
+          }}
+        />
+      </div>
 
       {/* ================= PRODUCTS SECTION ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
@@ -304,46 +325,59 @@ export default function AdminDashboard() {
         <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px" }}>
           <thead>
             <tr style={{ background: "#f0f4f2" }}>
-              <th>#</th>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Address</th>
-              <th>Payment</th>
-              <th>Status</th>
-              <th>Order Items</th>
-              <th>Invoice</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>#</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Order</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Customer</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Amount</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Address</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Payment</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Status</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Order Items</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Invoice</th>
             </tr>
           </thead>
 
           <tbody>
             {orders.slice(0, visibleOrders).map((o, index) => (
               <tr key={o.order_id} style={{ borderBottom: "1px solid #eee" }}>
-                <td>{index + 1}</td>
-                <td>{o.order_id}</td>
-                <td>{o.customer_name}</td>
-                <td>₹{o.total_amount}</td>
 
-                <td title={o.address}>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>{index + 1}</td>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.order_id}</td>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.customer_name}</td>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>₹{o.total_amount}</td>
+
+                <td
+                  style={{ padding: "12px", verticalAlign: "middle" }}
+                  title={`${o.full_address || o.address}
+${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`}
+                >
                   {o.city && o.state
                     ? `${o.city}, ${o.state}`
                     : o.address?.substring(0, 25)}
+
                   <span
-                    style={{ cursor: "pointer", marginLeft: "5px" }}
-                    onClick={()=>copyAddress(
-                      `${o.full_address || o.address}\n${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
-                    )}
-                  >📋</span>
+                    style={{ cursor: "pointer", marginLeft: "6px" }}
+                    onClick={() =>
+                      copyAddress(
+                        `${o.full_address || o.address}
+${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
+                      )
+                    }
+                  >
+                    📋
+                  </span>
                 </td>
 
                 <td style={{
+                  padding: "12px",
+                  verticalAlign: "middle",
                   color: o.payment_status === "PAID" ? "green" : "orange",
                   fontWeight: "bold"
                 }}>
                   {o.payment_status}
                 </td>
 
-                <td>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>
                   <select
                     value={o.order_status}
                     onChange={(e)=>updateOrderStatus(o.order_id, e.target.value)}
@@ -357,6 +391,7 @@ export default function AdminDashboard() {
                 </td>
 
                 <td
+                  style={{ padding: "12px", verticalAlign: "middle", cursor: "help", color: "#2f6f4e" }}
                   title={
                     o.items.map(item =>
                       `${item.product_name} ${
@@ -364,12 +399,11 @@ export default function AdminDashboard() {
                       } x ${item.quantity}`
                     ).join("\n")
                   }
-                  style={{ cursor: "help", color: "#2f6f4e" }}
                 >
                   Order Items
                 </td>
 
-                <td>
+                <td style={{ padding: "12px", verticalAlign: "middle" }}>
                   <button
                     style={greenBtn}
                     onMouseOver={(e)=>glow(e,true)}
