@@ -3,13 +3,13 @@ const router = express.Router();
 const db = require("../config/db");
 const verifyAdmin = require("../middleware/auth");
 
-/* 🔥 NEW: Import shipment email */
-const { sendShipmentNotification } = require("../services/emailService");
+const {
+  sendShipmentNotification,
+  sendDeliveredNotification
+} = require("../services/emailService");
 
-/**
- * UPDATE ORDER STATUS
- */
 router.patch("/orders/:orderId/status", verifyAdmin, async (req, res) => {
+
   try {
 
     const { orderId } = req.params;
@@ -34,7 +34,7 @@ router.patch("/orders/:orderId/status", verifyAdmin, async (req, res) => {
       UPDATE orders
       SET order_status = $1
       WHERE order_id = $2
-      RETURNING order_id, order_status, email;
+      RETURNING *;
       `,
       [order_status, orderId]
     );
@@ -47,14 +47,21 @@ router.patch("/orders/:orderId/status", verifyAdmin, async (req, res) => {
 
     const updatedOrder = result.rows[0];
 
-    /* 🔥 NEW: Send shipment email only if SHIPPED */
     if (order_status === "SHIPPED") {
       try {
         await sendShipmentNotification(updatedOrder);
         console.log("🚚 Shipment notification email sent");
       } catch (emailErr) {
         console.error("Shipment email failed:", emailErr);
-        // Do NOT fail API because email failed
+      }
+    }
+
+    if (order_status === "DELIVERED") {
+      try {
+        await sendDeliveredNotification(updatedOrder);
+        console.log("🎉 Delivered notification email sent");
+      } catch (emailErr) {
+        console.error("Delivered email failed:", emailErr);
       }
     }
 

@@ -34,7 +34,7 @@ router.get("/orders", auth, async (req, res) => {
 });
 
 
-/* 🔥 REAL PDF INVOICE */
+/* 🔥 UPDATED PDF INVOICE */
 router.get("/orders/:orderId/invoice", auth, async (req, res) => {
 
   try {
@@ -80,10 +80,14 @@ router.get("/orders/:orderId/invoice", auth, async (req, res) => {
     doc.text(`Phone: ${order.phone}`);
     doc.text(`Email: ${order.email}`);
     doc.moveDown();
-    doc.text("Shipping Address:");
-    doc.text(order.address);
-    doc.moveDown();
 
+    doc.text("Shipping Address:");
+    doc.text(order.full_address || order.address || "");
+    if (order.city || order.state || order.pincode) {
+      doc.text(`${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}`);
+    }
+
+    doc.moveDown();
     doc.text("Items:");
     doc.moveDown(0.5);
 

@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
 const Checkout = () => {
+
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
 
@@ -10,7 +11,10 @@ const Checkout = () => {
     customer_name: "",
     phone: "",
     email: "",
-    address: ""
+    full_address: "",
+    city: "",
+    state: "",
+    pincode: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -19,20 +23,51 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!form.full_address || !form.city || !form.state || !form.pincode) {
+      alert("Please fill all address fields");
+      return false;
+    }
+
+    if (!/^\d{6}$/.test(form.pincode)) {
+      alert("Pincode must be 6 digits");
+      return false;
+    }
+
+    return true;
+  };
+
   const placeOrder = async () => {
+
+    if (!validateForm()) return;
+
     try {
+
       setLoading(true);
+
+      const combinedAddress = `
+${form.full_address},
+${form.city},
+${form.state} - ${form.pincode}
+      `.trim();
 
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          customer_name: form.customer_name,
+          phone: form.phone,
+          email: form.email,
+          full_address: form.full_address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          address: combinedAddress, // backward compatibility
           items: cart.map(item => ({
             slug: item.slug,
             qty: item.qty,
-            price: item.price,        // existing logic (variant price already handled)
-            variantKey: item.variantKey || null   // ✅ NEW: send selected weight variant
+            price: item.price,
+            variant_key: item.variantKey || null
           }))
         })
       });
@@ -46,11 +81,9 @@ const Checkout = () => {
       }
 
       clearCart();
-
       navigate(`/order-success/${data.order_id}`);
 
     } catch (err) {
-      console.error(err);
       alert("Order creation failed");
     } finally {
       setLoading(false);
@@ -61,29 +94,19 @@ const Checkout = () => {
     <div>
       <h2>Checkout</h2>
 
-      <input
-        name="customer_name"
-        placeholder="Name"
-        onChange={handleChange}
-      />
-
-      <input
-        name="phone"
-        placeholder="Phone"
-        onChange={handleChange}
-      />
-
-      <input
-        name="email"
-        placeholder="Email"
-        onChange={handleChange}
-      />
+      <input name="customer_name" placeholder="Name" onChange={handleChange} />
+      <input name="phone" placeholder="Phone" onChange={handleChange} />
+      <input name="email" placeholder="Email" onChange={handleChange} />
 
       <textarea
-        name="address"
-        placeholder="Address"
+        name="full_address"
+        placeholder="House No, Street, Area"
         onChange={handleChange}
       />
+
+      <input name="city" placeholder="City" onChange={handleChange} />
+      <input name="state" placeholder="State" onChange={handleChange} />
+      <input name="pincode" placeholder="Pincode" onChange={handleChange} />
 
       <button onClick={placeOrder} disabled={loading}>
         {loading ? "Placing Order..." : "Place Order"}

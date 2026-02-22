@@ -14,6 +14,10 @@ router.post("/", async (req, res) => {
       phone,
       email,
       address,
+      full_address,
+      city,
+      state,
+      pincode,
       items
     } = req.body;
 
@@ -55,7 +59,7 @@ router.post("/", async (req, res) => {
         name: product.name,
         price: itemPrice,
         qty: item.qty,
-        variantKey: item.variantKey || null
+        variantKey: item.variant_key || item.variantKey || null
       });
     }
 
@@ -77,15 +81,28 @@ router.post("/", async (req, res) => {
     const orderId = "NH-" + uuidv4().slice(0, 8).toUpperCase();
 
     // -----------------------------
-    // Insert into orders
+    // Insert into orders (UPDATED)
     // -----------------------------
     await client.query(
       `
       INSERT INTO orders
-      (order_id, customer_name, phone, email, address, total_amount)
-      VALUES ($1,$2,$3,$4,$5,$6)
+      (order_id, customer_name, phone, email,
+       address, full_address, city, state, pincode,
+       total_amount)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       `,
-      [orderId, customer_name, phone, email, address, total]
+      [
+        orderId,
+        customer_name,
+        phone,
+        email,
+        address,
+        full_address || null,
+        city || null,
+        state || null,
+        pincode || null,
+        total
+      ]
     );
 
     // -----------------------------

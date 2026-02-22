@@ -30,7 +30,7 @@ function generateInvoice(order) {
     doc.pipe(stream);
 
     /* Header */
-    doc.fontSize(22).text("NativeHarvest", { align: "center" });
+    doc.fontSize(22).text("NativeHarvest India", { align: "center" });
     doc.moveDown(0.5);
     doc.fontSize(16).text("INVOICE", { align: "center" });
     doc.moveDown(1.5);
@@ -40,7 +40,17 @@ function generateInvoice(order) {
     doc.text(`Order ID: ${order.order_id}`);
     doc.text(`Customer: ${order.customer_name || ""}`);
     doc.text(`Email: ${order.email}`);
-    doc.text(`Payment Status: PAID`);
+    doc.text(`Phone: ${order.phone || ""}`);
+    doc.moveDown();
+
+    /* Address Section (NEW STRUCTURED SUPPORT) */
+    doc.text("Delivery Address:");
+    doc.text(order.full_address || order.address || "");
+
+    if (order.city || order.state || order.pincode) {
+      doc.text(`${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}`);
+    }
+
     doc.moveDown();
 
     doc.moveTo(50, doc.y)
@@ -61,7 +71,7 @@ function generateInvoice(order) {
 
     /* Footer */
     doc.fontSize(11).text(
-      "Thank you for shopping with NativeHarvest.",
+      "Thank you for shopping with NativeHarvest 🌾",
       { align: "center" }
     );
 
@@ -73,7 +83,7 @@ function generateInvoice(order) {
 }
 
 /* ---------------------------------------------------
-   📧 Customer Order Confirmation
+   📧 Customer Order Confirmation (UPDATED)
 --------------------------------------------------- */
 async function sendOrderConfirmation(order) {
 
@@ -84,15 +94,21 @@ async function sendOrderConfirmation(order) {
     to: order.email,
     subject: `Order Confirmation - ${order.order_id}`,
     html: `
-      <h2>Thank you for your order!</h2>
+      <h2>Thank you for your order! 🌾</h2>
       <p><strong>Order ID:</strong> ${order.order_id}</p>
       <p><strong>Total Amount:</strong> ₹${order.total_amount}</p>
-      <p><strong>Payment Status:</strong> PAID</p>
-      <br/>
+
+      <h4>Delivery Address:</h4>
+      <p>
+        ${order.full_address || order.address || ""}<br/>
+        ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+      </p>
+
       <p>You can track your order here:</p>
       <a href="https://nativeharvest.store/order/${order.order_id}">
         Track Order
       </a>
+
       <br/><br/>
       <p>Thank you for supporting NativeHarvest 🌾</p>
     `,
@@ -105,12 +121,11 @@ async function sendOrderConfirmation(order) {
   };
 
   await transporter.sendMail(mailOptions);
-
   fs.unlinkSync(invoicePath);
 }
 
 /* ---------------------------------------------------
-   🏢 Admin Notification Email
+   🏢 Admin Notification Email (UPDATED)
 --------------------------------------------------- */
 async function sendAdminNotification(order) {
 
@@ -120,10 +135,20 @@ async function sendAdminNotification(order) {
     subject: `🛒 New Paid Order - ${order.order_id}`,
     html: `
       <h3>New Paid Order Received</h3>
+
       <p><strong>Order ID:</strong> ${order.order_id}</p>
       <p><strong>Customer:</strong> ${order.customer_name || ""}</p>
       <p><strong>Email:</strong> ${order.email}</p>
+      <p><strong>Phone:</strong> ${order.phone || ""}</p>
+
+      <h4>Delivery Address:</h4>
+      <p>
+        ${order.full_address || order.address || ""}<br/>
+        ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+      </p>
+
       <p><strong>Total:</strong> ₹${order.total_amount}</p>
+
       <br/>
       <p>Please prepare the order for shipment.</p>
     `
@@ -133,7 +158,7 @@ async function sendAdminNotification(order) {
 }
 
 /* ---------------------------------------------------
-   🚚 Shipment Notification
+   🚚 Shipment Notification (UNCHANGED)
 --------------------------------------------------- */
 async function sendShipmentNotification(order) {
 
@@ -145,12 +170,50 @@ async function sendShipmentNotification(order) {
       <h2>Your Order Has Been Shipped 🚚</h2>
       <p><strong>Order ID:</strong> ${order.order_id}</p>
       <p>Your order is on its way!</p>
+
       <p>You can track your order here:</p>
       <a href="https://nativeharvest.store/order/${order.order_id}">
         Track Order
       </a>
+
       <br/><br/>
       <p>Thank you for shopping with NativeHarvest 🌾</p>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+/* ---------------------------------------------------
+   🎉 Delivered Notification + Marketing (NEW)
+--------------------------------------------------- */
+async function sendDeliveredNotification(order) {
+
+  const mailOptions = {
+    from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
+    to: order.email,
+    subject: `Order Delivered - ${order.order_id} 🎉`,
+    html: `
+      <h2>Your Order Has Been Delivered 🎉</h2>
+
+      <p>Hi ${order.customer_name},</p>
+
+      <p>Your order <strong>${order.order_id}</strong> has been successfully delivered.</p>
+
+      <p>We hope you loved our products! 🌾</p>
+
+      <p>
+        Visit us again for fresh and authentic farm-made goodness.
+      </p>
+
+      <a href="https://nativeharvest.store"
+         style="background:#2f6f4e;color:white;padding:10px 20px;
+                text-decoration:none;border-radius:6px;display:inline-block;">
+        Shop Again
+      </a>
+
+      <br/><br/>
+      <p>Thank you for supporting NativeHarvest.</p>
     `
   };
 
@@ -160,5 +223,6 @@ async function sendShipmentNotification(order) {
 module.exports = {
   sendOrderConfirmation,
   sendAdminNotification,
-  sendShipmentNotification
+  sendShipmentNotification,
+  sendDeliveredNotification
 };
