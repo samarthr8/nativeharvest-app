@@ -47,7 +47,6 @@ export default function AdminDashboard() {
     e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
-  // ✅ IMAGE UPLOAD RESTORED
   const uploadImage = async () => {
     if (!file) return alert("Select image");
 
@@ -94,6 +93,7 @@ export default function AdminDashboard() {
     }
 
     if (editingSlug) {
+
       await api.put(`/admin/products/${editingSlug}`, {
         name,
         price,
@@ -123,7 +123,6 @@ export default function AdminDashboard() {
       alert("Product added ✅");
     }
 
-    // Reset form
     setName("");
     setSlug("");
     setPrice("");
@@ -178,7 +177,6 @@ export default function AdminDashboard() {
 
         <h3>{editingSlug ? "Edit Product" : "Add Product"}</h3>
 
-        {/* ✅ IMAGE UPLOAD SECTION RESTORED */}
         <input type="file" onChange={e => setFile(e.target.files[0])} />
         <button
           style={{ ...greenBtn, marginLeft: "10px" }}
@@ -300,6 +298,7 @@ export default function AdminDashboard() {
 
       {/* ================= ORDERS SECTION ================= */}
       <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
+
         <h3>Orders</h3>
 
         <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px" }}>
@@ -324,17 +323,26 @@ export default function AdminDashboard() {
                 <td>{o.order_id}</td>
                 <td>{o.customer_name}</td>
                 <td>₹{o.total_amount}</td>
+
                 <td title={o.address}>
-                  {o.address.length > 25 ? o.address.substring(0,25)+"..." : o.address}
-                  <span style={{ cursor: "pointer", marginLeft: "5px" }}
-                        onClick={()=>copyAddress(o.address)}>📋</span>
+                  {o.city && o.state
+                    ? `${o.city}, ${o.state}`
+                    : o.address?.substring(0, 25)}
+                  <span
+                    style={{ cursor: "pointer", marginLeft: "5px" }}
+                    onClick={()=>copyAddress(
+                      `${o.full_address || o.address}\n${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
+                    )}
+                  >📋</span>
                 </td>
+
                 <td style={{
                   color: o.payment_status === "PAID" ? "green" : "orange",
                   fontWeight: "bold"
                 }}>
                   {o.payment_status}
                 </td>
+
                 <td>
                   <select
                     value={o.order_status}
@@ -347,6 +355,7 @@ export default function AdminDashboard() {
                     <option>CANCELLED</option>
                   </select>
                 </td>
+
                 <td
                   title={
                     o.items.map(item =>
@@ -359,6 +368,7 @@ export default function AdminDashboard() {
                 >
                   Order Items
                 </td>
+
                 <td>
                   <button
                     style={greenBtn}
@@ -369,10 +379,38 @@ export default function AdminDashboard() {
                     PDF
                   </button>
                 </td>
+
               </tr>
             ))}
           </tbody>
         </table>
+
+        {/* Load More / Show Less */}
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+
+          {visibleOrders < orders.length && (
+            <button
+              style={{ ...greenBtn, marginRight: "10px" }}
+              onMouseOver={(e)=>glow(e,true)}
+              onMouseOut={(e)=>glow(e,false)}
+              onClick={() => setVisibleOrders(prev => prev + 15)}
+            >
+              Load 15 More
+            </button>
+          )}
+
+          {visibleOrders > 15 && (
+            <button
+              style={{ ...greenBtn, background: "#777" }}
+              onMouseOver={(e)=>glow(e,true)}
+              onMouseOut={(e)=>glow(e,false)}
+              onClick={() => setVisibleOrders(15)}
+            >
+              Show Less
+            </button>
+          )}
+
+        </div>
 
       </div>
 
