@@ -47,6 +47,12 @@ export default function AdminDashboard() {
     e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
+  // ✅ RESTORED LOGOUT FUNCTION (unchanged logic)
+  const logout = () => {
+    localStorage.removeItem("adminToken");
+    window.location.href = "/admin/login";
+  };
+
   const uploadImage = async () => {
     if (!file) return alert("Select image");
 
@@ -170,27 +176,43 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: "30px", background: "#f5f7f6" }}>
 
-      {/* ===== BEAUTIFIED TITLE ===== */}
-      <div style={{ marginBottom: "25px" }}>
-        <h1
-          style={{
-            fontSize: "30px",
-            fontWeight: "600",
-            letterSpacing: "0.6px",
-            marginBottom: "6px",
-            color: "#1f2d2a"
-          }}
+      {/* ===== HEADER WITH TITLE + LOGOUT ===== */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "25px"
+      }}>
+        <div>
+          <h1
+            style={{
+              fontSize: "30px",
+              fontWeight: "600",
+              letterSpacing: "0.6px",
+              marginBottom: "6px",
+              color: "#1f2d2a"
+            }}
+          >
+            Admin Dashboard
+          </h1>
+          <div
+            style={{
+              width: "70px",
+              height: "3px",
+              background: "#2f6f4e",
+              borderRadius: "2px"
+            }}
+          />
+        </div>
+
+        <button
+          style={greenBtn}
+          onMouseOver={(e)=>glow(e,true)}
+          onMouseOut={(e)=>glow(e,false)}
+          onClick={logout}
         >
-          Admin Dashboard
-        </h1>
-        <div
-          style={{
-            width: "70px",
-            height: "3px",
-            background: "#2f6f4e",
-            borderRadius: "2px"
-          }}
-        />
+          Logout
+        </button>
       </div>
 
       {/* ================= PRODUCTS SECTION ================= */}
@@ -340,7 +362,6 @@ export default function AdminDashboard() {
           <tbody>
             {orders.slice(0, visibleOrders).map((o, index) => (
               <tr key={o.order_id} style={{ borderBottom: "1px solid #eee" }}>
-
                 <td style={{ padding: "12px", verticalAlign: "middle" }}>{index + 1}</td>
                 <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.order_id}</td>
                 <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.customer_name}</td>
@@ -413,15 +434,12 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
                     PDF
                   </button>
                 </td>
-
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Load More / Show Less */}
         <div style={{ marginTop: "20px", textAlign: "center" }}>
-
           {visibleOrders < orders.length && (
             <button
               style={{ ...greenBtn, marginRight: "10px" }}
@@ -443,7 +461,6 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
               Show Less
             </button>
           )}
-
         </div>
 
       </div>
