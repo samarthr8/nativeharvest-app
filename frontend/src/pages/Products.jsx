@@ -54,11 +54,40 @@ export default function Products() {
   products.forEach(p => {
     const slug = p.slug.toLowerCase();
 
-    if (slug.includes("pickle")) categories.royal.push(p);
-    else if (slug.includes("jam")) categories.orchard.push(p);
-    else if (slug.includes("oil")) categories.cold.push(p);
-    else if (slug.includes("sattu")) categories.heritage.push(p);
-    else categories.indulgence.push(p);
+    if (
+      slug.includes("pickle") ||
+      slug.includes("achaar")
+    ) {
+      categories.royal.push(p);
+    } 
+    else if (
+      slug.includes("jam") ||
+      slug.includes("flower") ||
+      slug.includes("flowers") ||
+      slug.includes("candy") ||
+      slug.includes("preserve") ||
+      slug.includes("murabba")
+    ) {
+      categories.orchard.push(p);
+    } 
+    else if (
+      slug.includes("oil") ||
+      slug.includes("ghee")
+    ) {
+      categories.cold.push(p);
+    } 
+    else if (
+      slug.includes("sattu") ||
+      slug.includes("birchun") ||
+      slug.includes("murka") ||
+      slug.includes("atta") ||
+      slug.includes("powder")
+    ) {
+      categories.heritage.push(p);
+    } 
+    else {
+      categories.indulgence.push(p);
+    }
   });
 
   /* -------- GRID STYLE (FIXED 4 COLS) -------- */
