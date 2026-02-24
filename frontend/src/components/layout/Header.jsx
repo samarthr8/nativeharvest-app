@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCart } from "../../context/CartContext";
 import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
@@ -11,6 +11,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
 
+  const closeTimeoutRef = useRef(null);
+
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   /* ---------------- SCROLL EFFECT ---------------- */
@@ -21,11 +23,26 @@ export default function Header() {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ---------------- NAV ITEMS ---------------- */
+  /* ---------------- HOVER HANDLERS ---------------- */
+
+  const handleMouseEnter = () => {
+
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+
+    setShowMega(true);
+  };
+
+  const handleMouseLeave = () => {
+
+    closeTimeoutRef.current = setTimeout(() => {
+      setShowMega(false);
+    }, 200); // 200ms buffer prevents flicker
+  };
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -66,7 +83,7 @@ export default function Header() {
         }}
       >
 
-        {/* LEFT TEXT BRAND */}
+        {/* LEFT BRAND */}
         <Link
           to="/"
           style={{
@@ -78,14 +95,7 @@ export default function Header() {
             textDecoration: "none",
             display: "flex",
             flexDirection: "column",
-            lineHeight: "1.1",
-            transition: "transform 0.3s ease"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0px)";
+            lineHeight: "1.1"
           }}
         >
           NativeHarvest
@@ -122,13 +132,6 @@ export default function Header() {
               transition: "0.3s ease",
               cursor: "pointer"
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.filter =
-                "drop-shadow(0 0 10px rgba(52,122,87,0.35))";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.filter = "none";
-            }}
           />
         </Link>
 
@@ -141,82 +144,83 @@ export default function Header() {
             position: "relative"
           }}
         >
-
           {navItems.map((item) => {
 
             const isActive = location.pathname === item.path;
 
-            return (
-              <div
-                key={item.name}
-                style={{ position: "relative" }}
-                onMouseEnter={() => item.mega && setShowMega(true)}
-                onMouseLeave={() => item.mega && setShowMega(false)}
-              >
-                <Link
-                  to={item.path}
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: "500",
-                    color: isActive
-                      ? "var(--green-dark)"
-                      : "#1e1e1e",
-                    textDecoration: "none",
-                    position: "relative",
-                    paddingBottom: "6px",
-                    transition: "color 0.3s ease"
-                  }}
+            if (item.mega) {
+              return (
+                <div
+                  key={item.name}
+                  style={{ position: "relative" }}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  {item.name}
-
-                  <span
+                  <Link
+                    to={item.path}
                     style={{
-                      position: "absolute",
-                      left: 0,
-                      bottom: 0,
-                      width: isActive ? "100%" : "0%",
-                      height: "2px",
-                      background: "var(--green-dark)",
-                      transition: "width 0.3s ease"
-                    }}
-                  />
-                </Link>
-
-                {/* ---------------- MEGA DROPDOWN ---------------- */}
-
-                {item.mega && showMega && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "40px",
-                      left: "-100px",
-                      width: "400px",
-                      background: "white",
-                      padding: "30px",
-                      borderRadius: "16px",
-                      boxShadow: "0 15px 40px rgba(0,0,0,0.08)",
-                      display: "grid",
-                      gap: "10px"
+                      fontSize: "15px",
+                      fontWeight: "500",
+                      color: isActive
+                        ? "var(--green-dark)"
+                        : "#1e1e1e",
+                      textDecoration: "none",
+                      position: "relative",
+                      paddingBottom: "6px"
                     }}
                   >
+                    {item.name}
+                  </Link>
 
-                    {/* UPDATED LINKS WITH HASH NAVIGATION */}
+                  {showMega && (
+                    <div
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                      style={{
+                        position: "absolute",
+                        top: "35px", // reduced gap
+                        left: "-100px",
+                        width: "400px",
+                        background: "white",
+                        padding: "30px",
+                        borderRadius: "16px",
+                        boxShadow:
+                          "0 15px 40px rgba(0,0,0,0.08)",
+                        display: "grid",
+                        gap: "10px",
+                        zIndex: 999
+                      }}
+                    >
+                      <Link to="/products#royal">Pickles</Link>
+                      <Link to="/products#orchard">Preserves</Link>
+                      <Link to="/products#cold">Oils and Essentials</Link>
+                      <Link to="/products#heritage">Heritage Staples</Link>
+                      <Link to="/products#indulgence">Healthy Snacks</Link>
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
-                    <Link to="/products#royal">Pickles</Link>
-                    <Link to="/products#orchard">Preserves</Link>
-                    <Link to="/products#cold">Oils and Essentials</Link>
-                    <Link to="/products#heritage">Heritage Staples</Link>
-                    <Link to="/products#indulgence">Healthy Snacks</Link>
-
-                  </div>
-                )}
-
-              </div>
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: "500",
+                  color: isActive
+                    ? "var(--green-dark)"
+                    : "#1e1e1e",
+                  textDecoration: "none"
+                }}
+              >
+                {item.name}
+              </Link>
             );
           })}
 
-          {/* ---------------- CART ---------------- */}
-
+          {/* CART */}
           <Link
             to="/cart"
             style={{
@@ -261,7 +265,6 @@ export default function Header() {
                 {cartCount}
               </span>
             )}
-
           </Link>
 
         </nav>
