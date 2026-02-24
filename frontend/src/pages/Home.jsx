@@ -308,49 +308,86 @@ const BrandStory = () => (
    NEWSLETTER
 ---------------------------------- */
 
-const Newsletter = () => (
-  <section
-    className="section"
-    style={{
-      background: "var(--green-main)",
-      color: "white"
-    }}
-  >
-    <div
-      className="container"
+const Newsletter = () => {
+
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setMessage("✓ Thank you for subscribing!");
+    setEmail("");
+
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  return (
+    <section
+      className="section"
       style={{
-        display: "grid",
-        gridTemplateColumns:
-          "repeat(auto-fit, minmax(300px,1fr))",
-        alignItems: "center",
-        gap: "40px"
+        background: "var(--green-main)",
+        color: "white"
       }}
     >
-      <div>
-        <h2>Stay Connected</h2>
-        <p style={{ marginTop: "10px" }}>
-          Get updates on new products and
-          seasonal batches.
-        </p>
-      </div>
+      <div
+        className="container"
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(300px,1fr))",
+          alignItems: "center",
+          gap: "40px"
+        }}
+      >
+        <div>
+          <h2>Stay Connected</h2>
+          <p style={{ marginTop: "10px" }}>
+            Get updates on new products and
+            seasonal batches.
+          </p>
+        </div>
 
-      <div style={{ display: "flex", gap: "15px" }}>
-        <input
-          placeholder="Enter your email"
-          style={{
-            borderRadius: "30px",
-            padding: "12px 18px",
-            border: "none",
-            flex: 1
-          }}
-        />
-        <button className="btn">
-          Subscribe
-        </button>
+        <div>
+          <form
+            onSubmit={handleSubscribe}
+            style={{ display: "flex", gap: "15px" }}
+          >
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              style={{
+                borderRadius: "30px",
+                padding: "12px 18px",
+                border: "none",
+                flex: 1
+              }}
+            />
+            <button type="submit" className="btn">
+              Subscribe
+            </button>
+          </form>
+
+          {/* ✅ MESSAGE GOES HERE */}
+          {message && (
+            <p style={{ marginTop: "10px", fontSize: "14px" }}>
+              {message}
+            </p>
+          )}
+        </div>
+
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ----------------------------------
    EXPORT
