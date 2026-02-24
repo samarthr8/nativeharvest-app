@@ -189,8 +189,10 @@ export default function Header() {
                     }}
                   >
                     <Link to="/products">Pickles</Link>
-                    <Link to="/products">Cold Pressed Oil</Link>
-                    <Link to="/products">Sattu</Link>
+                    <Link to="/products">Preserves</Link>
+                    <Link to="/products">Oils and Essentials</Link>
+                    <Link to="/products">Heritage Staples</Link>
+                    <Link to="/products">Healthy Snacks</Link>
                   </div>
                 )}
               </div>
