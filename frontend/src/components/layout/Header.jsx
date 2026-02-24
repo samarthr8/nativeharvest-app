@@ -4,20 +4,28 @@ import { useCart } from "../../context/CartContext";
 import logo from "../../assets/NH-Logo-Old-Transparent-Cropped-2.png";
 
 export default function Header() {
+
   const location = useLocation();
   const { cart } = useCart();
+
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
+  /* ---------------- SCROLL EFFECT ---------------- */
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  /* ---------------- NAV ITEMS ---------------- */
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -54,10 +62,11 @@ export default function Header() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          position: "relative" // 🔥 Needed for absolute center logo
+          position: "relative"
         }}
       >
-        {/* LEFT TEXT BRAND (UNCHANGED) */}
+
+        {/* LEFT TEXT BRAND */}
         <Link
           to="/"
           style={{
@@ -93,7 +102,7 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* 🔥 CENTER LOGO */}
+        {/* CENTER LOGO */}
         <Link
           to="/"
           style={{
@@ -132,7 +141,9 @@ export default function Header() {
             position: "relative"
           }}
         >
+
           {navItems.map((item) => {
+
             const isActive = location.pathname === item.path;
 
             return (
@@ -158,7 +169,6 @@ export default function Header() {
                 >
                   {item.name}
 
-                  {/* Animated underline */}
                   <span
                     style={{
                       position: "absolute",
@@ -172,6 +182,8 @@ export default function Header() {
                   />
                 </Link>
 
+                {/* ---------------- MEGA DROPDOWN ---------------- */}
+
                 {item.mega && showMega && (
                   <div
                     style={{
@@ -182,24 +194,29 @@ export default function Header() {
                       background: "white",
                       padding: "30px",
                       borderRadius: "16px",
-                      boxShadow:
-                        "0 15px 40px rgba(0,0,0,0.08)",
+                      boxShadow: "0 15px 40px rgba(0,0,0,0.08)",
                       display: "grid",
                       gap: "10px"
                     }}
                   >
-                    <Link to="/products">Pickles</Link>
-                    <Link to="/products">Preserves</Link>
-                    <Link to="/products">Oils and Essentials</Link>
-                    <Link to="/products">Heritage Staples</Link>
-                    <Link to="/products">Healthy Snacks</Link>
+
+                    {/* UPDATED LINKS WITH HASH NAVIGATION */}
+
+                    <Link to="/products#royal">Pickles</Link>
+                    <Link to="/products#orchard">Preserves</Link>
+                    <Link to="/products#cold">Oils and Essentials</Link>
+                    <Link to="/products#heritage">Heritage Staples</Link>
+                    <Link to="/products#indulgence">Healthy Snacks</Link>
+
                   </div>
                 )}
+
               </div>
             );
           })}
 
-          {/* CART */}
+          {/* ---------------- CART ---------------- */}
+
           <Link
             to="/cart"
             style={{
@@ -244,8 +261,11 @@ export default function Header() {
                 {cartCount}
               </span>
             )}
+
           </Link>
+
         </nav>
+
       </div>
     </header>
   );

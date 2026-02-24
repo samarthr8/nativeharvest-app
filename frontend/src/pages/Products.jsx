@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { useCart } from "../context/CartContext";
 
 export default function Products() {
+
+  const location = useLocation();
 
   const [products, setProducts] = useState([]);
   const [expanded, setExpanded] = useState({});
@@ -13,8 +15,19 @@ export default function Products() {
 
   const { addToCart } = useCart();
 
+  /* ---------------- CATEGORY REFS FOR SCROLL ---------------- */
+
+  const royalRef = useRef(null);
+  const orchardRef = useRef(null);
+  const coldRef = useRef(null);
+  const heritageRef = useRef(null);
+  const indulgenceRef = useRef(null);
+
+  /* ---------------- FETCH PRODUCTS ---------------- */
+
   useEffect(() => {
     api.get("/products").then(res => {
+
       setProducts(res.data);
 
       const defaults = {};
@@ -23,9 +36,45 @@ export default function Products() {
           defaults[p.slug] = p.variants[0];
         }
       });
+
       setSelectedVariants(defaults);
+
     });
   }, []);
+
+  /* ---------------- HASH SCROLL LOGIC ---------------- */
+
+  useEffect(() => {
+
+    if (!products.length) return;
+
+    if (!location.hash) return;
+
+    const id = location.hash.replace("#", "");
+
+    const scrollMap = {
+      royal: royalRef,
+      orchard: orchardRef,
+      cold: coldRef,
+      heritage: heritageRef,
+      indulgence: indulgenceRef
+    };
+
+    const targetRef = scrollMap[id];
+
+    if (targetRef && targetRef.current) {
+
+      setTimeout(() => {
+        targetRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 150);
+    }
+
+  }, [location.hash, products]);
+
+  /* ---------------- UI HELPERS ---------------- */
 
   const toggleReadMore = (slug) => {
     setExpanded(prev => ({
@@ -41,7 +90,7 @@ export default function Products() {
     setTimeout(() => setAddedSlug(null), 1500);
   };
 
-  /* -------- CATEGORY GROUPING -------- */
+  /* ---------------- CATEGORY GROUPING ---------------- */
 
   const categories = {
     royal: [],
@@ -52,6 +101,7 @@ export default function Products() {
   };
 
   products.forEach(p => {
+
     const slug = p.slug.toLowerCase();
 
     if (
@@ -59,7 +109,7 @@ export default function Products() {
       slug.includes("achaar")
     ) {
       categories.royal.push(p);
-    } 
+    }
     else if (
       slug.includes("jam") ||
       slug.includes("flower") ||
@@ -69,13 +119,13 @@ export default function Products() {
       slug.includes("murabba")
     ) {
       categories.orchard.push(p);
-    } 
+    }
     else if (
       slug.includes("oil") ||
       slug.includes("ghee")
     ) {
       categories.cold.push(p);
-    } 
+    }
     else if (
       slug.includes("sattu") ||
       slug.includes("birchun") ||
@@ -84,13 +134,14 @@ export default function Products() {
       slug.includes("powder")
     ) {
       categories.heritage.push(p);
-    } 
+    }
     else {
       categories.indulgence.push(p);
     }
+
   });
 
-  /* -------- GRID STYLE (FIXED 4 COLS) -------- */
+  /* ---------------- GRID STYLE ---------------- */
 
   const gridStyle = {
     display: "grid",
@@ -99,13 +150,10 @@ export default function Products() {
     alignItems: "stretch"
   };
 
-  const responsiveWrapper = {
-    width: "100%"
-  };
-
   const renderGrid = (list) => (
-    <div style={responsiveWrapper}>
+    <div>
       <div style={gridStyle}>
+
         {list.map(p => {
 
           let stockText = "";
@@ -114,11 +162,11 @@ export default function Products() {
           if (p.stock === 0) {
             stockText = "Out of Stock";
             stockColor = "red";
-          } 
+          }
           else if (p.stock <= 10) {
             stockText = "Only Few Left";
             stockColor = "#ff9800";
-          } 
+          }
           else {
             stockText = "In Stock";
             stockColor = "green";
@@ -192,17 +240,7 @@ export default function Products() {
                               : currentIndex - 1
                         }))
                       }
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "10px",
-                        transform: "translateY(-50%)",
-                        background: "rgba(0,0,0,0.4)",
-                        color: "white",
-                        padding: "4px 8px",
-                        borderRadius: "50%",
-                        cursor: "pointer"
-                      }}
+                      style={arrowStyle("left")}
                     >
                       ‹
                     </div>
@@ -217,22 +255,13 @@ export default function Products() {
                               : currentIndex + 1
                         }))
                       }
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        right: "10px",
-                        transform: "translateY(-50%)",
-                        background: "rgba(0,0,0,0.4)",
-                        color: "white",
-                        padding: "4px 8px",
-                        borderRadius: "50%",
-                        cursor: "pointer"
-                      }}
+                      style={arrowStyle("right")}
                     >
                       ›
                     </div>
                   </>
                 )}
+
               </div>
 
               <Link to={`/products/${p.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
@@ -348,49 +377,63 @@ export default function Products() {
             </div>
           );
         })}
+
       </div>
     </div>
   );
 
   return (
     <div className="container">
+
       <h1 style={{ marginBottom: "40px" }}>Products</h1>
 
       {categories.royal.length > 0 && (
-        <>
+        <div ref={royalRef}>
           <h2 style={{ marginBottom: "20px" }}>The Royal Achaar Collection</h2>
           {renderGrid(categories.royal)}
-        </>
+        </div>
       )}
 
       {categories.orchard.length > 0 && (
-        <>
+        <div ref={orchardRef}>
           <h2 style={{ margin: "60px 0 20px" }}>Orchard Preserves</h2>
           {renderGrid(categories.orchard)}
-        </>
+        </div>
       )}
 
       {categories.cold.length > 0 && (
-        <>
+        <div ref={coldRef}>
           <h2 style={{ margin: "60px 0 20px" }}>Cold-Pressed & Pure Essentials</h2>
           {renderGrid(categories.cold)}
-        </>
+        </div>
       )}
 
       {categories.heritage.length > 0 && (
-        <>
+        <div ref={heritageRef}>
           <h2 style={{ margin: "60px 0 20px" }}>Heritage Staples</h2>
           {renderGrid(categories.heritage)}
-        </>
+        </div>
       )}
 
       {categories.indulgence.length > 0 && (
-        <>
+        <div ref={indulgenceRef}>
           <h2 style={{ margin: "60px 0 20px" }}>Wholesome Indulgence</h2>
           {renderGrid(categories.indulgence)}
-        </>
+        </div>
       )}
 
     </div>
   );
 }
+
+const arrowStyle = (side) => ({
+  position: "absolute",
+  top: "50%",
+  [side]: "10px",
+  transform: "translateY(-50%)",
+  background: "rgba(0,0,0,0.4)",
+  color: "white",
+  padding: "4px 8px",
+  borderRadius: "50%",
+  cursor: "pointer"
+});
