@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
+import ProductDetail from "./pages/ProductDetail";
 
 /* Admin pages */
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -30,6 +31,7 @@ const App = () => {
         <Routes>
           <Route index element={<Home />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:slug" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/about" element={<About />} />
