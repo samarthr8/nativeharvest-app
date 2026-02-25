@@ -56,15 +56,23 @@ export default function AdminDashboard() {
   const uploadImage = async () => {
     if (!file) return alert("Select image");
 
-    const formData = new FormData();
-    formData.append("image", file);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
 
-    const res = await api.post("/admin/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
+      // ❌ DO NOT manually set Content-Type
+      const res = await api.post("/admin/upload", formData);
 
-    setImage(res.data.imageUrl);
-    alert("Image uploaded ✅");
+      setImage(res.data.imageUrl);
+      alert("Image uploaded ✅");
+
+    } catch (err) {
+      console.error("UPLOAD ERROR:", err);
+      alert(
+        err.response?.data?.message ||
+        "Image upload failed"
+      );
+    }
   };
 
   const handleEdit = (product) => {
