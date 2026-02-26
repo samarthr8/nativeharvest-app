@@ -46,15 +46,18 @@ const HeroSection = () => {
       style={{
         height: "clamp(500px, 60vh, 700px)",
 
-        background: `linear-gradient(
-          to right,
-          rgba(0,0,0,0.45),
-          rgba(0,0,0,0.15)
-        ), url(${slide.image})`,
+        backgroundImage: `
+          linear-gradient(
+            to right,
+           rgba(0,0,0,0.45),
+           rgba(0,0,0,0.15)
+          ),
+          url(${slide.image})
+        `,
 
-        backgroundSize: "cover",
-        backgroundPosition: "center center",
-        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center center, center center",
+        backgroundRepeat: "no-repeat, no-repeat",
 
         display: "flex",
         alignItems: "center",
