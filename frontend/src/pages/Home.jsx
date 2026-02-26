@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://lh3.googleusercontent.com/gg/AMW1TPplwl1SOr1rOyGq7q_xedD6rrx_TevAMlOKlL7RfAoGMapKT_3C7RL4CMkHyjy38mDf9mCz7bbgbXdpwJf-MTjGxXQvKqic72x8ppII4-Rr9xQtevU2IjFqbMcYIGU0_nROSsytuNQhJ3ARXk_DfIHhypksEbS2dXKBm0u0K_Fnd7yuNtif=s1024-rj-mp2",
+      "https://lh3.googleusercontent.com/gg/AMW1TPo3BDg4tiNKnhC93vCaViaWF32qDv5lRVW9eX1eTMsVuS6kIczD3TPXIlYk7kUnuhK_bOw-xtSDEEWLCeU4174u8cnTo9kSh3j9oBHY6By94CdYoOb9iNhVrgyLFClfS03BNs5VveQAid-vPmhBipY5a8otcVOCro-pXxvnJnzuidE0-TU6=s1024-rj-mp2",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
