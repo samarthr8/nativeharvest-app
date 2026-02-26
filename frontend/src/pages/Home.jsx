@@ -52,6 +52,7 @@ const HeroSection = () => {
         ), url(${slide.image})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
         display: "flex",
         alignItems: "center",
         transition: "0.6s ease",
