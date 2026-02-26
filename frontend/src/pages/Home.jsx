@@ -9,13 +9,13 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/2.jpg",
+      "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/2.jpg?auto=format&fit=crop&w=1600&q=80",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
   {
     image:
-      "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/1.jpg",
+      "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/1.jpg?auto=format&fit=crop&w=1600&q=80",
     heading: "Authentic Traditional Pickles.",
     sub: "Sun cured. Spice balanced. Naturally preserved."
   },
