@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://media.istockphoto.com/id/2174656530/vector/sun-abstract-retro-light-background.jpg?s=1024x1024&w=is&k=20&c=68vIAbNg7lolUHN0J1yTg4zi_CjqJjOUYNSHybhKJ9k=",
+      "https://lh3.googleusercontent.com/gg/AMW1TPplwl1SOr1rOyGq7q_xedD6rrx_TevAMlOKlL7RfAoGMapKT_3C7RL4CMkHyjy38mDf9mCz7bbgbXdpwJf-MTjGxXQvKqic72x8ppII4-Rr9xQtevU2IjFqbMcYIGU0_nROSsytuNQhJ3ARXk_DfIHhypksEbS2dXKBm0u0K_Fnd7yuNtif=s1024-rj-mp2",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
