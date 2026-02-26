@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://images.unsplash.com/photo-1625944525533-473f1a3d54d3?auto=format&fit=crop&w=1600&q=80",
+      "https://media.istockphoto.com/id/2174656530/vector/sun-abstract-retro-light-background.jpg?s=1024x1024&w=is&k=20&c=68vIAbNg7lolUHN0J1yTg4zi_CjqJjOUYNSHybhKJ9k=",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
