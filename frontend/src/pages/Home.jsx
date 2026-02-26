@@ -44,18 +44,21 @@ const HeroSection = () => {
     <section
       className="hero"
       style={{
-        height: "clamp(600px, 65vh, 750px)",
-        backgroundImage: `linear-gradient(
+        height: "clamp(500px, 60vh, 700px)",
+
+        background: `linear-gradient(
           to right,
           rgba(0,0,0,0.45),
           rgba(0,0,0,0.15)
         ), url(${slide.image})`,
+
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "center center",
         backgroundRepeat: "no-repeat",
+
         display: "flex",
         alignItems: "center",
-        transition: "0.6s ease",
+        transition: "background-image 0.6s ease",
         color: "white"
       }}
     >
