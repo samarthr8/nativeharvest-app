@@ -9,13 +9,13 @@ import { Link } from "react-router-dom";
 const slides = [
   {
     image:
-      "https://lh3.googleusercontent.com/gg/AMW1TPo3BDg4tiNKnhC93vCaViaWF32qDv5lRVW9eX1eTMsVuS6kIczD3TPXIlYk7kUnuhK_bOw-xtSDEEWLCeU4174u8cnTo9kSh3j9oBHY6By94CdYoOb9iNhVrgyLFClfS03BNs5VveQAid-vPmhBipY5a8otcVOCro-pXxvnJnzuidE0-TU6=s1024-rj-mp2",
+      "https://lh3.googleusercontent.com/gg/AMW1TPo3BDg4tiNKnhC93vCaViaWF32qDv5lRVW9eX1eTMsVuS6kIczD3TPXIlYk7kUnuhK_bOw-xtSDEEWLCeU4174u8cnTo9kSh3j9oBHY6By94CdYoOb9iNhVrgyLFClfS03BNs5VveQAid-vPmhBipY5a8otcVOCro-pXxvnJnzuidE0-TU6=s1024-rj-mp2?auto=format&fit=crop&w=1600&q=80",
     heading: "Rooted in Indian Soil.",
     sub: "Crafted in small batches using traditional methods."
   },
   {
     image:
-      "https://images.unsplash.com/photo-1589308078055-eb6a4d16b6f2",
+      "https://lh3.googleusercontent.com/gg/AMW1TPpHPuasIVmmbYD78pzNB6jpL8WhG7TAuIhrQbIi0enZjGBcCXVFnZFMACbEdtfvhtINoQyQBo5FzsnZM0gJ2lSRJl3V6HTLCEmPvKeLQsER5kXh773DPkhR-MpBoyWqPp9XllqfjUcPqfX1PQikCirodMVIPWco_4CzImD6ibNcxucUSN0R=s1024-rj-mp2?auto=format&fit=crop&w=1600&q=80",
     heading: "Authentic Traditional Pickles.",
     sub: "Sun cured. Spice balanced. Naturally preserved."
   },
