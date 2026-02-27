@@ -80,14 +80,15 @@ router.post("/razorpay", async (req, res) => {
 
       /**
        * 🔥 UPDATED:
-       * Added customer_name in RETURNING
+       * Changed to RETURNING * so the email service gets the 
+       * shipping_fee, phone, and full address details!
        */
       const result = await db.query(`
         UPDATE orders
         SET payment_status = 'PAID'
         WHERE razorpay_order_id = $1
         AND payment_status != 'PAID'
-        RETURNING order_id, email, total_amount, customer_name;
+        RETURNING *;
       `, [razorpayOrderId]);
 
       if (result.rowCount === 0) {
