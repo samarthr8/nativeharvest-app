@@ -19,10 +19,17 @@ const Checkout = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const total = cart.reduce(
+  // --- NEW SHIPPING LOGIC ---
+  const SHIPPING_FEE = 80;
+  const FREE_SHIPPING_THRESHOLD = 999;
+
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
     0
   );
+
+  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
+  const finalTotal = subtotal === 0 ? 0 : subtotal + shippingCost;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -210,12 +217,12 @@ ${form.state} - ${form.pincode}
 
           <button
             onClick={placeOrder}
-            disabled={loading}
+            disabled={loading || cart.length === 0}
             style={greenBtn}
             onMouseOver={(e)=>glow(e,true)}
             onMouseOut={(e)=>glow(e,false)}
           >
-            {loading ? "Placing Order..." : `Place Order • ₹${total}`}
+            {loading ? "Placing Order..." : `Place Order • ₹${finalTotal}`}
           </button>
 
         </div>
@@ -260,16 +267,31 @@ ${form.state} - ${form.pincode}
 
           <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
 
+          {/* --- NEW SUBTOTAL & DELIVERY UI --- */}
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+            <span>Subtotal</span>
+            <span>₹{subtotal}</span>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+            <span>Delivery Fee</span>
+            <span style={{ color: shippingCost === 0 ? "green" : "inherit", fontWeight: shippingCost === 0 ? "bold" : "normal" }}>
+              {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
+            </span>
+          </div>
+
+          <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
+
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               fontWeight: "600",
-              fontSize: "16px"
+              fontSize: "18px"
             }}
           >
             <span>Total</span>
-            <span>₹{total}</span>
+            <span>₹{finalTotal}</span>
           </div>
 
           <p style={{

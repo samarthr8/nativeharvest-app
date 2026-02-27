@@ -156,22 +156,6 @@ export default function Products() {
 
         {list.map(p => {
 
-          let stockText = "";
-          let stockColor = "";
-
-          if (p.stock === 0) {
-            stockText = "Out of Stock";
-            stockColor = "red";
-          }
-          else if (p.stock <= 10) {
-            stockText = "Only Few Left";
-            stockColor = "#ff9800";
-          }
-          else {
-            stockText = "In Stock";
-            stockColor = "green";
-          }
-
           const images =
             Array.isArray(p.images) && p.images.length > 0
               ? p.images
@@ -187,9 +171,30 @@ export default function Products() {
               ? p.description.substring(0, 120) + "..."
               : p.description;
 
+          // 1. CALCULATE DYNAMIC VALUES FIRST
           const selectedVariant = selectedVariants[p.slug];
           const displayPrice = selectedVariant?.price || p.price;
+          
+          const displayStock = selectedVariant && selectedVariant.stock !== undefined 
+                                ? selectedVariant.stock 
+                                : p.stock;
 
+          // 2. SET TEXT AND COLOR BASED ON THE DYNAMIC STOCK
+          let stockText = "";
+          let stockColor = "";
+
+          if (displayStock === 0) {
+            stockText = "Out of Stock";
+            stockColor = "red";
+          }
+          else if (displayStock <= 10) {
+            stockText = "Only Few Left";
+            stockColor = "#ff9800";
+          }
+          else {
+            stockText = "In Stock";
+            stockColor = "green";
+          }
           return (
             <div
               key={p.slug}

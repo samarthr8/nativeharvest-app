@@ -75,6 +75,7 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- 1. UPDATE handleEdit ---
   const handleEdit = (product) => {
     setEditingSlug(product.slug);
     setName(product.name);
@@ -84,20 +85,27 @@ export default function AdminDashboard() {
     setDescription(product.description || "");
     setImage(product.image || "");
     setExtraImages(product.images ? product.images.join(",") : "");
+    
+    // Load existing variants with their stock (default to 0 if missing)
     setVariantsInput(
       product.variants
-        ? product.variants.map(v => `${v.weight}:${v.price}`).join(",")
+        ? product.variants.map(v => `${v.weight}:${v.price}:${v.stock || 0}`).join(", ")
         : ""
     );
   };
 
+  // --- 2. UPDATE saveProduct ---
   const saveProduct = async () => {
 
     let variantsArray = null;
     if (variantsInput) {
       variantsArray = variantsInput.split(",").map(v => {
-        const [weight, price] = v.split(":");
-        return { weight: weight.trim(), price: Number(price.trim()) };
+        const parts = v.split(":");
+        return { 
+          weight: parts[0]?.trim(), 
+          price: Number(parts[1]?.trim() || 0),
+          stock: Number(parts[2]?.trim() || 0) // Parse the 3rd value as stock
+        };
       });
     }
 
@@ -275,7 +283,7 @@ export default function AdminDashboard() {
         /><br/>
 
         <input
-          placeholder="Variants (250gm:120,500gm:220)"
+          placeholder="Variants (e.g., 250gm:120:50, 500gm:220:10) -> weight:price:stock"
           value={variantsInput}
           onChange={e=>setVariantsInput(e.target.value)}
         /><br/>
