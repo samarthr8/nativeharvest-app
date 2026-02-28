@@ -59,15 +59,23 @@ function generateInvoice(order) {
 
     doc.moveDown();
 
-    /* --- NEW AMOUNT SECTION WITH SHIPPING LOGIC --- */
+    /* --- AMOUNT SECTION WITH COUPON LOGIC --- */
     const shippingFee = order.shipping_fee || 0;
-    const subtotal = order.total_amount - shippingFee;
+    const discountAmount = order.discount_amount || 0;
+    const couponCode = order.coupon_code || "";
+    
+    // Subtotal of just the items
+    const originalSubtotal = order.total_amount - shippingFee + discountAmount;
 
     doc.fontSize(14).text("Order Summary", { underline: true });
     doc.moveDown(0.5);
 
-    doc.fontSize(12).text(`Subtotal: ₹${subtotal}`, { align: "right" });
+    doc.fontSize(12).text(`Subtotal: ₹${originalSubtotal}`, { align: "right" });
     
+    if (discountAmount > 0) {
+      doc.text(`Discount (${couponCode}): -₹${discountAmount}`, { align: "right" });
+    }
+
     doc.text(
       `Delivery Fee: ${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}`, 
       { align: "right" }
@@ -100,8 +108,11 @@ function generateInvoice(order) {
 async function sendOrderConfirmation(order) {
 
   const invoicePath = await generateInvoice(order);
+  
   const shippingFee = order.shipping_fee || 0;
-  const subtotal = order.total_amount - shippingFee;
+  const discountAmount = order.discount_amount || 0;
+  const couponCode = order.coupon_code || "";
+  const originalSubtotal = order.total_amount - shippingFee + discountAmount;
 
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
@@ -111,7 +122,8 @@ async function sendOrderConfirmation(order) {
       <h2>Thank you for your order! 🌾</h2>
       <p><strong>Order ID:</strong> ${order.order_id}</p>
       
-      <p><strong>Subtotal:</strong> ₹${subtotal}</p>
+      <p><strong>Subtotal:</strong> ₹${originalSubtotal}</p>
+      ${discountAmount > 0 ? `<p><strong>Discount (${couponCode}):</strong> -₹${discountAmount}</p>` : ""}
       <p><strong>Delivery Fee:</strong> ${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</p>
       <p><strong>Total Amount:</strong> ₹${order.total_amount}</p>
 
@@ -147,7 +159,9 @@ async function sendOrderConfirmation(order) {
 async function sendAdminNotification(order) {
 
   const shippingFee = order.shipping_fee || 0;
-  const subtotal = order.total_amount - shippingFee;
+  const discountAmount = order.discount_amount || 0;
+  const couponCode = order.coupon_code || "";
+  const originalSubtotal = order.total_amount - shippingFee + discountAmount;
 
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
@@ -167,7 +181,8 @@ async function sendAdminNotification(order) {
         ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
       </p>
 
-      <p><strong>Subtotal:</strong> ₹${subtotal}</p>
+      <p><strong>Subtotal:</strong> ₹${originalSubtotal}</p>
+      ${discountAmount > 0 ? `<p><strong>Discount (${couponCode}):</strong> -₹${discountAmount}</p>` : ""}
       <p><strong>Delivery Fee:</strong> ${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</p>
       <p><strong>Total:</strong> ₹${order.total_amount}</p>
 

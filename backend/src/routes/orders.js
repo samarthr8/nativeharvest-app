@@ -3,6 +3,57 @@ const router = express.Router();
 const db = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 
+/* =========================================
+   NEW: VALIDATE COUPON ROUTE
+========================================= */
+router.post("/validate-coupon", async (req, res) => {
+  try {
+    const { code, subtotal } = req.body;
+
+    const result = await db.query(
+      "SELECT * FROM coupons WHERE code = $1 AND is_active = true",
+      [code.toUpperCase()]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(400).json({ message: "Invalid or expired coupon code" });
+    }
+
+    const coupon = result.rows[0];
+
+    if (subtotal < coupon.min_cart_value) {
+      return res.status(400).json({ 
+        message: `Cart total must be at least ₹${coupon.min_cart_value} to use this coupon` 
+      });
+    }
+
+    let discountAmount = 0;
+    if (coupon.discount_type === 'PERCENT') {
+      discountAmount = Math.round((subtotal * coupon.discount_value) / 100);
+    } else if (coupon.discount_type === 'FLAT') {
+      discountAmount = coupon.discount_value;
+    }
+
+    // Ensure we don't discount more than the cart value
+    discountAmount = Math.min(discountAmount, subtotal);
+
+    res.json({
+      success: true,
+      code: coupon.code,
+      discountAmount,
+      message: "Coupon applied successfully!"
+    });
+
+  } catch (err) {
+    console.error("Coupon validation error:", err);
+    res.status(500).json({ message: "Failed to validate coupon" });
+  }
+});
+
+
+/* =========================================
+   MAIN ORDER CREATION ROUTE
+========================================= */
 router.post("/", async (req, res) => {
 
   const client = await db.connect();
@@ -18,7 +69,8 @@ router.post("/", async (req, res) => {
       city,
       state,
       pincode,
-      items
+      items,
+      coupon_code // <--- NEW: Accept coupon code
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -34,8 +86,7 @@ router.post("/", async (req, res) => {
     // Validate stock + calculate subtotal
     // -----------------------------
     for (const item of items) {
-      // 🔥 CRITICAL: "FOR UPDATE" locks this row until the transaction COMMITs or ROLLBACKs.
-      // This prevents race conditions when editing the JSONB array.
+      // 🔥 CRITICAL: "FOR UPDATE" locks this row
       const productRes = await client.query(
         "SELECT name, stock, variants FROM products WHERE slug = $1 FOR UPDATE",
         [item.slug]
@@ -48,7 +99,6 @@ router.post("/", async (req, res) => {
       const product = productRes.rows[0];
       let availableStock = product.stock;
 
-      // If this item is a specific variant, check the variant's stock inside the JSON array
       if (item.variant_key && product.variants) {
         const variantData = product.variants.find(v => v.weight === item.variant_key);
         if (variantData && variantData.stock !== undefined) {
@@ -73,24 +123,52 @@ router.post("/", async (req, res) => {
     }
 
     // -----------------------------
+    // NEW: Calculate Discount
+    // -----------------------------
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (coupon_code) {
+      const couponRes = await client.query(
+        "SELECT * FROM coupons WHERE code = $1 AND is_active = true", 
+        [coupon_code.toUpperCase()]
+      );
+      
+      if (couponRes.rowCount > 0) {
+        const coupon = couponRes.rows[0];
+        if (subtotal >= coupon.min_cart_value) {
+          appliedCoupon = coupon.code;
+          if (coupon.discount_type === 'PERCENT') {
+            discountAmount = Math.round((subtotal * coupon.discount_value) / 100);
+          } else {
+            discountAmount = coupon.discount_value;
+          }
+          discountAmount = Math.min(discountAmount, subtotal);
+        }
+      }
+    }
+
+    const discountedSubtotal = subtotal - discountAmount;
+
+    // -----------------------------
     // Calculate Final Total with Shipping
     // -----------------------------
     const SHIPPING_FEE = 80;
     const FREE_SHIPPING_THRESHOLD = 999;    
-    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-    const finalTotal = subtotal + shippingCost;
+    
+    // Free shipping evaluates the mathematically discounted subtotal
+    const shippingCost = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const finalTotal = discountedSubtotal + shippingCost;
 
     // -----------------------------
-    // Reduce stock (Varient-Aware)
+    // Reduce stock (Variant-Aware)
     // -----------------------------
     for (const item of detailedItems) {
 
       if (item.variantKey) {
-        // Fetch the locked row
         const productRes = await client.query("SELECT stock, variants FROM products WHERE slug = $1", [item.slug]);
         const product = productRes.rows[0];
 
-        // Map over the JSON array and reduce the stock of the purchased variant
         const updatedVariants = product.variants.map(v => {
           if (v.weight === item.variantKey) {
             return { ...v, stock: Math.max(0, (v.stock || 0) - item.qty) };
@@ -98,17 +176,14 @@ router.post("/", async (req, res) => {
           return v;
         });
 
-        // Also reduce the global product stock so the total inventory is accurate
         const newTotalStock = Math.max(0, product.stock - item.qty);
 
-        // Update JSON and total stock
         await client.query(
           "UPDATE products SET variants = $1, stock = $2 WHERE slug = $3",
           [JSON.stringify(updatedVariants), newTotalStock, item.slug]
         );
 
       } else {
-        // Standard non-variant product
         await client.query(
           "UPDATE products SET stock = stock - $1 WHERE slug = $2",
           [item.qty, item.slug]
@@ -119,18 +194,15 @@ router.post("/", async (req, res) => {
     const orderId = "NH-" + uuidv4().slice(0, 8).toUpperCase();
 
     // -----------------------------
-    // Insert into orders (UPDATED with finalTotal)
-    // -----------------------------
-    // -----------------------------
-    // Insert into orders (UPDATED with shipping_fee)
+    // Insert into orders (UPDATED for coupons)
     // -----------------------------
     await client.query(
       `
       INSERT INTO orders
       (order_id, customer_name, phone, email,
        address, full_address, city, state, pincode,
-       total_amount, shipping_fee) 
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       total_amount, shipping_fee, coupon_code, discount_amount) 
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
       `,
       [
         orderId,
@@ -143,7 +215,9 @@ router.post("/", async (req, res) => {
         state || null,
         pincode || null,
         finalTotal,
-        shippingCost // <--- Pass the shipping cost here
+        shippingCost,
+        appliedCoupon,      // <--- New
+        discountAmount      // <--- New
       ]
     );
 
@@ -151,7 +225,6 @@ router.post("/", async (req, res) => {
     // Insert into order_items
     // -----------------------------
     for (const item of detailedItems) {
-
       await client.query(
         `
         INSERT INTO order_items
@@ -178,9 +251,7 @@ router.post("/", async (req, res) => {
   } catch (err) {
 
     await client.query("ROLLBACK");
-
     console.error("Order creation failed:", err);
-
     res.status(400).json({
       message: err.message
     });

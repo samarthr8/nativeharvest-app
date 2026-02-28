@@ -19,7 +19,14 @@ const Checkout = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // --- NEW SHIPPING LOGIC ---
+  // --- NEW: COUPON STATES ---
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState("");
+  const [isApplying, setIsApplying] = useState(false);
+
+  // --- SHIPPING & TOTAL LOGIC ---
   const SHIPPING_FEE = 80;
   const FREE_SHIPPING_THRESHOLD = 999;
 
@@ -28,8 +35,9 @@ const Checkout = () => {
     0
   );
 
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
-  const finalTotal = subtotal === 0 ? 0 : subtotal + shippingCost;
+  const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+  const shippingCost = (discountedSubtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0) ? 0 : SHIPPING_FEE;
+  const finalTotal = subtotal === 0 ? 0 : discountedSubtotal + shippingCost;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -47,6 +55,43 @@ const Checkout = () => {
     }
 
     return true;
+  };
+
+  // --- NEW: APPLY COUPON ---
+  const applyCoupon = async () => {
+    if (!couponInput) return;
+    setIsApplying(true);
+    setCouponMessage("");
+
+    try {
+      const res = await fetch("/api/orders/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput, subtotal })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCouponMessage(`❌ ${data.message}`);
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+      } else {
+        setAppliedCoupon(data.code);
+        setDiscountAmount(data.discountAmount);
+        setCouponMessage(`✅ ${data.message}`);
+      }
+    } catch (err) {
+      setCouponMessage("❌ Error validating coupon");
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setCouponInput("");
+    setCouponMessage("");
   };
 
   const placeOrder = async () => {
@@ -75,6 +120,7 @@ ${form.state} - ${form.pincode}
           state: form.state,
           pincode: form.pincode,
           address: combinedAddress,
+          coupon_code: appliedCoupon, // <--- New: Pass the coupon code to the backend
           items: cart.map(item => ({
             slug: item.slug,
             qty: item.qty,
@@ -267,11 +313,55 @@ ${form.state} - ${form.pincode}
 
           <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
 
-          {/* --- NEW SUBTOTAL & DELIVERY UI --- */}
+          {/* --- NEW: COUPON INPUT SECTION --- */}
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <input 
+                type="text" 
+                placeholder="Promo Code" 
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                disabled={appliedCoupon !== null}
+                style={{ ...inputStyle, marginBottom: 0, textTransform: "uppercase" }} 
+              />
+              {appliedCoupon ? (
+                <button 
+                  onClick={removeCoupon} 
+                  style={{ background: "#d9534f", color: "white", border: "none", padding: "0 15px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
+                >
+                  Remove
+                </button>
+              ) : (
+                <button 
+                  onClick={applyCoupon} 
+                  disabled={isApplying || !couponInput} 
+                  style={{ background: "#2f6f4e", color: "white", border: "none", padding: "0 15px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
+                >
+                  {isApplying ? "..." : "Apply"}
+                </button>
+              )}
+            </div>
+            {couponMessage && (
+              <div style={{ fontSize: "12px", marginTop: "8px", color: appliedCoupon ? "green" : "#d9534f", fontWeight: "500" }}>
+                {couponMessage}
+              </div>
+            )}
+          </div>
+
+          <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
+
+          {/* --- SUBTOTAL & DISCOUNT & DELIVERY --- */}
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
             <span>Subtotal</span>
             <span>₹{subtotal}</span>
           </div>
+
+          {appliedCoupon && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px", color: "#2f6f4e", fontWeight: "bold" }}>
+              <span>Discount ({appliedCoupon})</span>
+              <span>-₹{discountAmount}</span>
+            </div>
+          )}
 
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
             <span>Delivery Fee</span>

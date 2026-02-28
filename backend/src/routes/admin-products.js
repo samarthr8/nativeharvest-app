@@ -87,4 +87,50 @@ router.delete("/products/:slug", verifyAdmin, async (req, res) => {
   }
 });
 
+/* ================= COUPON MANAGEMENT ================= */
+
+/* GET ALL COUPONS */
+router.get("/coupons", verifyAdmin, async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM coupons ORDER BY created_at DESC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load coupons" });
+  }
+});
+
+/* CREATE COUPON */
+router.post("/coupons", verifyAdmin, async (req, res) => {
+  try {
+    const { code, discount_type, discount_value, min_cart_value } = req.body;
+    await db.query(
+      `INSERT INTO coupons (code, discount_type, discount_value, min_cart_value) VALUES ($1, $2, $3, $4)`,
+      [code.toUpperCase(), discount_type, discount_value, min_cart_value || 0]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create coupon (Code might already exist)" });
+  }
+});
+
+/* TOGGLE COUPON STATUS */
+router.patch("/coupons/:id/toggle", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(`UPDATE coupons SET is_active = NOT is_active WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to toggle coupon" });
+  }
+});
+
+/* DELETE COUPON */
+router.delete("/coupons/:id", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(`DELETE FROM coupons WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete coupon" });
+  }
+});
+
 module.exports = router;
