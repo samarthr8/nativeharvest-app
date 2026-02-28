@@ -1,14 +1,72 @@
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
 
   const { cart, removeFromCart, updateQty } = useCart();
+  const [stockWarning, setStockWarning] = useState("");
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
     0
   );
+
+  // --- STALE CART VALIDATION LOGIC ---
+  useEffect(() => {
+    if (cart.length === 0) return;
+
+    const validateStock = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const dbProducts = await res.json();
+        let cartChanged = false;
+
+        cart.forEach(cartItem => {
+          // Find the live product from the DB
+          const liveProduct = dbProducts.find(p => p.slug === cartItem.slug);
+          
+          if (!liveProduct) {
+            // Product was deleted entirely
+            removeFromCart(cartItem.slug, cartItem.variantKey);
+            cartChanged = true;
+            return;
+          }
+
+          // Find live variant stock
+          let liveStock = liveProduct.stock;
+          if (cartItem.variantKey && liveProduct.variants) {
+            const liveVariant = liveProduct.variants.find(v => v.weight === cartItem.variantKey);
+            if (liveVariant && liveVariant.stock !== undefined) {
+              liveStock = liveVariant.stock;
+            }
+          }
+
+          // If cart quantity exceeds live stock, adjust it
+          if (liveStock === 0) {
+            removeFromCart(cartItem.slug, cartItem.variantKey);
+            cartChanged = true;
+          } else if (cartItem.qty > liveStock) {
+            updateQty(cartItem.slug, cartItem.variantKey, liveStock);
+            cartChanged = true;
+          }
+        });
+
+        if (cartChanged) {
+          setStockWarning("Some items in your cart were updated because they sold out or their available stock changed.");
+          // Clear the warning after 8 seconds
+          setTimeout(() => setStockWarning(""), 8000);
+        }
+      } catch (err) {
+        console.error("Failed to validate cart stock", err);
+      }
+    };
+
+    // Run this validation once when the cart page opens
+    validateStock();
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const greenBtn = {
     background: "#2f6f4e",
@@ -70,6 +128,22 @@ const Cart = () => {
       }}>
         Your Cart
       </h2>
+
+      {/* --- STOCK WARNING BANNER --- */}
+      {stockWarning && (
+        <div style={{
+          background: "#fef3c7",
+          color: "#92400e",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          marginBottom: "20px",
+          border: "1px solid #fcd34d",
+          fontSize: "14px",
+          fontWeight: "500"
+        }}>
+          ⚠️ {stockWarning}
+        </div>
+      )}
 
       {/* CART ITEMS */}
       {cart.map(item => (

@@ -12,27 +12,28 @@ const transporter = nodemailer.createTransport({
 });
 
 /* ---------------------------------------------------
-   🧾 Generate Professional Invoice PDF (UPDATED)
+   🧾 Generate Professional Invoice PDF (UPDATED WITH GST)
 --------------------------------------------------- */
 function generateInvoice(order) {
 
   return new Promise((resolve, reject) => {
 
     const doc = new PDFDocument({ margin: 50 });
-
     const fontPath = path.join(__dirname, "../../fonts/NotoSans-Regular.ttf");
     doc.registerFont("NotoSans", fontPath);
     doc.font("NotoSans");
 
     const filePath = path.join(__dirname, `../../temp-${order.order_id}.pdf`);
     const stream = fs.createWriteStream(filePath);
-
     doc.pipe(stream);
 
-    /* Header */
-    doc.fontSize(22).text("NativeHarvest India", { align: "center" });
+    /* --- HEADER WITH LLP & GSTIN --- */
+    doc.fontSize(22).text("NativeHarvest India LLP", { align: "center" });
+    doc.moveDown(0.2);
+    // TODO: Replace with your actual GSTIN
+    doc.fontSize(10).fillColor("#555").text("GSTIN: 23XXXXXXXXXXXXX", { align: "center" }); 
     doc.moveDown(0.5);
-    doc.fontSize(16).text("INVOICE", { align: "center" });
+    doc.fontSize(16).fillColor("#000").text("TAX INVOICE", { align: "center" });
     doc.moveDown(1.5);
 
     /* Order Details */
@@ -46,31 +47,37 @@ function generateInvoice(order) {
     /* Address Section */
     doc.text("Delivery Address:");
     doc.text(order.full_address || order.address || "");
-
     if (order.city || order.state || order.pincode) {
       doc.text(`${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}`);
     }
 
     doc.moveDown();
-
-    doc.moveTo(50, doc.y)
-       .lineTo(550, doc.y)
-       .stroke();
-
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown();
 
-    /* --- AMOUNT SECTION WITH COUPON LOGIC --- */
+    /* --- AMOUNT & GST SECTION --- */
     const shippingFee = order.shipping_fee || 0;
     const discountAmount = order.discount_amount || 0;
     const couponCode = order.coupon_code || "";
     
-    // Subtotal of just the items
     const originalSubtotal = order.total_amount - shippingFee + discountAmount;
+
+    // Assuming a standard 5% Inclusive GST (2.5% CGST + 2.5% SGST)
+    // Formula: Taxable Value = Total / 1.05
+    const taxableValue = (originalSubtotal / 1.05).toFixed(2);
+    const totalGst = (originalSubtotal - taxableValue).toFixed(2);
+    const halfGst = (totalGst / 2).toFixed(2);
 
     doc.fontSize(14).text("Order Summary", { underline: true });
     doc.moveDown(0.5);
 
-    doc.fontSize(12).text(`Subtotal: ₹${originalSubtotal}`, { align: "right" });
+    doc.fontSize(12).text(`Taxable Value: ₹${taxableValue}`, { align: "right" });
+    doc.fontSize(10).fillColor("#555")
+       .text(`CGST (2.5%): ₹${halfGst}`, { align: "right" })
+       .text(`SGST (2.5%): ₹${halfGst}`, { align: "right" });
+    
+    doc.moveDown(0.3);
+    doc.fontSize(12).fillColor("#000").text(`Subtotal (Inc. Taxes): ₹${originalSubtotal}`, { align: "right" });
     
     if (discountAmount > 0) {
       doc.text(`Discount (${couponCode}): -₹${discountAmount}`, { align: "right" });
@@ -82,21 +89,14 @@ function generateInvoice(order) {
     );
     
     doc.moveDown(0.5);
-
-    doc.fontSize(14).text(`Total Amount: ₹${order.total_amount}`, {
-      align: "right"
-    });
+    doc.fontSize(14).text(`Total Amount: ₹${order.total_amount}`, { align: "right" });
 
     doc.moveDown(2);
 
     /* Footer */
-    doc.fontSize(11).text(
-      "Thank you for shopping with NativeHarvest 🌾",
-      { align: "center" }
-    );
+    doc.fontSize(11).text("Thank you for shopping with NativeHarvest 🌾", { align: "center" });
 
     doc.end();
-
     stream.on("finish", () => resolve(filePath));
     stream.on("error", reject);
   });
