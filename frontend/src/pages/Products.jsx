@@ -8,6 +8,8 @@ export default function Products() {
   const location = useLocation();
 
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // --- NEW: SEARCH STATE ---
+  
   const [expanded, setExpanded] = useState({});
   const [addedSlug, setAddedSlug] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState({});
@@ -16,18 +18,11 @@ export default function Products() {
   const { addToCart } = useCart();
 
   /* ---------------- CATEGORY REFS FOR SCROLL ---------------- */
-
-  const royalRef = useRef(null);
-  const orchardRef = useRef(null);
-  const coldRef = useRef(null);
-  const heritageRef = useRef(null);
-  const indulgenceRef = useRef(null);
+  const categoryRefs = useRef({});
 
   /* ---------------- FETCH PRODUCTS ---------------- */
-
   useEffect(() => {
     api.get("/products").then(res => {
-
       setProducts(res.data);
 
       const defaults = {};
@@ -36,51 +31,28 @@ export default function Products() {
           defaults[p.slug] = p.variants[0];
         }
       });
-
       setSelectedVariants(defaults);
-
     });
   }, []);
 
   /* ---------------- HASH SCROLL LOGIC ---------------- */
-
   useEffect(() => {
+    if (!products.length || !location.hash) return;
 
-    if (!products.length) return;
+    // Decode URI component to handle spaces in categories (e.g. #Healthy%20Snacks)
+    const id = decodeURIComponent(location.hash.replace("#", ""));
+    const targetRef = categoryRefs.current[id];
 
-    if (!location.hash) return;
-
-    const id = location.hash.replace("#", "");
-
-    const scrollMap = {
-      royal: royalRef,
-      orchard: orchardRef,
-      cold: coldRef,
-      heritage: heritageRef,
-      indulgence: indulgenceRef
-    };
-
-    const targetRef = scrollMap[id];
-
-    if (targetRef && targetRef.current) {
-
+    if (targetRef) {
       setTimeout(() => {
-        targetRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+        targetRef.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     }
-
   }, [location.hash, products]);
 
   /* ---------------- UI HELPERS ---------------- */
-
   const toggleReadMore = (slug) => {
-    setExpanded(prev => ({
-      ...prev,
-      [slug]: !prev[slug]
-    }));
+    setExpanded(prev => ({ ...prev, [slug]: !prev[slug] }));
   };
 
   const handleAddToCart = (product) => {
@@ -90,59 +62,31 @@ export default function Products() {
     setTimeout(() => setAddedSlug(null), 1500);
   };
 
-  /* ---------------- CATEGORY GROUPING ---------------- */
-
-  const categories = {
-    royal: [],
-    orchard: [],
-    cold: [],
-    heritage: [],
-    indulgence: []
-  };
-
-  products.forEach(p => {
-
-    const slug = p.slug.toLowerCase();
-
-    if (
-      slug.includes("pickle") ||
-      slug.includes("achaar")
-    ) {
-      categories.royal.push(p);
-    }
-    else if (
-      slug.includes("jam") ||
-      slug.includes("flower") ||
-      slug.includes("flowers") ||
-      slug.includes("candy") ||
-      slug.includes("preserve") ||
-      slug.includes("murabba")
-    ) {
-      categories.orchard.push(p);
-    }
-    else if (
-      slug.includes("oil") ||
-      slug.includes("ghee")
-    ) {
-      categories.cold.push(p);
-    }
-    else if (
-      slug.includes("sattu") ||
-      slug.includes("birchun") ||
-      slug.includes("murka") ||
-      slug.includes("atta") ||
-      slug.includes("powder")
-    ) {
-      categories.heritage.push(p);
-    }
-    else {
-      categories.indulgence.push(p);
-    }
-
+  /* ---------------- SEARCH & CATEGORY LOGIC ---------------- */
+  
+  // 1. Filter by Search Query
+  const filteredProducts = products.filter(p => {
+    if (!searchQuery) return true;
+    const lowerQuery = searchQuery.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(lowerQuery) || 
+      (p.description && p.description.toLowerCase().includes(lowerQuery))
+    );
   });
 
-  /* ---------------- GRID STYLE ---------------- */
+  // 2. Group dynamically by Database Category
+  const groupedProducts = {};
+  
+  filteredProducts.forEach(p => {
+    const cat = p.category || "Uncategorized";
+    if (!groupedProducts[cat]) groupedProducts[cat] = [];
+    groupedProducts[cat].push(p);
+  });
 
+  // Fixed order for presentation
+  const categoryOrder = ["Pickles", "Preserves", "Oils & Essentials", "Heritage Staples", "Healthy Snacks", "Uncategorized"];
+
+  /* ---------------- GRID STYLE ---------------- */
   const gridStyle = {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
@@ -153,120 +97,50 @@ export default function Products() {
   const renderGrid = (list) => (
     <div>
       <div style={gridStyle}>
-
         {list.map(p => {
-
-          const images =
-            Array.isArray(p.images) && p.images.length > 0
-              ? p.images
-              : p.image
-              ? [p.image]
-              : [];
-
+          const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : p.image ? [p.image] : [];
           const currentIndex = activeImageIndex[p.slug] || 0;
-
           const isExpanded = expanded[p.slug];
-          const shortText =
-            p.description && p.description.length > 120
-              ? p.description.substring(0, 120) + "..."
-              : p.description;
+          const shortText = p.description && p.description.length > 120 ? p.description.substring(0, 120) + "..." : p.description;
 
-          // 1. CALCULATE DYNAMIC VALUES FIRST
+          // --- DYNAMIC STOCK & PRICE LOGIC ---
           const selectedVariant = selectedVariants[p.slug];
           const displayPrice = selectedVariant?.price || p.price;
-          
-          const displayStock = selectedVariant && selectedVariant.stock !== undefined 
-                                ? selectedVariant.stock 
-                                : p.stock;
+          const displayStock = selectedVariant && selectedVariant.stock !== undefined ? selectedVariant.stock : p.stock;
 
-          // 2. SET TEXT AND COLOR BASED ON THE DYNAMIC STOCK
           let stockText = "";
           let stockColor = "";
-
           if (displayStock === 0) {
             stockText = "Out of Stock";
             stockColor = "red";
-          }
-          else if (displayStock <= 10) {
+          } else if (displayStock <= 10) {
             stockText = "Only Few Left";
             stockColor = "#ff9800";
-          }
-          else {
+          } else {
             stockText = "In Stock";
             stockColor = "green";
           }
+
           return (
             <div
               key={p.slug}
               style={{
-                border: "1px solid #eaeaea",
-                padding: "18px",
-                borderRadius: "12px",
-                background: "white",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.05)",
-                transition: "all 0.25s ease"
+                border: "1px solid #eaeaea", padding: "18px", borderRadius: "12px", background: "white", display: "flex", flexDirection: "column", boxShadow: "0 6px 18px rgba(0,0,0,0.05)", transition: "all 0.25s ease"
               }}
             >
-
               {/* IMAGE */}
-              <div style={{
-                height: "220px",
-                overflow: "hidden",
-                borderRadius: "10px",
-                position: "relative",
-                background: "#f7f7f7"
-              }}>
-
+              <div style={{ height: "220px", overflow: "hidden", borderRadius: "10px", position: "relative", background: "#f7f7f7" }}>
                 {images.length > 0 && (
                   <Link to={`/products/${p.slug}`}>
-                    <img
-                      src={images[currentIndex]}
-                      alt={p.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover"
-                      }}
-                    />
+                    <img src={images[currentIndex]} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </Link>
                 )}
-
                 {images.length > 1 && (
                   <>
-                    <div
-                      onClick={() =>
-                        setActiveImageIndex(prev => ({
-                          ...prev,
-                          [p.slug]:
-                            currentIndex === 0
-                              ? images.length - 1
-                              : currentIndex - 1
-                        }))
-                      }
-                      style={arrowStyle("left")}
-                    >
-                      ‹
-                    </div>
-
-                    <div
-                      onClick={() =>
-                        setActiveImageIndex(prev => ({
-                          ...prev,
-                          [p.slug]:
-                            currentIndex === images.length - 1
-                              ? 0
-                              : currentIndex + 1
-                        }))
-                      }
-                      style={arrowStyle("right")}
-                    >
-                      ›
-                    </div>
+                    <div onClick={() => setActiveImageIndex(prev => ({ ...prev, [p.slug]: currentIndex === 0 ? images.length - 1 : currentIndex - 1 }))} style={arrowStyle("left")}>‹</div>
+                    <div onClick={() => setActiveImageIndex(prev => ({ ...prev, [p.slug]: currentIndex === images.length - 1 ? 0 : currentIndex + 1 }))} style={arrowStyle("right")}>›</div>
                   </>
                 )}
-
               </div>
 
               <Link to={`/products/${p.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
@@ -275,17 +149,8 @@ export default function Products() {
 
               <p style={{ flexGrow: 1 }}>
                 {isExpanded ? p.description : shortText}
-
                 {p.description && p.description.length > 120 && (
-                  <span
-                    onClick={() => toggleReadMore(p.slug)}
-                    style={{
-                      color: "#2f6f4e",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                      marginLeft: "6px"
-                    }}
-                  >
+                  <span onClick={() => toggleReadMore(p.slug)} style={{ color: "#2f6f4e", fontWeight: "bold", cursor: "pointer", marginLeft: "6px" }}>
                     {isExpanded ? "Read Less" : "Read More"}
                   </span>
                 )}
@@ -297,26 +162,8 @@ export default function Products() {
                     {p.variants.map((variant, i) => (
                       <button
                         key={i}
-                        onClick={() =>
-                          setSelectedVariants(prev => ({
-                            ...prev,
-                            [p.slug]: variant
-                          }))
-                        }
-                        style={{
-                          padding: "5px 10px",
-                          borderRadius: "20px",
-                          border:
-                            selectedVariant?.weight === variant.weight
-                              ? "2px solid #2f6f4e"
-                              : "1px solid #ccc",
-                          background:
-                            selectedVariant?.weight === variant.weight
-                              ? "#f0f8f5"
-                              : "white",
-                          cursor: "pointer",
-                          fontSize: "12px"
-                        }}
+                        onClick={() => setSelectedVariants(prev => ({ ...prev, [p.slug]: variant }))}
+                        style={{ padding: "5px 10px", borderRadius: "20px", border: selectedVariant?.weight === variant.weight ? "2px solid #2f6f4e" : "1px solid #ccc", background: selectedVariant?.weight === variant.weight ? "#f0f8f5" : "white", cursor: "pointer", fontSize: "12px" }}
                       >
                         {variant.weight}
                       </button>
@@ -326,63 +173,25 @@ export default function Products() {
               )}
 
               <strong>₹{displayPrice}</strong>
+              <p style={{ marginTop: "6px", fontWeight: "bold", color: stockColor }}>{stockText}</p>
 
-              <p style={{
-                marginTop: "6px",
-                fontWeight: "bold",
-                color: stockColor
-              }}>
-                {stockText}
-              </p>
-
-              {p.stock === 0 ? (
-                <button disabled style={{
-                  marginTop: "10px",
-                  background: "#ccc",
-                  padding: "8px",
-                  border: "none",
-                  borderRadius: "6px"
-                }}>
-                  Out of Stock
-                </button>
+              {displayStock === 0 ? (
+                <button disabled style={{ marginTop: "10px", background: "#ccc", padding: "8px", border: "none", borderRadius: "6px" }}>Out of Stock</button>
               ) : (
                 <div style={{ position: "relative", marginTop: "10px" }}>
-                  <button
-                    onClick={() => handleAddToCart(p)}
-                    style={{
-                      padding: "8px",
-                      background: "#2f6f4e",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer"
-                    }}
-                  >
+                  <button onClick={() => handleAddToCart(p)} style={{ padding: "8px", background: "#2f6f4e", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", width: "100%" }}>
                     Add to Cart
                   </button>
-
                   {addedSlug === p.slug && (
-                    <div style={{
-                      position: "absolute",
-                      top: "-28px",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "#2f6f4e",
-                      color: "white",
-                      padding: "5px 10px",
-                      borderRadius: "6px",
-                      fontSize: "12px"
-                    }}>
+                    <div style={{ position: "absolute", top: "-28px", left: "50%", transform: "translateX(-50%)", background: "#2f6f4e", color: "white", padding: "5px 10px", borderRadius: "6px", fontSize: "12px", whiteSpace: "nowrap" }}>
                       Added to cart ✓
                     </div>
                   )}
                 </div>
               )}
-
             </div>
           );
         })}
-
       </div>
     </div>
   );
@@ -390,41 +199,46 @@ export default function Products() {
   return (
     <div className="container">
 
-      <h1 style={{ marginBottom: "40px" }}>Products</h1>
-
-      {categories.royal.length > 0 && (
-        <div ref={royalRef}>
-          <h2 style={{ marginBottom: "20px" }}>The Royal Achaar Collection</h2>
-          {renderGrid(categories.royal)}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px", flexWrap: "wrap", gap: "20px" }}>
+        <h1 style={{ margin: 0 }}>Products</h1>
+        
+        {/* --- LIVE SEARCH BAR --- */}
+        <div style={{ position: "relative", width: "300px" }}>
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ 
+              width: "100%", padding: "12px 18px", paddingLeft: "40px",
+              borderRadius: "30px", border: "1px solid #ddd", fontSize: "15px",
+              outline: "none", transition: "0.2s"
+            }}
+          />
+          <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", color: "#888" }}>
+            🔍
+          </span>
         </div>
-      )}
+      </div>
 
-      {categories.orchard.length > 0 && (
-        <div ref={orchardRef}>
-          <h2 style={{ margin: "60px 0 20px" }}>Orchard Preserves</h2>
-          {renderGrid(categories.orchard)}
+      {/* Render Dynamic Categories */}
+      {searchQuery && Object.keys(groupedProducts).length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#666" }}>
+          <h2>No products found for "{searchQuery}"</h2>
         </div>
-      )}
-
-      {categories.cold.length > 0 && (
-        <div ref={coldRef}>
-          <h2 style={{ margin: "60px 0 20px" }}>Cold-Pressed & Pure Essentials</h2>
-          {renderGrid(categories.cold)}
-        </div>
-      )}
-
-      {categories.heritage.length > 0 && (
-        <div ref={heritageRef}>
-          <h2 style={{ margin: "60px 0 20px" }}>Heritage Staples</h2>
-          {renderGrid(categories.heritage)}
-        </div>
-      )}
-
-      {categories.indulgence.length > 0 && (
-        <div ref={indulgenceRef}>
-          <h2 style={{ margin: "60px 0 20px" }}>Wholesome Indulgence</h2>
-          {renderGrid(categories.indulgence)}
-        </div>
+      ) : (
+        categoryOrder.map(cat => {
+          if (!groupedProducts[cat] || groupedProducts[cat].length === 0) return null;
+          
+          return (
+            <div key={cat} ref={el => categoryRefs.current[cat] = el}>
+              <h2 style={{ margin: "60px 0 20px", color: "#2f6f4e" }}>
+                {cat === "Pickles" ? "The Royal Achaar Collection" : cat}
+              </h2>
+              {renderGrid(groupedProducts[cat])}
+            </div>
+          );
+        })
       )}
 
     </div>
@@ -432,13 +246,5 @@ export default function Products() {
 }
 
 const arrowStyle = (side) => ({
-  position: "absolute",
-  top: "50%",
-  [side]: "10px",
-  transform: "translateY(-50%)",
-  background: "rgba(0,0,0,0.4)",
-  color: "white",
-  padding: "4px 8px",
-  borderRadius: "50%",
-  cursor: "pointer"
+  position: "absolute", top: "50%", [side]: "10px", transform: "translateY(-50%)", background: "rgba(0,0,0,0.4)", color: "white", padding: "4px 8px", borderRadius: "50%", cursor: "pointer"
 });

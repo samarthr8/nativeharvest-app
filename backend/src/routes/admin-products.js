@@ -6,22 +6,13 @@ const verifyAdmin = require("../middleware/auth");
 /* ADD PRODUCT */
 router.post("/products", verifyAdmin, async (req, res) => {
   try {
-    const {
-      name,
-      slug,
-      price,
-      image,
-      images,
-      variants,
-      description,
-      stock
-    } = req.body;
+    const { name, slug, price, image, images, variants, description, stock, category } = req.body;
 
     await db.query(
       `
       INSERT INTO products
-      (name, slug, price, image, images, variants, description, stock)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      (name, slug, price, image, images, variants, description, stock, category)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       `,
       [
         name,
@@ -31,51 +22,29 @@ router.post("/products", verifyAdmin, async (req, res) => {
         images ? JSON.stringify(images) : null,
         variants ? JSON.stringify(variants) : null,
         description,
-        stock || 0
+        stock || 0,
+        category || 'Uncategorized'
       ]
     );
 
-    res.json({
-      success: true,
-      message: "Product added successfully"
-    });
-
+    res.json({ success: true, message: "Product added successfully" });
   } catch (err) {
     console.error("ADD PRODUCT ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to add product"
-    });
+    res.status(500).json({ success: false, message: "Failed to add product" });
   }
 });
 
-/* ================= UPDATE PRODUCT (NEW) ================= */
+/* UPDATE PRODUCT */
 router.put("/products/:slug", verifyAdmin, async (req, res) => {
   try {
-
     const { slug } = req.params;
-
-    const {
-      name,
-      price,
-      image,
-      images,
-      variants,
-      description,
-      stock
-    } = req.body;
+    const { name, price, image, images, variants, description, stock, category } = req.body;
 
     await db.query(
       `
       UPDATE products
-      SET name = $1,
-          price = $2,
-          image = $3,
-          images = $4,
-          variants = $5,
-          description = $6,
-          stock = $7
-      WHERE slug = $8
+      SET name = $1, price = $2, image = $3, images = $4, variants = $5, description = $6, stock = $7, category = $8
+      WHERE slug = $9
       `,
       [
         name,
@@ -85,74 +54,36 @@ router.put("/products/:slug", verifyAdmin, async (req, res) => {
         variants ? JSON.stringify(variants) : null,
         description,
         stock || 0,
+        category || 'Uncategorized',
         slug
       ]
     );
 
-    res.json({
-      success: true,
-      message: "Product updated successfully"
-    });
-
+    res.json({ success: true, message: "Product updated successfully" });
   } catch (err) {
     console.error("UPDATE PRODUCT ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Product update failed"
-    });
+    res.status(500).json({ success: false, message: "Product update failed" });
   }
 });
 
-/* UPDATE STOCK */
+/* UPDATE STOCK (Unchanged) */
 router.patch("/products/:slug/stock", verifyAdmin, async (req, res) => {
   try {
     const { stock } = req.body;
-
-    await db.query(
-      `
-      UPDATE products
-      SET stock = $1
-      WHERE slug = $2
-      `,
-      [stock, req.params.slug]
-    );
-
-    res.json({
-      success: true,
-      message: "Stock updated"
-    });
-
+    await db.query(`UPDATE products SET stock = $1 WHERE slug = $2`, [stock, req.params.slug]);
+    res.json({ success: true, message: "Stock updated" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Stock update failed"
-    });
+    res.status(500).json({ success: false, message: "Stock update failed" });
   }
 });
 
-/* DELETE PRODUCT */
+/* DELETE PRODUCT (Unchanged) */
 router.delete("/products/:slug", verifyAdmin, async (req, res) => {
   try {
-    await db.query(
-      `
-      DELETE FROM products
-      WHERE slug = $1
-      `,
-      [req.params.slug]
-    );
-
-    res.json({
-      success: true,
-      message: "Product deleted successfully"
-    });
-
+    await db.query(`DELETE FROM products WHERE slug = $1`, [req.params.slug]);
+    res.json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Delete failed"
-    });
+    res.status(500).json({ success: false, message: "Delete failed" });
   }
 });
 

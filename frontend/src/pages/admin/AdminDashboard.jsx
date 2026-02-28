@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("Pickles"); // <--- NEW STATE
   const [variantsInput, setVariantsInput] = useState("");
   
   // --- MAIN IMAGE STATES ---
@@ -120,6 +121,7 @@ export default function AdminDashboard() {
     setStock(product.stock);
     setDescription(product.description || "");
     setImage(product.image || "");
+    setCategory(product.category || "Pickles"); // <--- ADD THIS
     
     // Set extra images array
     setExtraImages(product.images || []);
@@ -157,7 +159,8 @@ export default function AdminDashboard() {
         image,
         images: imagesArray,
         variants: variantsArray,
-        description
+        description,
+        category // <--- ADD THIS
       });
       alert("Product updated ✅");
       setEditingSlug(null);
@@ -171,7 +174,8 @@ export default function AdminDashboard() {
         image,
         images: imagesArray,
         variants: variantsArray,
-        description
+        description,
+        category  // <--- ADD THIS
       });
       alert("Product added ✅");
     }
@@ -184,6 +188,7 @@ export default function AdminDashboard() {
     setDescription("");
     setImage("");
     setExtraImages([]); // Reset array
+    setCategory("Pickles");
     setVariantsInput("");
     setFile(null);
     setExtraFiles(null);
@@ -323,6 +328,19 @@ export default function AdminDashboard() {
           onChange={e=>setDescription(e.target.value)}
           style={{ width: "100%", padding: "8px", marginBottom: "10px", height: "80px" }}
         />
+
+        <select 
+          value={category} 
+          onChange={e => setCategory(e.target.value)} 
+          style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+        >
+          <option value="Pickles">Pickles</option>
+          <option value="Preserves">Preserves & Jams</option>
+          <option value="Oils & Essentials">Oils & Essentials</option>
+          <option value="Heritage Staples">Heritage Staples</option>
+          <option value="Healthy Snacks">Healthy Snacks</option>
+          <option value="Uncategorized">Uncategorized</option>
+        </select>        
 
         <input
           placeholder="Variants (e.g., 250gm:120:50, 500gm:220:10) -> weight:price:stock"

@@ -4,7 +4,6 @@ const db = require("../config/db");
 
 /* GET ALL PRODUCTS */
 router.get("/", async (req, res) => {
-
   const result = await db.query(
     `
     SELECT 
@@ -15,6 +14,7 @@ router.get("/", async (req, res) => {
       images,
       variants,
       description,
+      category, 
       COALESCE(stock,0) as stock
     FROM products
     ORDER BY id
@@ -30,10 +30,8 @@ router.get("/", async (req, res) => {
   res.json(products);
 });
 
-
 /* GET PRODUCT BY SLUG */
 router.get("/:slug", async (req, res) => {
-
   const result = await db.query(
     `
     SELECT 
@@ -44,6 +42,7 @@ router.get("/:slug", async (req, res) => {
       images,
       variants,
       description,
+      category,
       COALESCE(stock,0) as stock
     FROM products 
     WHERE slug=$1
