@@ -5,7 +5,7 @@ export default function AdminDashboard() {
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [coupons, setCoupons] = useState([]); // --- NEW: Coupon State
+  const [coupons, setCoupons] = useState([]);
   const [visibleOrders, setVisibleOrders] = useState(15);
 
   const [editingSlug, setEditingSlug] = useState(null);
@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const [extraImages, setExtraImages] = useState([]); 
   const [isUploadingExtra, setIsUploadingExtra] = useState(false);
 
-  // --- NEW: Coupon Form States ---
+  // Coupon Form States
   const [cCode, setCCode] = useState("");
   const [cType, setCType] = useState("PERCENT");
   const [cValue, setCValue] = useState("");
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
 
   const loadProducts = () => api.get("/products").then(res => setProducts(res.data));
   const loadOrders = () => api.get("/admin/orders").then(res => setOrders(res.data));
-  const loadCoupons = () => api.get("/admin/coupons").then(res => setCoupons(res.data)); // --- Fetch Coupons
+  const loadCoupons = () => api.get("/admin/coupons").then(res => setCoupons(res.data));
 
   const greenBtn = {
     background: "#2f6f4e", color: "white", border: "none", padding: "8px 14px",
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
     document.body.appendChild(link); link.click(); link.remove();
   };
 
-  // --- NEW: COUPON FUNCTIONS ---
+  // --- COUPON FUNCTIONS ---
   const createCoupon = async () => {
     if (!cCode || !cValue) return alert("Please provide code and discount value");
     try {
@@ -322,6 +322,8 @@ export default function AdminDashboard() {
               <th style={{ padding: "12px", textAlign: "left" }}>Address</th>
               <th style={{ padding: "12px", textAlign: "left" }}>Payment</th>
               <th style={{ padding: "12px", textAlign: "left" }}>Status</th>
+              {/* RESTORED ORDER ITEMS COLUMN HEADER */}
+              <th style={{ padding: "12px", textAlign: "left" }}>Order Items</th>
               <th style={{ padding: "12px", textAlign: "left" }}>Invoice</th>
             </tr>
           </thead>
@@ -345,6 +347,15 @@ export default function AdminDashboard() {
                     <option>CREATED</option><option>PACKED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
                   </select>
                 </td>
+                
+                {/* RESTORED ORDER ITEMS DATA CELL */}
+                <td 
+                  style={{ padding: "12px", cursor: "help", color: "#2f6f4e", fontWeight: "bold" }} 
+                  title={o.items ? o.items.map(item => `${item.product_name} ${item.variant_key ? `(${item.variant_key})` : ""} x ${item.quantity}`).join("\n") : "No items"}
+                >
+                  View Items
+                </td>
+
                 <td style={{ padding: "12px" }}>
                   <button style={{ ...greenBtn, padding: "6px 10px", fontSize: "12px" }} onClick={()=>downloadInvoice(o.order_id)}>PDF</button>
                 </td>
