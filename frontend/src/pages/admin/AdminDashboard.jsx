@@ -14,10 +14,16 @@ export default function AdminDashboard() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
+  const [variantsInput, setVariantsInput] = useState("");
+  
+  // --- MAIN IMAGE STATES ---
   const [file, setFile] = useState(null);
   const [image, setImage] = useState("");
-  const [extraImages, setExtraImages] = useState("");
-  const [variantsInput, setVariantsInput] = useState("");
+
+  // --- NEW: EXTRA IMAGES STATES ---
+  const [extraFiles, setExtraFiles] = useState(null);
+  const [extraImages, setExtraImages] = useState([]); // Now an array instead of a string
+  const [isUploadingExtra, setIsUploadingExtra] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -47,12 +53,12 @@ export default function AdminDashboard() {
     e.target.style.boxShadow = on ? "0 0 10px #2f6f4e" : "none";
   };
 
-  // ✅ RESTORED LOGOUT FUNCTION (unchanged logic)
   const logout = () => {
     localStorage.removeItem("adminToken");
     window.location.href = "/admin/login";
   };
 
+  // --- UPLOAD MAIN IMAGE ---
   const uploadImage = async () => {
     if (!file) return alert("Select image");
 
@@ -60,22 +66,52 @@ export default function AdminDashboard() {
       const formData = new FormData();
       formData.append("image", file);
 
-      // ❌ DO NOT manually set Content-Type
       const res = await api.post("/admin/upload", formData);
 
       setImage(res.data.imageUrl);
-      alert("Image uploaded ✅");
+      alert("Main image uploaded ✅");
 
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
-      alert(
-        err.response?.data?.message ||
-        "Image upload failed"
-      );
+      alert(err.response?.data?.message || "Image upload failed");
     }
   };
 
-  // --- 1. UPDATE handleEdit ---
+  // --- NEW: UPLOAD MULTIPLE EXTRA IMAGES ---
+  const uploadExtraImages = async () => {
+    if (!extraFiles || extraFiles.length === 0) return alert("Select extra images first");
+    
+    setIsUploadingExtra(true);
+    try {
+      const uploadedUrls = [];
+      
+      // Loop through selected files and upload them one by one
+      for (let i = 0; i < extraFiles.length; i++) {
+        const formData = new FormData();
+        formData.append("image", extraFiles[i]);
+        
+        const res = await api.post("/admin/upload", formData);
+        uploadedUrls.push(res.data.imageUrl);
+      }
+
+      // Add new URLs to the existing array of extra images
+      setExtraImages(prev => [...prev, ...uploadedUrls]);
+      setExtraFiles(null);
+      alert("Extra images uploaded ✅");
+
+    } catch (err) {
+      console.error("UPLOAD EXTRA ERROR:", err);
+      alert("Failed to upload some extra images");
+    } finally {
+      setIsUploadingExtra(false);
+    }
+  };
+
+  // --- NEW: REMOVE EXTRA IMAGE THUMBNAIL ---
+  const removeExtraImage = (indexToRemove) => {
+    setExtraImages(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const handleEdit = (product) => {
     setEditingSlug(product.slug);
     setName(product.name);
@@ -84,9 +120,11 @@ export default function AdminDashboard() {
     setStock(product.stock);
     setDescription(product.description || "");
     setImage(product.image || "");
-    setExtraImages(product.images ? product.images.join(",") : "");
     
-    // Load existing variants with their stock (default to 0 if missing)
+    // Set extra images array
+    setExtraImages(product.images || []);
+    
+    // Set variants
     setVariantsInput(
       product.variants
         ? product.variants.map(v => `${v.weight}:${v.price}:${v.stock || 0}`).join(", ")
@@ -94,7 +132,6 @@ export default function AdminDashboard() {
     );
   };
 
-  // --- 2. UPDATE saveProduct ---
   const saveProduct = async () => {
 
     let variantsArray = null;
@@ -104,18 +141,15 @@ export default function AdminDashboard() {
         return { 
           weight: parts[0]?.trim(), 
           price: Number(parts[1]?.trim() || 0),
-          stock: Number(parts[2]?.trim() || 0) // Parse the 3rd value as stock
+          stock: Number(parts[2]?.trim() || 0)
         };
       });
     }
 
-    let imagesArray = null;
-    if (extraImages) {
-      imagesArray = extraImages.split(",").map(i => i.trim());
-    }
+    // Use the extraImages array directly
+    let imagesArray = extraImages.length > 0 ? extraImages : null;
 
     if (editingSlug) {
-
       await api.put(`/admin/products/${editingSlug}`, {
         name,
         price,
@@ -125,12 +159,10 @@ export default function AdminDashboard() {
         variants: variantsArray,
         description
       });
-
       alert("Product updated ✅");
       setEditingSlug(null);
 
     } else {
-
       await api.post("/admin/products", {
         name,
         slug,
@@ -141,18 +173,20 @@ export default function AdminDashboard() {
         variants: variantsArray,
         description
       });
-
       alert("Product added ✅");
     }
 
+    // Reset Form
     setName("");
     setSlug("");
     setPrice("");
     setStock("");
     setDescription("");
     setImage("");
-    setExtraImages("");
+    setExtraImages([]); // Reset array
     setVariantsInput("");
+    setFile(null);
+    setExtraFiles(null);
 
     loadProducts();
   };
@@ -200,33 +234,13 @@ export default function AdminDashboard() {
         marginBottom: "25px"
       }}>
         <div>
-          <h1
-            style={{
-              fontSize: "30px",
-              fontWeight: "600",
-              letterSpacing: "0.6px",
-              marginBottom: "6px",
-              color: "#1f2d2a"
-            }}
-          >
+          <h1 style={{ fontSize: "30px", fontWeight: "600", letterSpacing: "0.6px", marginBottom: "6px", color: "#1f2d2a" }}>
             Admin Dashboard
           </h1>
-          <div
-            style={{
-              width: "70px",
-              height: "3px",
-              background: "#2f6f4e",
-              borderRadius: "2px"
-            }}
-          />
+          <div style={{ width: "70px", height: "3px", background: "#2f6f4e", borderRadius: "2px" }} />
         </div>
 
-        <button
-          style={greenBtn}
-          onMouseOver={(e)=>glow(e,true)}
-          onMouseOut={(e)=>glow(e,false)}
-          onClick={logout}
-        >
+        <button style={greenBtn} onMouseOver={(e)=>glow(e,true)} onMouseOut={(e)=>glow(e,false)} onClick={logout}>
           Logout
         </button>
       </div>
@@ -236,64 +250,88 @@ export default function AdminDashboard() {
 
         <h3>{editingSlug ? "Edit Product" : "Add Product"}</h3>
 
-        <input type="file" onChange={e => setFile(e.target.files[0])} />
-        <button
-          style={{ ...greenBtn, marginLeft: "10px" }}
-          onMouseOver={(e)=>glow(e,true)}
-          onMouseOut={(e)=>glow(e,false)}
-          onClick={uploadImage}
-        >
-          Upload
-        </button>
+        {/* MAIN IMAGE UPLOAD */}
+        <div style={{ marginBottom: "15px", padding: "15px", border: "1px solid #eee", borderRadius: "8px" }}>
+          <h4>Main Thumbnail Image</h4>
+          <input type="file" onChange={e => setFile(e.target.files[0])} />
+          <button style={{ ...greenBtn, marginLeft: "10px" }} onClick={uploadImage}>
+            Upload Main Image
+          </button>
+          {image && (
+            <div style={{ marginTop: "10px" }}>
+              <img src={image} alt="" style={{ width: "80px", borderRadius: "6px" }} />
+            </div>
+          )}
+        </div>
 
-        {image && (
-          <div>
-            <img src={image} alt="" style={{ width: 100, marginTop: "10px" }} />
-          </div>
-        )}
+        {/* EXTRA IMAGES UPLOAD (THUMBNAIL GRID) */}
+        <div style={{ marginBottom: "20px", padding: "15px", border: "1px dashed #ccc", borderRadius: "8px", background: "#fafafa" }}>
+          <h4>Extra Images (Gallery)</h4>
+          <input 
+            type="file" 
+            multiple 
+            onChange={e => setExtraFiles(e.target.files)} 
+          />
+          <button
+            style={{ ...greenBtn, marginLeft: "10px", background: isUploadingExtra ? "#777" : "#2f6f4e" }}
+            onClick={uploadExtraImages}
+            disabled={isUploadingExtra}
+          >
+            {isUploadingExtra ? "Uploading..." : "Upload Extra Images"}
+          </button>
+          
+          {/* Thumbnails Grid */}
+          {extraImages.length > 0 && (
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "15px" }}>
+              {extraImages.map((imgUrl, idx) => (
+                <div key={idx} style={{ position: "relative", width: "70px", height: "70px" }}>
+                  <img 
+                    src={imgUrl} 
+                    alt="extra" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #ddd" }} 
+                  />
+                  <button 
+                    onClick={() => removeExtraImage(idx)}
+                    style={{
+                      position: "absolute", top: "-6px", right: "-6px",
+                      background: "#e74c3c", color: "white", border: "none",
+                      borderRadius: "50%", width: "22px", height: "22px",
+                      cursor: "pointer", fontSize: "14px", display: "flex", 
+                      alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <hr />
-
-        <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} /><br/>
+        <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
 
         {!editingSlug && (
-          <>
-            <input
-              placeholder="Slug"
-              value={slug}
-              onChange={e=>setSlug(e.target.value)}
-            />
-            <br/>
-          </>
+          <input placeholder="Slug" value={slug} onChange={e=>setSlug(e.target.value)} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
         )}
 
-        <input placeholder="Price" value={price} onChange={e=>setPrice(e.target.value)} /><br/>
-        <input placeholder="Stock" value={stock} onChange={e=>setStock(e.target.value)} /><br/>
+        <input placeholder="Base Price" value={price} onChange={e=>setPrice(e.target.value)} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+        <input placeholder="Base Stock" value={stock} onChange={e=>setStock(e.target.value)} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
 
         <textarea
           placeholder="Description"
           value={description}
           onChange={e=>setDescription(e.target.value)}
-        /><br/>
-
-        <input
-          placeholder="Extra Image URLs (comma separated)"
-          value={extraImages}
-          onChange={e=>setExtraImages(e.target.value)}
-        /><br/>
+          style={{ width: "100%", padding: "8px", marginBottom: "10px", height: "80px" }}
+        />
 
         <input
           placeholder="Variants (e.g., 250gm:120:50, 500gm:220:10) -> weight:price:stock"
           value={variantsInput}
           onChange={e=>setVariantsInput(e.target.value)}
-        /><br/>
+          style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
+        />
 
-        <button
-          style={greenBtn}
-          onMouseOver={(e)=>glow(e,true)}
-          onMouseOut={(e)=>glow(e,false)}
-          onClick={saveProduct}
-        >
+        <button style={greenBtn} onMouseOver={(e)=>glow(e,true)} onMouseOut={(e)=>glow(e,false)} onClick={saveProduct}>
           {editingSlug ? "Update Product" : "Add Product"}
         </button>
 
@@ -308,46 +346,44 @@ export default function AdminDashboard() {
               setStock("");
               setDescription("");
               setImage("");
-              setExtraImages("");
+              setExtraImages([]);
               setVariantsInput("");
+              setFile(null);
+              setExtraFiles(null);
             }}
           >
             Cancel
           </button>
         )}
 
-        <hr />
+        <hr style={{ margin: "30px 0" }} />
 
         <h3>Existing Products</h3>
 
         <div style={{ maxHeight: "400px", overflowY: "auto" }}>
           {products.map(p => (
-            <div key={p.slug}
-                 style={{ borderBottom: "1px solid #eee", padding: "10px 0" }}>
-
-              <strong>{p.name}</strong> — ₹{p.price}
-
-              {p.image && (
+            <div key={p.slug} style={{ borderBottom: "1px solid #eee", padding: "10px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              
+              <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+                {p.image ? (
+                  <img src={p.image} alt="" style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "6px" }} />
+                ) : (
+                  <div style={{ width: "50px", height: "50px", background: "#eee", borderRadius: "6px" }} />
+                )}
                 <div>
-                  <img src={p.image} alt="" style={{ width: 80, marginTop: "5px" }} />
+                  <strong>{p.name}</strong> <br/>
+                  <span style={{ fontSize: "13px", color: "#666" }}>₹{p.price} | Stock: {p.stock}</span>
                 </div>
-              )}
+              </div>
 
-              <div>Stock: {p.stock}</div>
-
-              <button
-                style={{ ...greenBtn, marginTop: "5px", marginRight: "10px" }}
-                onClick={()=>handleEdit(p)}
-              >
-                Edit
-              </button>
-
-              <button
-                style={greenBtn}
-                onClick={()=>deleteProduct(p.slug)}
-              >
-                Delete
-              </button>
+              <div>
+                <button style={{ ...greenBtn, marginRight: "10px" }} onClick={()=>handleEdit(p)}>
+                  Edit
+                </button>
+                <button style={{ ...greenBtn, background: "#d9534f" }} onClick={()=>deleteProduct(p.slug)}>
+                  Delete
+                </button>
+              </div>
 
             </div>
           ))}
@@ -360,7 +396,7 @@ export default function AdminDashboard() {
 
         <h3>Orders</h3>
 
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px", fontSize: "14px" }}>
           <thead>
             <tr style={{ background: "#f0f4f2" }}>
               <th style={{ padding: "12px", textAlign: "left" }}>#</th>
@@ -378,15 +414,14 @@ export default function AdminDashboard() {
           <tbody>
             {orders.slice(0, visibleOrders).map((o, index) => (
               <tr key={o.order_id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>{index + 1}</td>
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.order_id}</td>
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>{o.customer_name}</td>
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>₹{o.total_amount}</td>
+                <td style={{ padding: "12px" }}>{index + 1}</td>
+                <td style={{ padding: "12px" }}>{o.order_id}</td>
+                <td style={{ padding: "12px" }}>{o.customer_name}</td>
+                <td style={{ padding: "12px" }}>₹{o.total_amount}</td>
 
                 <td
-                  style={{ padding: "12px", verticalAlign: "middle" }}
-                  title={`${o.full_address || o.address}
-${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`}
+                  style={{ padding: "12px" }}
+                  title={`${o.full_address || o.address}\n${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`}
                 >
                   {o.city && o.state
                     ? `${o.city}, ${o.state}`
@@ -396,8 +431,7 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`}
                     style={{ cursor: "pointer", marginLeft: "6px" }}
                     onClick={() =>
                       copyAddress(
-                        `${o.full_address || o.address}
-${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
+                        `${o.full_address || o.address}\n${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
                       )
                     }
                   >
@@ -407,17 +441,17 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
 
                 <td style={{
                   padding: "12px",
-                  verticalAlign: "middle",
                   color: o.payment_status === "PAID" ? "green" : "orange",
                   fontWeight: "bold"
                 }}>
                   {o.payment_status}
                 </td>
 
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>
+                <td style={{ padding: "12px" }}>
                   <select
                     value={o.order_status}
                     onChange={(e)=>updateOrderStatus(o.order_id, e.target.value)}
+                    style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ccc" }}
                   >
                     <option>CREATED</option>
                     <option>PACKED</option>
@@ -428,7 +462,7 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
                 </td>
 
                 <td
-                  style={{ padding: "12px", verticalAlign: "middle", cursor: "help", color: "#2f6f4e" }}
+                  style={{ padding: "12px", cursor: "help", color: "#2f6f4e", fontWeight: "bold" }}
                   title={
                     o.items.map(item =>
                       `${item.product_name} ${
@@ -437,14 +471,12 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
                     ).join("\n")
                   }
                 >
-                  Order Items
+                  View Items
                 </td>
 
-                <td style={{ padding: "12px", verticalAlign: "middle" }}>
+                <td style={{ padding: "12px" }}>
                   <button
-                    style={greenBtn}
-                    onMouseOver={(e)=>glow(e,true)}
-                    onMouseOut={(e)=>glow(e,false)}
+                    style={{ ...greenBtn, padding: "6px 10px", fontSize: "12px" }}
                     onClick={()=>downloadInvoice(o.order_id)}
                   >
                     PDF
@@ -457,23 +489,13 @@ ${o.city || ""}, ${o.state || ""} - ${o.pincode || ""}`
 
         <div style={{ marginTop: "20px", textAlign: "center" }}>
           {visibleOrders < orders.length && (
-            <button
-              style={{ ...greenBtn, marginRight: "10px" }}
-              onMouseOver={(e)=>glow(e,true)}
-              onMouseOut={(e)=>glow(e,false)}
-              onClick={() => setVisibleOrders(prev => prev + 15)}
-            >
+            <button style={{ ...greenBtn, marginRight: "10px" }} onClick={() => setVisibleOrders(prev => prev + 15)}>
               Load 15 More
             </button>
           )}
 
           {visibleOrders > 15 && (
-            <button
-              style={{ ...greenBtn, background: "#777" }}
-              onMouseOver={(e)=>glow(e,true)}
-              onMouseOut={(e)=>glow(e,false)}
-              onClick={() => setVisibleOrders(15)}
-            >
+            <button style={{ ...greenBtn, background: "#777" }} onClick={() => setVisibleOrders(15)}>
               Show Less
             </button>
           )}
