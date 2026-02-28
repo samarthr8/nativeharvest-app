@@ -8,7 +8,7 @@ export default function Products() {
   const location = useLocation();
 
   const [products, setProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // --- NEW: SEARCH STATE ---
+  const [searchQuery, setSearchQuery] = useState(""); 
   
   const [expanded, setExpanded] = useState({});
   const [addedSlug, setAddedSlug] = useState(null);
@@ -24,7 +24,6 @@ export default function Products() {
   useEffect(() => {
     api.get("/products").then(res => {
       setProducts(res.data);
-
       const defaults = {};
       res.data.forEach(p => {
         if (p.variants && p.variants.length > 0) {
@@ -35,13 +34,26 @@ export default function Products() {
     });
   }, []);
 
-  /* ---------------- HASH SCROLL LOGIC ---------------- */
+  /* ---------------- HASH SCROLL LOGIC (FIXED) ---------------- */
+  // Maps the URL hashes from Header.jsx to the actual Database Categories
+  const hashToCategoryMap = {
+    royal: "Pickles",
+    orchard: "Preserves",
+    cold: "Oils & Essentials",
+    heritage: "Heritage Staples",
+    indulgence: "Healthy Snacks"
+  };
+
   useEffect(() => {
     if (!products.length || !location.hash) return;
 
-    // Decode URI component to handle spaces in categories (e.g. #Healthy%20Snacks)
+    // Decode and remove "#"
     const id = decodeURIComponent(location.hash.replace("#", ""));
-    const targetRef = categoryRefs.current[id];
+    
+    // Look up real category name (fallback to exact id if no map exists)
+    const targetCategory = hashToCategoryMap[id] || id;
+    
+    const targetRef = categoryRefs.current[targetCategory];
 
     if (targetRef) {
       setTimeout(() => {
@@ -62,9 +74,8 @@ export default function Products() {
     setTimeout(() => setAddedSlug(null), 1500);
   };
 
-  /* ---------------- SEARCH & CATEGORY LOGIC ---------------- */
+  /* ---------------- SEARCH & CATEGORY LOGIC (FIXED) ---------------- */
   
-  // 1. Filter by Search Query
   const filteredProducts = products.filter(p => {
     if (!searchQuery) return true;
     const lowerQuery = searchQuery.toLowerCase();
@@ -74,7 +85,6 @@ export default function Products() {
     );
   });
 
-  // 2. Group dynamically by Database Category
   const groupedProducts = {};
   
   filteredProducts.forEach(p => {
@@ -83,15 +93,18 @@ export default function Products() {
     groupedProducts[cat].push(p);
   });
 
-  // Fixed order for presentation
-  const categoryOrder = ["Pickles", "Preserves", "Oils & Essentials", "Heritage Staples", "Healthy Snacks", "Uncategorized"];
+  // Base order for known categories
+  const baseCategoryOrder = ["Pickles", "Preserves", "Oils & Essentials", "Heritage Staples", "Healthy Snacks", "Uncategorized"];
+  
+  // Find any new/custom categories from the DB that aren't in the base list
+  const extraCategories = Object.keys(groupedProducts).filter(cat => !baseCategoryOrder.includes(cat));
+  
+  // Combine them so nothing ever gets hidden!
+  const finalCategoryOrder = [...baseCategoryOrder, ...extraCategories];
 
   /* ---------------- GRID STYLE ---------------- */
   const gridStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "28px",
-    alignItems: "stretch"
+    display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "28px", alignItems: "stretch"
   };
 
   const renderGrid = (list) => (
@@ -122,13 +135,7 @@ export default function Products() {
           }
 
           return (
-            <div
-              key={p.slug}
-              style={{
-                border: "1px solid #eaeaea", padding: "18px", borderRadius: "12px", background: "white", display: "flex", flexDirection: "column", boxShadow: "0 6px 18px rgba(0,0,0,0.05)", transition: "all 0.25s ease"
-              }}
-            >
-              {/* IMAGE */}
+            <div key={p.slug} style={{ border: "1px solid #eaeaea", padding: "18px", borderRadius: "12px", background: "white", display: "flex", flexDirection: "column", boxShadow: "0 6px 18px rgba(0,0,0,0.05)", transition: "all 0.25s ease" }}>
               <div style={{ height: "220px", overflow: "hidden", borderRadius: "10px", position: "relative", background: "#f7f7f7" }}>
                 {images.length > 0 && (
                   <Link to={`/products/${p.slug}`}>
@@ -202,7 +209,6 @@ export default function Products() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px", flexWrap: "wrap", gap: "20px" }}>
         <h1 style={{ margin: 0 }}>Products</h1>
         
-        {/* --- LIVE SEARCH BAR --- */}
         <div style={{ position: "relative", width: "300px" }}>
           <input 
             type="text" 
@@ -221,13 +227,12 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Render Dynamic Categories */}
       {searchQuery && Object.keys(groupedProducts).length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", color: "#666" }}>
           <h2>No products found for "{searchQuery}"</h2>
         </div>
       ) : (
-        categoryOrder.map(cat => {
+        finalCategoryOrder.map(cat => {
           if (!groupedProducts[cat] || groupedProducts[cat].length === 0) return null;
           
           return (

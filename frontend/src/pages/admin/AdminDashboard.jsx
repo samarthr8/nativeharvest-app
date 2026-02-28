@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Pickles"); // <--- NEW STATE
+  const [category, setCategory] = useState(""); // <--- NEW STATE
   const [variantsInput, setVariantsInput] = useState("");
   
   // --- MAIN IMAGE STATES ---
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
     setStock(product.stock);
     setDescription(product.description || "");
     setImage(product.image || "");
-    setCategory(product.category || "Pickles"); // <--- ADD THIS
+    setCategory(product.category || ""); // <--- ADD THIS
     
     // Set extra images array
     setExtraImages(product.images || []);
@@ -135,6 +135,8 @@ export default function AdminDashboard() {
   };
 
   const saveProduct = async () => {
+
+    if (!category) return alert("Please choose a category!"); // --- FIX: Prevent saving without category
 
     let variantsArray = null;
     if (variantsInput) {
@@ -188,7 +190,7 @@ export default function AdminDashboard() {
     setDescription("");
     setImage("");
     setExtraImages([]); // Reset array
-    setCategory("Pickles");
+    setCategory("");
     setVariantsInput("");
     setFile(null);
     setExtraFiles(null);
@@ -329,17 +331,18 @@ export default function AdminDashboard() {
           style={{ width: "100%", padding: "8px", marginBottom: "10px", height: "80px" }}
         />
 
+        {/* --- FIX: "Choose Category" Default Dropdown --- */}
         <select 
           value={category} 
           onChange={e => setCategory(e.target.value)} 
           style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
         >
+          <option value="" disabled>Choose Category</option>
           <option value="Pickles">Pickles</option>
           <option value="Preserves">Preserves & Jams</option>
           <option value="Oils & Essentials">Oils & Essentials</option>
           <option value="Heritage Staples">Heritage Staples</option>
           <option value="Healthy Snacks">Healthy Snacks</option>
-          <option value="Uncategorized">Uncategorized</option>
         </select>        
 
         <input
@@ -363,6 +366,7 @@ export default function AdminDashboard() {
               setPrice("");
               setStock("");
               setDescription("");
+              setCategory("");
               setImage("");
               setExtraImages([]);
               setVariantsInput("");
@@ -377,32 +381,20 @@ export default function AdminDashboard() {
         <hr style={{ margin: "30px 0" }} />
 
         <h3>Existing Products</h3>
-
         <div style={{ maxHeight: "400px", overflowY: "auto" }}>
           {products.map(p => (
             <div key={p.slug} style={{ borderBottom: "1px solid #eee", padding: "10px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              
               <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-                {p.image ? (
-                  <img src={p.image} alt="" style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "6px" }} />
-                ) : (
-                  <div style={{ width: "50px", height: "50px", background: "#eee", borderRadius: "6px" }} />
-                )}
+                {p.image ? <img src={p.image} alt="" style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "6px" }} /> : <div style={{ width: "50px", height: "50px", background: "#eee", borderRadius: "6px" }} />}
                 <div>
-                  <strong>{p.name}</strong> <br/>
+                  <strong>{p.name}</strong> <span style={{fontSize: "12px", background: "#e8f3ee", padding: "2px 6px", borderRadius: "4px", marginLeft: "8px"}}>{p.category || "Uncategorized"}</span><br/>
                   <span style={{ fontSize: "13px", color: "#666" }}>₹{p.price} | Stock: {p.stock}</span>
                 </div>
               </div>
-
               <div>
-                <button style={{ ...greenBtn, marginRight: "10px" }} onClick={()=>handleEdit(p)}>
-                  Edit
-                </button>
-                <button style={{ ...greenBtn, background: "#d9534f" }} onClick={()=>deleteProduct(p.slug)}>
-                  Delete
-                </button>
+                <button style={{ ...greenBtn, marginRight: "10px" }} onClick={()=>handleEdit(p)}>Edit</button>
+                <button style={{ ...greenBtn, background: "#d9534f" }} onClick={()=>deleteProduct(p.slug)}>Delete</button>
               </div>
-
             </div>
           ))}
         </div>
