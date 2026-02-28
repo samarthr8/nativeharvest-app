@@ -116,40 +116,56 @@ const Cart = () => {
                 Subtotal: ₹{item.price * item.qty}
               </div>
 
-              <input
-                type="number"
-                min="1"
-                value={item.qty}
-                onChange={(e) =>
-                  updateQty(
-                    item.slug,
-                    item.variantKey,
-                    Number(e.target.value)
-                  )
-                }
-                style={{
-                  width: "70px",
-                  padding: "6px",
-                  borderRadius: "6px",
-                  border: "1px solid #ddd",
-                  marginRight: "10px"
-                }}
-              />
+              <div>
+                <input
+                  type="number"
+                  min="1"
+                  max={item.maxStock} // Enforce HTML limit
+                  value={item.qty}
+                  onChange={(e) =>
+                    updateQty(
+                      item.slug,
+                      item.variantKey,
+                      Number(e.target.value)
+                    )
+                  }
+                  style={{
+                    width: "70px",
+                    padding: "6px",
+                    borderRadius: "6px",
+                    border: "1px solid #ddd",
+                    marginRight: "10px"
+                  }}
+                />
 
-              <button
-                onClick={() =>
-                  removeFromCart(item.slug, item.variantKey)
-                }
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#c0392b",
-                  cursor: "pointer",
-                  fontWeight: "500"
-                }}
-              >
-                Remove
-              </button>
+                <button
+                  onClick={() =>
+                    removeFromCart(item.slug, item.variantKey)
+                  }
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#c0392b",
+                    cursor: "pointer",
+                    fontWeight: "500"
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+              
+              {/* MAX STOCK WARNING UI */}
+              {item.qty >= item.maxStock && (
+                <div style={{ 
+                  fontSize: "12px", 
+                  color: "#d9534f", 
+                  marginTop: "6px",
+                  fontWeight: "500" 
+                }}>
+                  Limit reached ({item.maxStock} available)
+                </div>
+              )}
+
             </div>
 
           </div>
@@ -186,7 +202,7 @@ const Cart = () => {
           marginBottom: "20px"
         }}>
           <span>Shipping</span>
-          <span>Calculated at checkout</span>
+          <span>{total >= 999 ? "FREE" : "₹80 (Calculated at checkout)"}</span>
         </div>
 
         <hr style={{ marginBottom: "20px", borderColor: "#eee" }} />

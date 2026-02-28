@@ -13,11 +13,16 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ADD TO CART WITH VARIANT SUPPORT */
+  /* ADD TO CART WITH VARIANT AND MAX STOCK SUPPORT */
   const addToCart = (product, selectedVariant = null) => {
 
     const variantKey = selectedVariant?.weight || null;
     const price = selectedVariant?.price || product.price;
+    
+    // Determine the true stock limit for this specific item/variant
+    const maxStock = selectedVariant && selectedVariant.stock !== undefined 
+      ? selectedVariant.stock 
+      : product.stock;
 
     setCart((prev) => {
 
@@ -26,11 +31,14 @@ export const CartProvider = ({ children }) => {
       );
 
       if (existing) {
-        return prev.map(p =>
-          p.slug === product.slug && p.variantKey === variantKey
-            ? { ...p, qty: p.qty + 1 }
-            : p
-        );
+        return prev.map(p => {
+          if (p.slug === product.slug && p.variantKey === variantKey) {
+            // Cap the quantity at maxStock
+            const newQty = p.qty + 1 > maxStock ? maxStock : p.qty + 1;
+            return { ...p, qty: newQty, maxStock }; 
+          }
+          return p;
+        });
       }
 
       return [
@@ -39,7 +47,8 @@ export const CartProvider = ({ children }) => {
           ...product,
           price,
           variantKey,
-          qty: 1
+          qty: 1,
+          maxStock // Save the limit in the cart item
         }
       ];
     });
@@ -53,11 +62,14 @@ export const CartProvider = ({ children }) => {
 
   const updateQty = (slug, variantKey, qty) => {
     setCart(prev =>
-      prev.map(p =>
-        p.slug === slug && p.variantKey === variantKey
-          ? { ...p, qty }
-          : p
-      )
+      prev.map(p => {
+        if (p.slug === slug && p.variantKey === variantKey) {
+          // Enforce bounds: no less than 1, no more than maxStock
+          const validQty = qty > p.maxStock ? p.maxStock : (qty < 1 ? 1 : qty);
+          return { ...p, qty: validQty };
+        }
+        return p;
+      })
     );
   };
 
