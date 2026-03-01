@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
+const db = require("../../config/db"); // Adjust path if necessary based on your folder structure
 
 /**
  * PUBLIC ORDER TRACKING
@@ -8,10 +8,10 @@ const db = require("../config/db");
 router.get("/:orderId", async (req, res) => {
 
   try {
-
     const { orderId } = req.params;
 
-    const result = await db.query(
+    // 1. Fetch the main order details (Now including shipping and discounts)
+    const orderResult = await db.query(
       `
       SELECT 
         order_id,
@@ -19,6 +19,9 @@ router.get("/:orderId", async (req, res) => {
         phone,
         email,
         total_amount,
+        shipping_fee,
+        discount_amount,
+        coupon_code,
         payment_status,
         order_status,
         created_at
@@ -28,21 +31,30 @@ router.get("/:orderId", async (req, res) => {
       [orderId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({
-        message: "Order not found"
-      });
+    if (orderResult.rowCount === 0) {
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    res.json(result.rows[0]);
+    const order = orderResult.rows[0];
+
+    // 2. Fetch the actual items for this order
+    const itemsResult = await db.query(
+      `
+      SELECT product_name, variant_key, price, quantity 
+      FROM order_items 
+      WHERE order_id = $1
+      `,
+      [orderId]
+    );
+
+    // 3. Attach the items array to the order object
+    order.items = itemsResult.rows;
+
+    res.json(order);
 
   } catch (err) {
-
     console.error("Order tracking error:", err);
-
-    res.status(500).json({
-      message: "Failed to fetch order"
-    });
+    res.status(500).json({ message: "Failed to fetch order" });
   }
 });
 

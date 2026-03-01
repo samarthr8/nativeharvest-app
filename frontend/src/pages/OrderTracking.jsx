@@ -9,6 +9,7 @@ export default function OrderTracking() {
 
   const fetchOrder = async () => {
     try {
+      // NOTE: Ensure your backend route returns items, shipping_fee, and discount_amount!
       const res = await api.get(`/orders/${orderId}`);
       setOrder(res.data);
     } catch (err) {
@@ -19,6 +20,7 @@ export default function OrderTracking() {
 
   useEffect(() => {
     fetchOrder();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!order) {
@@ -34,10 +36,19 @@ export default function OrderTracking() {
   -------------------------------- */
 
   const steps = ["CREATED", "PACKED", "SHIPPED", "DELIVERED"];
-  const currentStepIndex = steps.indexOf(order.order_status);
+  
+  // NEW: Safely handle if an order is cancelled
+  const isCancelled = order.order_status === "CANCELLED";
+  const currentStepIndex = isCancelled ? -1 : steps.indexOf(order.order_status);
 
   const estimatedDelivery = new Date(order.created_at);
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
+
+  // NEW: Mathematical breakdown
+  const shippingFee = order.shipping_fee || 0;
+  const discountAmount = order.discount_amount || 0;
+  const couponCode = order.coupon_code || "";
+  const subtotal = order.total_amount - shippingFee + discountAmount;
 
   return (
     <div style={{ background: "#f5f7f6", minHeight: "100vh", padding: "60px 20px" }}>
@@ -69,69 +80,83 @@ export default function OrderTracking() {
         <hr style={{ margin: "25px 0" }} />
 
         {/* STEP TRACKER */}
-        <div style={{ marginBottom: "40px" }}>
-
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            position: "relative",
-            marginBottom: "30px"
-          }}>
-
-            {steps.map((step, index) => {
-
-              const isActive = index <= currentStepIndex;
-
-              return (
-                <div key={step} style={{ textAlign: "center", flex: 1 }}>
-
-                  <div style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    margin: "0 auto",
-                    background: isActive ? "#2f6f4e" : "#ddd",
-                    transition: "0.3s ease"
-                  }} />
-
-                  <div style={{
-                    marginTop: "8px",
-                    fontSize: "13px",
-                    fontWeight: isActive ? "600" : "400",
-                    color: isActive ? "#2f6f4e" : "#999"
-                  }}>
-                    {step}
-                  </div>
-
-                </div>
-              );
-            })}
-
-            {/* Progress Line */}
-            <div style={{
-              position: "absolute",
-              top: "14px",
-              left: "5%",
-              width: `${(currentStepIndex / (steps.length - 1)) * 90}%`,
-              height: "4px",
-              background: "#2f6f4e",
-              zIndex: "-1",
-              transition: "0.3s ease"
-            }} />
+        {isCancelled ? (
+          <div style={{ background: "#fdeced", color: "#d9534f", padding: "15px", borderRadius: "8px", textAlign: "center", fontWeight: "bold", marginBottom: "30px" }}>
+            This order has been CANCELLED.
           </div>
+        ) : (
+          <div style={{ marginBottom: "40px" }}>
 
-        </div>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              position: "relative",
+              marginBottom: "30px"
+            }}>
+
+              {steps.map((step, index) => {
+
+                const isActive = index <= currentStepIndex;
+
+                return (
+                  <div key={step} style={{ textAlign: "center", flex: 1, zIndex: 2 }}>
+
+                    <div style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      margin: "0 auto",
+                      background: isActive ? "#2f6f4e" : "#ddd",
+                      transition: "0.3s ease"
+                    }} />
+
+                    <div style={{
+                      marginTop: "8px",
+                      fontSize: "13px",
+                      fontWeight: isActive ? "600" : "400",
+                      color: isActive ? "#2f6f4e" : "#999"
+                    }}>
+                      {step}
+                    </div>
+
+                  </div>
+                );
+              })}
+
+              {/* Progress Line (Updated to look cleaner with the nodes) */}
+              <div style={{
+                position: "absolute",
+                top: "14px",
+                left: "5%",
+                width: "90%",
+                height: "4px",
+                background: "#ddd",
+                zIndex: "1"
+              }}>
+                <div style={{
+                  height: "100%",
+                  background: "#2f6f4e",
+                  width: `${Math.max(0, (currentStepIndex / (steps.length - 1)) * 100)}%`,
+                  transition: "0.3s ease"
+                }} />
+              </div>
+            </div>
+
+          </div>
+        )}
 
         {/* DELIVERY ETA */}
-        <div style={{
-          background: "#f0f4f2",
-          padding: "15px 20px",
-          borderRadius: "10px",
-          marginBottom: "30px"
-        }}>
-          <strong>Estimated Delivery:</strong>{" "}
-          {estimatedDelivery.toDateString()}
-        </div>
+        {!isCancelled && order.order_status !== "DELIVERED" && (
+          <div style={{
+            background: "#f0f4f2",
+            padding: "15px 20px",
+            borderRadius: "10px",
+            marginBottom: "30px"
+          }}>
+            <strong>Estimated Delivery:</strong>{" "}
+            {estimatedDelivery.toDateString()}
+          </div>
+        )}
 
         {/* PAYMENT STATUS */}
         <div style={{ marginBottom: "25px" }}>
@@ -181,6 +206,39 @@ export default function OrderTracking() {
             ))}
           </>
         )}
+
+        {/* --- NEW FINANCIAL BREAKDOWN SECTION --- */}
+        <div style={{
+          marginTop: "20px",
+          background: "#fafafa",
+          padding: "20px",
+          borderRadius: "8px",
+          border: "1px solid #eee"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+            <span>Subtotal</span>
+            <span>₹{subtotal}</span>
+          </div>
+          
+          {discountAmount > 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px", color: "#2f6f4e", fontWeight: "bold" }}>
+              <span>Discount {couponCode ? `(${couponCode})` : ""}</span>
+              <span>-₹{discountAmount}</span>
+            </div>
+          )}
+          
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px", fontSize: "14px" }}>
+            <span>Delivery Fee</span>
+            <span>{shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</span>
+          </div>
+          
+          <hr style={{ borderColor: "#ddd", margin: "10px 0" }}/>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "700", fontSize: "18px" }}>
+            <span>Total</span>
+            <span>₹{order.total_amount}</span>
+          </div>
+        </div>
 
         {/* SUCCESS CHECKMARK */}
         {order.order_status === "DELIVERED" && (
