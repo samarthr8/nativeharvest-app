@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../../config/db"); // Adjust path if necessary based on your folder structure
+const db = require("../config/db"); // Adjust path if necessary based on your folder structure
 
 /**
  * PUBLIC ORDER TRACKING
