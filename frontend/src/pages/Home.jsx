@@ -41,111 +41,133 @@ const HeroSection = () => {
   const slide = slides[current];
 
   return (
-    <section
-      className="hero"
-      style={{
-        height: "clamp(500px, 60vh, 700px)",
+    <>
+      {/* --- CSS FOR UN-CROPPED MOBILE HERO --- */}
+      <style>
+        {`
+          .hero-content h1 { font-size: 48px; }
+          .hero-content p { font-size: 18px; }
+          .hero-section { background-size: cover, cover !important; background-position: center center !important; }
+          
+          @media (max-width: 768px) {
+            .hero-content h1 { font-size: 34px !important; }
+            .hero-content p { font-size: 15px !important; }
+            
+            /* Fits the image perfectly to the width without cropping */
+            .hero-section { 
+              background-size: 100% auto, 100% auto !important; 
+              background-position: top center, top center !important; 
+              align-items: flex-end !important; /* Pushes text down */
+              padding-bottom: 50px !important;
+            } 
+          }
+        `}
+      </style>
 
-        backgroundImage: `
-          linear-gradient(
-            to right,
-           rgba(0,0,0,0.45),
-           rgba(0,0,0,0.15)
-          ),
-          url(${slide.image})
-        `,
-
-        backgroundSize: "cover, cover",
-        backgroundPosition: "center center, center center",
-        backgroundRepeat: "no-repeat, no-repeat",
-
-        display: "flex",
-        alignItems: "center",
-        transition: "background-image 0.6s ease",
-        color: "white"
-      }}
-    >
-      <div
-        className="hero-content"
+      <section
+        className="hero hero-section"
         style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "0 20px"
+          height: "clamp(500px, 60vh, 700px)",
+
+          backgroundImage: `
+            linear-gradient(
+              to bottom,
+            rgba(0,0,0,0.1),
+            rgba(0,0,0,0.85)
+            ),
+            url(${slide.image})
+          `,
+
+          backgroundRepeat: "no-repeat, no-repeat",
+
+          display: "flex",
+          alignItems: "center",
+          transition: "background-image 0.6s ease",
+          color: "white"
         }}
       >
-        <h1
-          style={{
-            fontSize: "48px",
-            maxWidth: "650px",
-            lineHeight: "1.2"
-          }}
-        >
-          {slide.heading}
-        </h1>
-
-        <p
-          style={{
-            fontSize: "18px",
-            marginTop: "18px",
-            maxWidth: "520px",
-            lineHeight: "1.6"
-          }}
-        >
-          {slide.sub}
-        </p>
-
         <div
+          className="hero-content"
           style={{
-            marginTop: "28px",
-            display: "flex",
-            gap: "18px"
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "0 20px",
+            width: "100%"
           }}
         >
-          <Link to="/products" className="btn">
-            Shop Now
-          </Link>
-
-          <Link
-            to="/about"
+          <h1
             style={{
-              border: "1px solid white",
-              padding: "12px 26px",
-              borderRadius: "30px",
-              color: "white",
-              textDecoration: "none"
+              maxWidth: "650px",
+              lineHeight: "1.2"
             }}
           >
-            Learn More
-          </Link>
-        </div>
+            {slide.heading}
+          </h1>
 
-        {/* Slider Dots */}
-        <div
-          style={{
-            marginTop: "30px",
-            display: "flex",
-            gap: "10px"
-          }}
-        >
-          {slides.map((_, i) => (
-            <div
-              key={i}
-              onClick={() => setCurrent(i)}
+          <p
+            style={{
+              marginTop: "18px",
+              maxWidth: "520px",
+              lineHeight: "1.6"
+            }}
+          >
+            {slide.sub}
+          </p>
+
+          <div
+            style={{
+              marginTop: "28px",
+              display: "flex",
+              gap: "18px",
+              flexWrap: "wrap"
+            }}
+          >
+            <Link to="/products" className="btn">
+              Shop Now
+            </Link>
+
+            <Link
+              to="/about"
               style={{
-                width: "9px",
-                height: "9px",
-                borderRadius: "50%",
-                background:
-                  i === current
-                    ? "white"
-                    : "rgba(255,255,255,0.5)",
-                cursor: "pointer"
+                border: "1px solid white",
+                padding: "12px 26px",
+                borderRadius: "30px",
+                color: "white",
+                textDecoration: "none"
               }}
-            />
-          ))}
+            >
+              Learn More
+            </Link>
+          </div>
+
+          {/* Slider Dots */}
+          <div
+            style={{
+              marginTop: "30px",
+              display: "flex",
+              gap: "10px"
+            }}
+          >
+            {slides.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => setCurrent(i)}
+                style={{
+                  width: "9px",
+                  height: "9px",
+                  borderRadius: "50%",
+                  background:
+                    i === current
+                      ? "white"
+                      : "rgba(255,255,255,0.5)",
+                  cursor: "pointer"
+                }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
@@ -383,7 +405,6 @@ const Newsletter = () => {
             </button>
           </form>
 
-          {/* ✅ MESSAGE GOES HERE */}
           {message && (
             <p style={{ marginTop: "10px", fontSize: "14px" }}>
               {message}
