@@ -10,6 +10,9 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
+  
+  // --- NEW: Mobile Menu State ---
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
 
   const closeTimeoutRef = useRef(null);
 
@@ -29,16 +32,13 @@ export default function Header() {
   /* ---------------- HOVER HANDLERS ---------------- */
 
   const handleMouseEnter = () => {
-
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
-
     setShowMega(true);
   };
 
   const handleMouseLeave = () => {
-
     closeTimeoutRef.current = setTimeout(() => {
       setShowMega(false);
     }, 200); // 200ms buffer prevents flicker
@@ -70,6 +70,23 @@ export default function Header() {
           : "none"
       }}
     >
+      {/* --- NEW: CSS FOR MOBILE RESPONSIVENESS --- */}
+      <style>
+        {`
+          .desktop-nav { display: flex; }
+          .mobile-hamburger { display: none; }
+          .header-brand-text { display: flex; }
+          .center-logo { position: absolute; left: 50%; transform: translateX(-50%); }
+          
+          @media (max-width: 850px) {
+            .desktop-nav { display: none !important; }
+            .mobile-hamburger { display: block !important; cursor: pointer; }
+            .header-brand-text { display: none !important; } 
+            .center-logo { position: static !important; transform: none !important; margin: 0 auto; }
+          }
+        `}
+      </style>
+
       <div
         style={{
           maxWidth: "1200px",
@@ -86,6 +103,7 @@ export default function Header() {
         {/* LEFT BRAND */}
         <Link
           to="/"
+          className="header-brand-text"
           style={{
             fontFamily: "Playfair Display, serif",
             fontSize: "28px",
@@ -93,7 +111,6 @@ export default function Header() {
             letterSpacing: "1px",
             color: "var(--green-dark)",
             textDecoration: "none",
-            display: "flex",
             flexDirection: "column",
             lineHeight: "1.1"
           }}
@@ -112,13 +129,23 @@ export default function Header() {
           </span>
         </Link>
 
+        {/* --- NEW: HAMBURGER ICON (Visible on Mobile only) --- */}
+        <div 
+          className="mobile-hamburger" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--green-dark)", marginTop: "6px" }}>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </div>
+
         {/* CENTER LOGO */}
         <Link
           to="/"
+          className="center-logo"
           style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center"
           }}
@@ -137,8 +164,8 @@ export default function Header() {
 
         {/* RIGHT NAVIGATION */}
         <nav
+          className="desktop-nav"
           style={{
-            display: "flex",
             gap: "32px",
             alignItems: "center",
             position: "relative"
@@ -178,7 +205,7 @@ export default function Header() {
                       onMouseLeave={handleMouseLeave}
                       style={{
                         position: "absolute",
-                        top: "35px", // reduced gap
+                        top: "35px",
                         left: "-100px",
                         width: "400px",
                         background: "white",
@@ -268,6 +295,42 @@ export default function Header() {
           </Link>
 
         </nav>
+
+        {/* --- NEW: MOBILE DROPDOWN MENU --- */}
+        {mobileMenuOpen && (
+          <div style={{ 
+            position: "absolute", 
+            top: "75px", 
+            left: 0, 
+            width: "100%", 
+            background: "white", 
+            borderTop: "1px solid #eee", 
+            padding: "20px", 
+            boxShadow: "0 10px 20px rgba(0,0,0,0.05)", 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "15px", 
+            zIndex: 999 
+          }}>
+            {navItems.map((item) => (
+              <Link 
+                key={item.name} 
+                to={item.path} 
+                onClick={() => setMobileMenuOpen(false)} 
+                style={{ 
+                  fontSize: "16px", 
+                  fontWeight: "500", 
+                  color: "#1e1e1e", 
+                  textDecoration: "none", 
+                  padding: "10px 0", 
+                  borderBottom: "1px solid #f5f5f5" 
+                }}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
       </div>
     </header>

@@ -182,15 +182,27 @@ ${form.state} - ${form.pincode}
         minHeight: "100vh"
       }}
     >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1fr 400px",
-          gap: "40px"
-        }}
-      >
+
+      {/* --- MAGIC CSS MEDIA QUERY FOR MOBILE STACKING --- */}
+      <style>
+        {`
+          .checkout-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 400px; 
+            gap: 40px; 
+            max-width: 1100px; 
+            margin: 0 auto; 
+          }
+          @media (max-width: 850px) {
+            .checkout-grid { 
+              grid-template-columns: 1fr; 
+              gap: 20px; 
+            }
+          }
+        `}
+      </style>
+
+      <div className="checkout-grid">
 
         {/* LEFT SIDE — FORM */}
         <div

@@ -102,9 +102,12 @@ export default function Products() {
   // Combine them so nothing ever gets hidden!
   const finalCategoryOrder = [...baseCategoryOrder, ...extraCategories];
 
-  /* ---------------- GRID STYLE ---------------- */
+  /* ---------------- GRID STYLE (RESPONSIVE FIX) ---------------- */
   const gridStyle = {
-    display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "28px", alignItems: "stretch"
+    display: "grid", 
+    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", 
+    gap: "28px", 
+    alignItems: "stretch"
   };
 
   const renderGrid = (list) => (
