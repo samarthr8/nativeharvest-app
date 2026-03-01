@@ -42,22 +42,36 @@ const HeroSection = () => {
 
   return (
     <>
-      {/* --- CSS FOR UN-CROPPED MOBILE HERO --- */}
+      {/* --- NEW: CSS FOR UN-CROPPED MOBILE & DESKTOP HERO --- */}
       <style>
         {`
-          .hero-content h1 { font-size: 48px; }
-          .hero-content p { font-size: 18px; }
-          .hero-section { background-size: cover, cover !important; background-position: center center !important; }
+          .hero-content h1 { 
+            font-size: 48px; 
+          }
+          .hero-content p { 
+            font-size: 18px; 
+          }
+          
+          /* DESKTOP: Stop the aggressive cropping */
+          .hero-section { 
+            background-size: cover !important; 
+            background-position: center right !important; 
+            background-color: #1a1a1a !important; 
+          }
           
           @media (max-width: 768px) {
-            .hero-content h1 { font-size: 34px !important; }
-            .hero-content p { font-size: 15px !important; }
+            .hero-content h1 { 
+              font-size: 34px !important; 
+            }
+            .hero-content p { 
+              font-size: 15px !important; 
+            }
             
             /* Fits the image perfectly to the width without cropping */
             .hero-section { 
-              background-size: 100% auto, 100% auto !important; 
-              background-position: top center, top center !important; 
-              align-items: flex-end !important; /* Pushes text down */
+              background-size: 100% auto !important; 
+              background-position: top center !important; 
+              align-items: flex-end !important; 
               padding-bottom: 50px !important;
             } 
           }
@@ -72,14 +86,13 @@ const HeroSection = () => {
           backgroundImage: `
             linear-gradient(
               to bottom,
-            rgba(0,0,0,0.1),
-            rgba(0,0,0,0.85)
+              rgba(0,0,0,0.1),
+              rgba(0,0,0,0.85)
             ),
             url(${slide.image})
           `,
 
-          backgroundRepeat: "no-repeat, no-repeat",
-
+          backgroundRepeat: "no-repeat",
           display: "flex",
           alignItems: "center",
           transition: "background-image 0.6s ease",
@@ -405,6 +418,7 @@ const Newsletter = () => {
             </button>
           </form>
 
+          {/* ✅ MESSAGE GOES HERE */}
           {message && (
             <p style={{ marginTop: "10px", fontSize: "14px" }}>
               {message}

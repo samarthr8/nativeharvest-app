@@ -10,6 +10,8 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
+  
+  // --- NEW: Mobile Menu State ---
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
 
   const closeTimeoutRef = useRef(null);
@@ -30,16 +32,19 @@ export default function Header() {
   /* ---------------- HOVER HANDLERS ---------------- */
 
   const handleMouseEnter = () => {
+
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
+
     setShowMega(true);
   };
 
   const handleMouseLeave = () => {
+
     closeTimeoutRef.current = setTimeout(() => {
       setShowMega(false);
-    }, 200); 
+    }, 200); // 200ms buffer prevents flicker
   };
 
   const navItems = [
@@ -68,40 +73,79 @@ export default function Header() {
           : "none"
       }}
     >
-      {/* --- CSS FOR PERFECT MOBILE ALIGNMENT --- */}
+      {/* --- NEW: THE MAGIC GRID FIX --- */}
       <style>
         {`
-          .header-left, .header-right { flex: 1; display: flex; align-items: center; }
-          .header-right { justify-content: flex-end; gap: 32px; }
-          .desktop-nav { display: flex; gap: 32px; align-items: center; }
-          .mobile-hamburger { display: none; }
-          .brand-text { display: flex; flex-direction: column; }
+          .header-grid { 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr; 
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+          }
+          
+          .header-left { 
+            justify-self: start; 
+            display: flex; 
+            align-items: center; 
+          }
+          
+          .center-logo { 
+            justify-self: center; 
+            display: flex; 
+            align-items: center; 
+          }
+          
+          .header-right { 
+            justify-self: end; 
+            display: flex; 
+            align-items: center; 
+            gap: 32px; 
+          }
+          
+          .desktop-nav { 
+            display: flex; 
+            gap: 32px; 
+            align-items: center; 
+          }
+          
+          .mobile-hamburger { 
+            display: none; 
+          }
+          
+          .brand-text { 
+            display: flex; 
+            flex-direction: column; 
+          }
           
           @media (max-width: 850px) {
-            .desktop-nav { display: none !important; }
-            .mobile-hamburger { display: block !important; cursor: pointer; }
-            .brand-text { display: none !important; }
-            .header-right { gap: 15px !important; } 
+            .header-grid { 
+              grid-template-columns: auto 1fr auto; 
+              gap: 15px; 
+            }
+            .desktop-nav { 
+              display: none !important; 
+            }
+            .mobile-hamburger { 
+              display: block !important; 
+              cursor: pointer; 
+            }
+            .brand-text { 
+              display: none !important; 
+            }
+            .center-logo { 
+              justify-self: center; 
+            }
           }
         `}
       </style>
 
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "0 20px",
-          width: "100%",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          position: "relative"
-        }}
-      >
+      <div className="header-grid">
 
         {/* ================= LEFT ZONE ================= */}
         <div className="header-left">
-          {/* BRAND TEXT (Desktop Only) */}
           <Link
             to="/"
             className="brand-text"
@@ -129,12 +173,22 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* HAMBURGER ICON (Mobile Only) */}
+          {/* HAMBURGER ICON (Visible on Mobile only) */}
           <div 
             className="mobile-hamburger" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--green-dark)", marginTop: "6px" }}>
+            <svg 
+              width="28" 
+              height="28" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              style={{ color: "var(--green-dark)", marginTop: "6px" }}
+            >
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -143,27 +197,27 @@ export default function Header() {
         </div>
 
         {/* ================= CENTER ZONE ================= */}
-        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center" }}>
-          <Link to="/">
-            <img
-              src={logo}
-              alt="NativeHarvest Logo"
-              style={{
-                height: "70px",
-                width: "auto",
-                transition: "0.3s ease",
-                cursor: "pointer"
-              }}
-            />
-          </Link>
-        </div>
+        <Link
+          to="/"
+          className="center-logo"
+        >
+          <img
+            src={logo}
+            alt="NativeHarvest Logo"
+            style={{
+              height: "70px",
+              width: "auto",
+              transition: "0.3s ease",
+              cursor: "pointer"
+            }}
+          />
+        </Link>
 
         {/* ================= RIGHT ZONE ================= */}
         <div className="header-right">
-          
-          {/* NAVIGATION LINKS (Desktop Only) */}
           <nav className="desktop-nav">
             {navItems.map((item) => {
+
               const isActive = location.pathname === item.path;
 
               if (item.mega) {
@@ -179,8 +233,11 @@ export default function Header() {
                       style={{
                         fontSize: "15px",
                         fontWeight: "500",
-                        color: isActive ? "var(--green-dark)" : "#1e1e1e",
+                        color: isActive
+                          ? "var(--green-dark)"
+                          : "#1e1e1e",
                         textDecoration: "none",
+                        position: "relative",
                         paddingBottom: "6px"
                       }}
                     >
@@ -193,13 +250,14 @@ export default function Header() {
                         onMouseLeave={handleMouseLeave}
                         style={{
                           position: "absolute",
-                          top: "35px",
+                          top: "35px", 
                           left: "-100px",
                           width: "400px",
                           background: "white",
                           padding: "30px",
                           borderRadius: "16px",
-                          boxShadow: "0 15px 40px rgba(0,0,0,0.08)",
+                          boxShadow:
+                            "0 15px 40px rgba(0,0,0,0.08)",
                           display: "grid",
                           gap: "10px",
                           zIndex: 999
@@ -223,7 +281,9 @@ export default function Header() {
                   style={{
                     fontSize: "15px",
                     fontWeight: "500",
-                    color: isActive ? "var(--green-dark)" : "#1e1e1e",
+                    color: isActive
+                      ? "var(--green-dark)"
+                      : "#1e1e1e",
                     textDecoration: "none"
                   }}
                 >
@@ -233,7 +293,7 @@ export default function Header() {
             })}
           </nav>
 
-          {/* CART (Always Visible) */}
+          {/* CART */}
           <Link
             to="/cart"
             style={{
@@ -279,24 +339,27 @@ export default function Header() {
               </span>
             )}
           </Link>
+
         </div>
 
-        {/* MOBILE DROPDOWN MENU */}
+        {/* --- NEW: MOBILE DROPDOWN MENU --- */}
         {mobileMenuOpen && (
-          <div style={{ 
-            position: "absolute", 
-            top: "75px", 
-            left: 0, 
-            width: "100%", 
-            background: "white", 
-            borderTop: "1px solid #eee", 
-            padding: "20px", 
-            boxShadow: "0 10px 20px rgba(0,0,0,0.05)", 
-            display: "flex", 
-            flexDirection: "column", 
-            gap: "15px", 
-            zIndex: 999 
-          }}>
+          <div 
+            style={{ 
+              position: "absolute", 
+              top: "75px", 
+              left: 0, 
+              width: "100%", 
+              background: "white", 
+              borderTop: "1px solid #eee", 
+              padding: "20px", 
+              boxShadow: "0 10px 20px rgba(0,0,0,0.05)", 
+              display: "flex", 
+              flexDirection: "column", 
+              gap: "15px", 
+              zIndex: 999 
+            }}
+          >
             {navItems.map((item) => (
               <Link 
                 key={item.name} 
