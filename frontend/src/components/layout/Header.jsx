@@ -42,12 +42,11 @@ export default function Header() {
     }, 200); 
   };
 
-  // --- NEW: Added "Track Order" to the navigation array ---
+  // --- FIXED: Track Order removed from Header ---
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products", mega: true },
     { name: "About", path: "/about" },
-    { name: "Track Order", path: "/track" }, 
     { name: "Contact", path: "/contact" }
   ];
 

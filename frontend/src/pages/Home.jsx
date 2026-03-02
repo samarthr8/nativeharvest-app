@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
    HERO SLIDER (REFINED PROPORTIONS)
 ---------------------------------- */
 
+// --- FIXED: Removed the 3rd Unsplash image ---
 const slides = [
   {
     image:
@@ -18,12 +19,6 @@ const slides = [
       "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/1.jpg",
     heading: "Authentic Traditional Pickles.",
     sub: "Sun cured. Spice balanced. Naturally preserved."
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1590080875515-8d3a8d47baf1",
-    heading: "Pure Cold Pressed Oils.",
-    sub: "Farm sourced. Traditional extraction. No shortcuts."
   }
 ];
 
@@ -54,14 +49,13 @@ const HeroSection = () => {
           .hero-section { 
             background-size: cover !important; 
             background-position: center center !important; 
-            min-height: 70vh; 
+            min-height: 85vh; 
             padding: 100px 0; 
           }
           
-          /* --- THE TEXT COMPACTION FIX FOR MOBILE --- */
           @media (max-width: 768px) {
             .hero-section { 
-              min-height: 55vh !important; /* Shorter container = less image cropping */
+              min-height: 55vh !important; 
               padding: 50px 0 !important;
             } 
             
@@ -72,22 +66,22 @@ const HeroSection = () => {
             
             .hero-content p { 
               font-size: 15px !important; 
-              margin-top: 0 !important; /* Removes gap above text */
-              line-height: 1.4 !important; /* Tightens the text stacking */
+              margin-top: 0 !important; 
+              line-height: 1.4 !important; 
             }
             
             .hero-buttons {
-              margin-top: 20px !important; /* Shrinks gap above buttons */
-              gap: 12px !important; /* Shrinks gap between buttons */
+              margin-top: 20px !important; 
+              gap: 12px !important; 
             }
             
             .hero-buttons a {
-              padding: 10px 20px !important; /* Makes buttons slightly smaller */
+              padding: 10px 20px !important; 
               font-size: 14px !important;
             }
             
             .hero-dots {
-              margin-top: 25px !important; /* Shrinks gap above dots */
+              margin-top: 25px !important; 
             }
           }
         `}
@@ -166,7 +160,6 @@ const HeroSection = () => {
             </Link>
           </div>
 
-          {/* Slider Dots */}
           <div
             className="hero-dots"
             style={{

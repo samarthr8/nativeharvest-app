@@ -22,7 +22,7 @@ const Privacy = () => {
         <div style={{ lineHeight: "1.7", fontSize: "15px", color: "#444", display: "flex", flexDirection: "column", gap: "20px" }}>
           
           <p>
-            At NativeHarvest India LLP, we value your trust and respect your privacy. This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from our website.
+            At NativeHarvest India, we value your trust and respect your privacy. This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from our website.
           </p>
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>1. Information We Collect</h3>
@@ -47,7 +47,7 @@ const Privacy = () => {
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>5. Contact Us</h3>
           <p>
-            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by email at <strong>nativeharvestindia@gmail.com</strong> or by mail at NativeHarvest India LLP, Chhatarpur, Madhya Pradesh, India.
+            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by email at <strong>nativeharvestindia@gmail.com</strong> or by mail at NativeHarvest India, Madhya Pradesh, India.
           </p>
 
         </div>

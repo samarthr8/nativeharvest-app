@@ -22,12 +22,12 @@ const Terms = () => {
         <div style={{ lineHeight: "1.7", fontSize: "15px", color: "#444", display: "flex", flexDirection: "column", gap: "20px" }}>
           
           <p>
-            Welcome to NativeHarvest. These terms and conditions outline the rules and regulations for the use of the NativeHarvest India LLP website. By accessing this website, we assume you accept these terms and conditions in full. Do not continue to use NativeHarvest if you do not accept all of the terms and conditions stated on this page.
+            Welcome to NativeHarvest. These terms and conditions outline the rules and regulations for the use of the NativeHarvest India website. By accessing this website, we assume you accept these terms and conditions in full. Do not continue to use NativeHarvest if you do not accept all of the terms and conditions stated on this page.
           </p>
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>1. General Provisons</h3>
           <p>
-            The website is operated by NativeHarvest India LLP, registered and operating out of Chhatarpur, Madhya Pradesh, India. Throughout the site, the terms "we", "us" and "our" refer to NativeHarvest. We offer this website, including all information, tools, and services available to you, the user, conditioned upon your acceptance of all terms stated here.
+            The website is operated by NativeHarvest India, registered and operating out of Madhya Pradesh, India. Throughout the site, the terms "we", "us" and "our" refer to NativeHarvest. We offer this website, including all information, tools, and services available to you, the user, conditioned upon your acceptance of all terms stated here.
           </p>
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>2. Products and Pricing</h3>
@@ -37,7 +37,7 @@ const Terms = () => {
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>3. Shipping and Delivery</h3>
           <p>
-            We process orders within 1-2 business days. Delivery timelines (typically 5-7 days) are estimates provided by our courier partners. NativeHarvest India LLP is not liable for delays caused by extreme weather conditions, strikes, or remote delivery locations. Free shipping is provided on orders meeting the minimum cart value as advertised, calculated prior to coupon applications.
+            We process orders within 1-2 business days. Delivery timelines (typically 5-7 days) are estimates provided by our courier partners. NativeHarvest India is not liable for delays caused by extreme weather conditions, strikes, or remote delivery locations. Free shipping is provided on orders meeting the minimum cart value as advertised, calculated prior to coupon applications.
           </p>
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>4. Returns and Cancellations</h3>
@@ -47,7 +47,7 @@ const Terms = () => {
 
           <h3 style={{ color: "#1e1e1e", marginTop: "10px" }}>5. Governing Law</h3>
           <p>
-            These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of India. Any disputes arising shall be subject to the exclusive jurisdiction of the courts in Chhatarpur, Madhya Pradesh.
+            These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of India. Any disputes arising shall be subject to the exclusive jurisdiction of the courts in Madhya Pradesh.
           </p>
 
         </div>
