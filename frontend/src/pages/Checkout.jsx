@@ -120,7 +120,7 @@ ${form.state} - ${form.pincode}
           state: form.state,
           pincode: form.pincode,
           address: combinedAddress,
-          coupon_code: appliedCoupon, // <--- New: Pass the coupon code to the backend
+          coupon_code: appliedCoupon,
           items: cart.map(item => ({
             slug: item.slug,
             qty: item.qty,
@@ -138,6 +138,7 @@ ${form.state} - ${form.pincode}
         return;
       }
 
+      // We still clear cart and navigate to the next screen
       clearCart();
       navigate(`/order-success/${data.order_id}`);
 
@@ -273,6 +274,7 @@ ${form.state} - ${form.pincode}
             onChange={handleChange}
           />
 
+          {/* --- CHANGED: Button text now explicitly tells them to pay next --- */}
           <button
             onClick={placeOrder}
             disabled={loading || cart.length === 0}
@@ -280,8 +282,13 @@ ${form.state} - ${form.pincode}
             onMouseOver={(e)=>glow(e,true)}
             onMouseOut={(e)=>glow(e,false)}
           >
-            {loading ? "Placing Order..." : `Place Order • ₹${finalTotal}`}
+            {loading ? "Processing..." : `Proceed to Payment • ₹${finalTotal}`}
           </button>
+          
+          {/* --- ADDED: Trust subtext to reinforce expectation --- */}
+          <div style={{ textAlign: "center", marginTop: "12px", fontSize: "12px", color: "#666" }}>
+            🔒 You will be redirected to securely complete your payment.
+          </div>
 
         </div>
 
@@ -395,14 +402,6 @@ ${form.state} - ${form.pincode}
             <span>Total</span>
             <span>₹{finalTotal}</span>
           </div>
-
-          <p style={{
-            marginTop: "20px",
-            fontSize: "12px",
-            opacity: 0.6
-          }}>
-            Secure checkout powered by NativeHarvest.
-          </p>
 
         </div>
 

@@ -94,12 +94,32 @@ const OrderSuccess = () => {
         textAlign: "center"
       }}>
 
-        <h2 style={{ color: "#2f6f4e", marginBottom: "10px" }}>
-          Order Created 🎉
+        {/* --- CHANGED: Dynamic Headline based on Payment Status --- */}
+        <h2 style={{ 
+          color: status === "PAID" ? "#2f6f4e" : "#e67e22", 
+          marginBottom: "10px" 
+        }}>
+          {status === "PAID" ? "Order Confirmed 🎉" : "Almost There! 💳"}
         </h2>
 
         <p style={{ opacity: 0.7 }}>Your Order ID</p>
         <h3 style={{ marginBottom: "25px" }}>{orderId}</h3>
+
+        {/* --- ADDED: Clear Warning Box to force action --- */}
+        {status === "PENDING" && !paymentStarted && (
+          <div style={{ 
+            background: "#fff3cd", 
+            color: "#856404", 
+            padding: "15px", 
+            borderRadius: "8px", 
+            marginBottom: "25px", 
+            fontSize: "14px", 
+            fontWeight: "500",
+            border: "1px solid #ffeeba"
+          }}>
+            Your items are reserved. Please complete your payment to finalize your order.
+          </div>
+        )}
 
         {status === "PENDING" && !paymentStarted && (
           <button
@@ -111,7 +131,10 @@ const OrderSuccess = () => {
               padding: "12px 24px",
               borderRadius: "8px",
               cursor: "pointer",
-              fontWeight: "500"
+              fontWeight: "500",
+              fontSize: "16px",
+              width: "100%",
+              boxShadow: "0 4px 12px rgba(47,111,78,0.3)" /* Added a slight glow to draw the eye */
             }}
           >
             Complete Payment

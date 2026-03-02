@@ -159,10 +159,10 @@ const Cart = () => {
           }}
         >
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "15px" }}>
 
             <div>
-              <h4 style={{ margin: "0 0 8px 0" }}>{item.name}</h4>
+              <h4 style={{ margin: "0 0 8px 0", fontSize: "16px" }}>{item.name}</h4>
 
               {item.variantKey && (
                 <span
@@ -180,50 +180,79 @@ const Cart = () => {
                 </span>
               )}
 
-              <div style={{ marginTop: "5px", fontWeight: "500" }}>
+              <div style={{ marginTop: "5px", fontWeight: "600", color: "#444" }}>
                 ₹{item.price} each
               </div>
             </div>
 
-            <div style={{ textAlign: "right" }}>
-              <div style={{ marginBottom: "8px" }}>
+            <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+              <div style={{ marginBottom: "12px", fontWeight: "700", fontSize: "16px" }}>
                 Subtotal: ₹{item.price * item.qty}
               </div>
 
-              <div>
-                <input
-                  type="number"
-                  min="1"
-                  max={item.maxStock} // Enforce HTML limit
-                  value={item.qty}
-                  onChange={(e) =>
-                    updateQty(
-                      item.slug,
-                      item.variantKey,
-                      Number(e.target.value)
-                    )
-                  }
-                  style={{
-                    width: "70px",
-                    padding: "6px",
-                    borderRadius: "6px",
-                    border: "1px solid #ddd",
-                    marginRight: "10px"
-                  }}
-                />
+              {/* --- NEW: TOUCH-FRIENDLY QUANTITY STEPPER & REMOVE BUTTON --- */}
+              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                
+                {/* Stepper Container */}
+                <div style={{ 
+                  display: "flex", 
+                  border: "1px solid #ddd", 
+                  borderRadius: "6px", 
+                  overflow: "hidden" 
+                }}>
+                  <button 
+                    onClick={() => updateQty(item.slug, item.variantKey, item.qty - 1)}
+                    disabled={item.qty <= 1}
+                    style={{ 
+                      padding: "8px 14px", background: "#f9f9f9", border: "none", 
+                      cursor: item.qty <= 1 ? "not-allowed" : "pointer", fontSize: "16px", fontWeight: "bold", color: "#333" 
+                    }}
+                  >
+                    −
+                  </button>
+                  
+                  <div style={{ 
+                    padding: "8px 12px", background: "white", minWidth: "35px", 
+                    textAlign: "center", fontSize: "15px", fontWeight: "600", 
+                    borderLeft: "1px solid #ddd", borderRight: "1px solid #ddd",
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                  }}>
+                    {item.qty}
+                  </div>
+                  
+                  <button 
+                    onClick={() => updateQty(item.slug, item.variantKey, item.qty + 1)}
+                    disabled={item.qty >= item.maxStock}
+                    style={{ 
+                      padding: "8px 14px", background: "#f9f9f9", border: "none", 
+                      cursor: item.qty >= item.maxStock ? "not-allowed" : "pointer", fontSize: "16px", fontWeight: "bold", color: "#333" 
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
 
+                {/* Improved Touch Target for Remove Button */}
                 <button
-                  onClick={() =>
-                    removeFromCart(item.slug, item.variantKey)
-                  }
+                  onClick={() => removeFromCart(item.slug, item.variantKey)}
                   style={{
-                    background: "transparent",
-                    border: "none",
+                    background: "#ffeeee",
+                    border: "1px solid #ffcccc",
                     color: "#c0392b",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
                     cursor: "pointer",
-                    fontWeight: "500"
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px"
                   }}
                 >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
                   Remove
                 </button>
               </div>
@@ -233,8 +262,11 @@ const Cart = () => {
                 <div style={{ 
                   fontSize: "12px", 
                   color: "#d9534f", 
-                  marginTop: "6px",
-                  fontWeight: "500" 
+                  marginTop: "8px",
+                  fontWeight: "600",
+                  background: "#fdf1f0",
+                  padding: "4px 8px",
+                  borderRadius: "4px"
                 }}>
                   Limit reached ({item.maxStock} available)
                 </div>
