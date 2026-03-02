@@ -113,7 +113,7 @@ const Footer = () => {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <p style={{ opacity: 0.9 }}>
-              Chhatarpur, Madhya Pradesh
+              Madhya Pradesh
             </p>
 
             {/* Premium Email */}

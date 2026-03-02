@@ -18,7 +18,7 @@ const FAQ = () => {
     },
     {
       question: "How long does shipping take?",
-      answer: "We ship our small batches directly from our facility in Chhatarpur, Madhya Pradesh. Deliveries typically take 5-7 business days depending on your location in India. You can track your package anytime using the 'Track Order' link on our website."
+      answer: "We ship our small batches directly from our facility in Madhya Pradesh. Deliveries typically take 5-7 business days depending on your location in India. You can track your package anytime using the 'Track Order' link on our website."
     },
     {
       question: "Do you accept returns or exchanges?",
