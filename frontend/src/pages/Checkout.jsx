@@ -36,7 +36,10 @@ const Checkout = () => {
   );
 
   const discountedSubtotal = Math.max(0, subtotal - discountAmount);
-  const shippingCost = (discountedSubtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0) ? 0 : SHIPPING_FEE;
+  
+  // --- FIXED: Shipping cost is now strictly evaluated against the ORIGINAL subtotal ---
+  const shippingCost = (subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0) ? 0 : SHIPPING_FEE;
+  
   const finalTotal = subtotal === 0 ? 0 : discountedSubtotal + shippingCost;
 
   const handleChange = (e) => {
@@ -379,14 +382,14 @@ ${form.state} - ${form.pincode}
               justifyContent: "space-between",
               fontWeight: "600",
               fontSize: "18px",
-              marginBottom: "25px" /* Added bottom margin to push the button down */
+              marginBottom: "25px" 
             }}
           >
             <span>Total</span>
             <span>₹{finalTotal}</span>
           </div>
 
-          {/* --- FIXED: MOVED BUTTON TO THE BOTTOM OF THE ORDER SUMMARY --- */}
+          {/* BUTTON AT THE BOTTOM OF ORDER SUMMARY */}
           <button
             onClick={placeOrder}
             disabled={loading || cart.length === 0}

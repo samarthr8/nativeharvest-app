@@ -156,8 +156,9 @@ router.post("/", async (req, res) => {
     const SHIPPING_FEE = 80;
     const FREE_SHIPPING_THRESHOLD = 999;    
     
-    // Free shipping evaluates the mathematically discounted subtotal
-    const shippingCost = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    // --- FIXED: Free shipping evaluates against the original subtotal ---
+    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    
     const finalTotal = discountedSubtotal + shippingCost;
 
     // -----------------------------
