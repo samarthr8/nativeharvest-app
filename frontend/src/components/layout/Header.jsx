@@ -10,8 +10,6 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
-  
-  // --- NEW: Mobile Menu State ---
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
 
   const closeTimeoutRef = useRef(null);
@@ -32,25 +30,24 @@ export default function Header() {
   /* ---------------- HOVER HANDLERS ---------------- */
 
   const handleMouseEnter = () => {
-
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
-
     setShowMega(true);
   };
 
   const handleMouseLeave = () => {
-
     closeTimeoutRef.current = setTimeout(() => {
       setShowMega(false);
-    }, 200); // 200ms buffer prevents flicker
+    }, 200); 
   };
 
+  // --- NEW: Added "Track Order" to the navigation array ---
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products", mega: true },
     { name: "About", path: "/about" },
+    { name: "Track Order", path: "/track" }, 
     { name: "Contact", path: "/contact" }
   ];
 
@@ -73,7 +70,6 @@ export default function Header() {
           : "none"
       }}
     >
-      {/* --- NEW: THE MAGIC GRID FIX --- */}
       <style>
         {`
           .header-grid { 
@@ -173,7 +169,6 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* HAMBURGER ICON (Visible on Mobile only) */}
           <div 
             className="mobile-hamburger" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -197,10 +192,7 @@ export default function Header() {
         </div>
 
         {/* ================= CENTER ZONE ================= */}
-        <Link
-          to="/"
-          className="center-logo"
-        >
+        <Link to="/" className="center-logo">
           <img
             src={logo}
             alt="NativeHarvest Logo"
@@ -233,9 +225,7 @@ export default function Header() {
                       style={{
                         fontSize: "15px",
                         fontWeight: "500",
-                        color: isActive
-                          ? "var(--green-dark)"
-                          : "#1e1e1e",
+                        color: isActive ? "var(--green-dark)" : "#1e1e1e",
                         textDecoration: "none",
                         position: "relative",
                         paddingBottom: "6px"
@@ -256,8 +246,7 @@ export default function Header() {
                           background: "white",
                           padding: "30px",
                           borderRadius: "16px",
-                          boxShadow:
-                            "0 15px 40px rgba(0,0,0,0.08)",
+                          boxShadow: "0 15px 40px rgba(0,0,0,0.08)",
                           display: "grid",
                           gap: "10px",
                           zIndex: 999
@@ -281,9 +270,7 @@ export default function Header() {
                   style={{
                     fontSize: "15px",
                     fontWeight: "500",
-                    color: isActive
-                      ? "var(--green-dark)"
-                      : "#1e1e1e",
+                    color: isActive ? "var(--green-dark)" : "#1e1e1e",
                     textDecoration: "none"
                   }}
                 >
@@ -293,7 +280,6 @@ export default function Header() {
             })}
           </nav>
 
-          {/* CART */}
           <Link
             to="/cart"
             style={{
@@ -342,7 +328,7 @@ export default function Header() {
 
         </div>
 
-        {/* --- NEW: MOBILE DROPDOWN MENU --- */}
+        {/* MOBILE DROPDOWN MENU */}
         {mobileMenuOpen && (
           <div 
             style={{ 

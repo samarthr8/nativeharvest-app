@@ -69,31 +69,41 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* QUICK LINKS */}
+        {/* QUICK LINKS (Track Order kept here for balance) */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Quick Links</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <Link to="/" style={{ color: "white", opacity: 0.9 }}>
+            <Link to="/" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               Home
             </Link>
-            <Link to="/products" style={{ color: "white", opacity: 0.9 }}>
+            <Link to="/products" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               Products
             </Link>
-            <Link to="/about" style={{ color: "white", opacity: 0.9 }}>
+            <Link to="/about" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               About
             </Link>
-            <Link to="/contact" style={{ color: "white", opacity: 0.9 }}>
+            <Link to="/track" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Track Order
+            </Link>
+            <Link to="/contact" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               Contact
             </Link>
           </div>
         </div>
 
-        {/* POLICIES */}
+        {/* POLICIES (FAQs moved here for balance) */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Policies</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <p style={{ opacity: 0.9 }}>Privacy Policy</p>
-            <p style={{ opacity: 0.9 }}>Terms & Conditions</p>
+            <Link to="/privacy" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Privacy Policy
+            </Link>
+            <Link to="/terms" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Terms & Conditions
+            </Link>
+            <Link to="/faq" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              FAQs
+            </Link>
           </div>
         </div>
 
