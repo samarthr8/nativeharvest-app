@@ -42,38 +42,53 @@ const HeroSection = () => {
 
   return (
     <>
-      {/* --- NEW: CSS FOR UN-CROPPED MOBILE & DESKTOP HERO --- */}
       <style>
         {`
           .hero-content h1 { 
-            font-size: 48px; 
+            font-size: 52px; 
           }
           .hero-content p { 
             font-size: 18px; 
           }
           
-          /* DESKTOP: Stop the aggressive cropping */
           .hero-section { 
             background-size: cover !important; 
-            background-position: center right !important; 
-            background-color: #1a1a1a !important; 
+            background-position: center center !important; 
+            min-height: 70vh; 
+            padding: 100px 0; 
           }
           
+          /* --- THE TEXT COMPACTION FIX FOR MOBILE --- */
           @media (max-width: 768px) {
+            .hero-section { 
+              min-height: 55vh !important; /* Shorter container = less image cropping */
+              padding: 50px 0 !important;
+            } 
+            
             .hero-content h1 { 
-              font-size: 34px !important; 
-            }
-            .hero-content p { 
-              font-size: 15px !important; 
+              font-size: 36px !important; 
+              margin-bottom: 5px !important;
             }
             
-            /* Fits the image perfectly to the width without cropping */
-            .hero-section { 
-              background-size: 100% auto !important; 
-              background-position: top center !important; 
-              align-items: flex-end !important; 
-              padding-bottom: 50px !important;
-            } 
+            .hero-content p { 
+              font-size: 15px !important; 
+              margin-top: 0 !important; /* Removes gap above text */
+              line-height: 1.4 !important; /* Tightens the text stacking */
+            }
+            
+            .hero-buttons {
+              margin-top: 20px !important; /* Shrinks gap above buttons */
+              gap: 12px !important; /* Shrinks gap between buttons */
+            }
+            
+            .hero-buttons a {
+              padding: 10px 20px !important; /* Makes buttons slightly smaller */
+              font-size: 14px !important;
+            }
+            
+            .hero-dots {
+              margin-top: 25px !important; /* Shrinks gap above dots */
+            }
           }
         `}
       </style>
@@ -81,17 +96,14 @@ const HeroSection = () => {
       <section
         className="hero hero-section"
         style={{
-          height: "clamp(500px, 60vh, 700px)",
-
           backgroundImage: `
             linear-gradient(
-              to bottom,
-              rgba(0,0,0,0.1),
-              rgba(0,0,0,0.85)
+              to right,
+              rgba(0,0,0,0.65),
+              rgba(0,0,0,0.2)
             ),
             url(${slide.image})
           `,
-
           backgroundRepeat: "no-repeat",
           display: "flex",
           alignItems: "center",
@@ -128,8 +140,9 @@ const HeroSection = () => {
           </p>
 
           <div
+            className="hero-buttons"
             style={{
-              marginTop: "28px",
+              marginTop: "35px",
               display: "flex",
               gap: "18px",
               flexWrap: "wrap"
@@ -155,8 +168,9 @@ const HeroSection = () => {
 
           {/* Slider Dots */}
           <div
+            className="hero-dots"
             style={{
-              marginTop: "30px",
+              marginTop: "40px",
               display: "flex",
               gap: "10px"
             }}
@@ -166,14 +180,15 @@ const HeroSection = () => {
                 key={i}
                 onClick={() => setCurrent(i)}
                 style={{
-                  width: "9px",
-                  height: "9px",
+                  width: "10px",
+                  height: "10px",
                   borderRadius: "50%",
                   background:
                     i === current
                       ? "white"
-                      : "rgba(255,255,255,0.5)",
-                  cursor: "pointer"
+                      : "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  transition: "0.3s"
                 }}
               />
             ))}
@@ -418,7 +433,6 @@ const Newsletter = () => {
             </button>
           </form>
 
-          {/* ✅ MESSAGE GOES HERE */}
           {message && (
             <p style={{ marginTop: "10px", fontSize: "14px" }}>
               {message}
