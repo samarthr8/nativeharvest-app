@@ -19,7 +19,7 @@ const Checkout = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // --- NEW: COUPON STATES ---
+  // --- COUPON STATES ---
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -57,7 +57,7 @@ const Checkout = () => {
     return true;
   };
 
-  // --- NEW: APPLY COUPON ---
+  // --- APPLY COUPON ---
   const applyCoupon = async () => {
     if (!couponInput) return;
     setIsApplying(true);
@@ -138,7 +138,6 @@ ${form.state} - ${form.pincode}
         return;
       }
 
-      // We still clear cart and navigate to the next screen
       clearCart();
       navigate(`/order-success/${data.order_id}`);
 
@@ -184,7 +183,6 @@ ${form.state} - ${form.pincode}
       }}
     >
 
-      {/* --- MAGIC CSS MEDIA QUERY FOR MOBILE STACKING --- */}
       <style>
         {`
           .checkout-grid { 
@@ -205,7 +203,7 @@ ${form.state} - ${form.pincode}
 
       <div className="checkout-grid">
 
-        {/* LEFT SIDE — FORM */}
+        {/* ================= LEFT SIDE — FORM ================= */}
         <div
           style={{
             background: "white",
@@ -274,25 +272,9 @@ ${form.state} - ${form.pincode}
             onChange={handleChange}
           />
 
-          {/* --- CHANGED: Button text now explicitly tells them to pay next --- */}
-          <button
-            onClick={placeOrder}
-            disabled={loading || cart.length === 0}
-            style={greenBtn}
-            onMouseOver={(e)=>glow(e,true)}
-            onMouseOut={(e)=>glow(e,false)}
-          >
-            {loading ? "Processing..." : `Proceed to Payment • ₹${finalTotal}`}
-          </button>
-          
-          {/* --- ADDED: Trust subtext to reinforce expectation --- */}
-          <div style={{ textAlign: "center", marginTop: "12px", fontSize: "12px", color: "#666" }}>
-            🔒 You will be redirected to securely complete your payment.
-          </div>
-
         </div>
 
-        {/* RIGHT SIDE — ORDER SUMMARY */}
+        {/* ================= RIGHT SIDE — ORDER SUMMARY ================= */}
         <div
           style={{
             background: "white",
@@ -332,7 +314,7 @@ ${form.state} - ${form.pincode}
 
           <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
 
-          {/* --- NEW: COUPON INPUT SECTION --- */}
+          {/* COUPON INPUT SECTION */}
           <div style={{ marginBottom: "15px" }}>
             <div style={{ display: "flex", gap: "10px" }}>
               <input 
@@ -369,7 +351,7 @@ ${form.state} - ${form.pincode}
 
           <hr style={{ margin: "15px 0", borderColor: "#eee" }} />
 
-          {/* --- SUBTOTAL & DISCOUNT & DELIVERY --- */}
+          {/* SUBTOTAL & DISCOUNT & DELIVERY */}
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
             <span>Subtotal</span>
             <span>₹{subtotal}</span>
@@ -396,11 +378,27 @@ ${form.state} - ${form.pincode}
               display: "flex",
               justifyContent: "space-between",
               fontWeight: "600",
-              fontSize: "18px"
+              fontSize: "18px",
+              marginBottom: "25px" /* Added bottom margin to push the button down */
             }}
           >
             <span>Total</span>
             <span>₹{finalTotal}</span>
+          </div>
+
+          {/* --- FIXED: MOVED BUTTON TO THE BOTTOM OF THE ORDER SUMMARY --- */}
+          <button
+            onClick={placeOrder}
+            disabled={loading || cart.length === 0}
+            style={greenBtn}
+            onMouseOver={(e)=>glow(e,true)}
+            onMouseOut={(e)=>glow(e,false)}
+          >
+            {loading ? "Processing..." : `Proceed to Payment • ₹${finalTotal}`}
+          </button>
+          
+          <div style={{ textAlign: "center", marginTop: "12px", fontSize: "12px", color: "#666" }}>
+            🔒 You will be redirected to securely complete your payment.
           </div>
 
         </div>

@@ -94,7 +94,6 @@ const OrderSuccess = () => {
         textAlign: "center"
       }}>
 
-        {/* --- CHANGED: Dynamic Headline based on Payment Status --- */}
         <h2 style={{ 
           color: status === "PAID" ? "#2f6f4e" : "#e67e22", 
           marginBottom: "10px" 
@@ -102,10 +101,26 @@ const OrderSuccess = () => {
           {status === "PAID" ? "Order Confirmed 🎉" : "Almost There! 💳"}
         </h2>
 
-        <p style={{ opacity: 0.7 }}>Your Order ID</p>
-        <h3 style={{ marginBottom: "25px" }}>{orderId}</h3>
+        <p style={{ opacity: 0.7, marginBottom: "8px" }}>Your Order ID</p>
+        
+        {/* --- FIXED: Classy, uniform Monospace styling for Order ID --- */}
+        <div style={{ marginBottom: "30px" }}>
+          <span style={{
+            fontFamily: "'Courier New', Courier, monospace",
+            fontSize: "20px",
+            fontWeight: "700",
+            letterSpacing: "2px",
+            background: "#f0f8f5",
+            color: "#2f6f4e",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "1px dashed #2f6f4e",
+            display: "inline-block"
+          }}>
+            {orderId}
+          </span>
+        </div>
 
-        {/* --- ADDED: Clear Warning Box to force action --- */}
         {status === "PENDING" && !paymentStarted && (
           <div style={{ 
             background: "#fff3cd", 
@@ -134,7 +149,7 @@ const OrderSuccess = () => {
               fontWeight: "500",
               fontSize: "16px",
               width: "100%",
-              boxShadow: "0 4px 12px rgba(47,111,78,0.3)" /* Added a slight glow to draw the eye */
+              boxShadow: "0 4px 12px rgba(47,111,78,0.3)"
             }}
           >
             Complete Payment
