@@ -2,6 +2,9 @@
   "name": "nativeharvest-backend",
   "version": "1.0.0",
   "main": "src/app.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "start": "node src/app.js",
     "test": "NODE_ENV=test jest --runInBand --ci --coverage"

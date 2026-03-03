@@ -13,6 +13,8 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const { addToCart } = useCart();
 
+  const [shareText, setShareText] = useState("Share"); // For desktop fallback feedback
+
   useEffect(() => {
     api.get(`/products/${slug}`).then(res => {
 
@@ -80,9 +82,33 @@ export default function ProductDetail() {
     addToCart(product, selectedVariant, qty);
   };
 
+  // --- NEW: NATIVE WEB SHARE API ---
+  const handleShare = async () => {
+    const shareData = {
+      title: `${product.name} | NativeHarvest`,
+      text: `Check out ${product.name} at NativeHarvest!`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        // Opens the native iOS/Android sharing drawer
+        await navigator.share(shareData);
+      } else {
+        // Fallback for older browsers / desktop: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        setShareText("Copied!");
+        setTimeout(() => setShareText("Share"), 2000);
+      }
+    } catch (err) {
+      console.error("Error sharing product:", err);
+    }
+  };
+
   return (
     <div className="container" style={{ padding: "50px 0" }}>
 
+      {/* The SEO component now wires up the Open Graph tags for WhatsApp! */}
       <SEO
         title={`${product.name} | NativeHarvest`}
         description={product.description}
@@ -91,8 +117,8 @@ export default function ProductDetail() {
 
       {/* Breadcrumb */}
       <div style={{ marginBottom: "25px", fontSize: "14px", opacity: 0.7 }}>
-        <Link to="/">Home</Link> {" > "}
-        <Link to="/products">Products</Link> {" > "}
+        <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>Home</Link> {" > "}
+        <Link to="/products" style={{ color: "inherit", textDecoration: "none" }}>Products</Link> {" > "}
         {product.name}
       </div>
 
@@ -103,9 +129,8 @@ export default function ProductDetail() {
         alignItems: "start"
       }}>
 
-        {/* LEFT SIDE — IMAGES */}
+        {/* ================= LEFT SIDE — IMAGES ================= */}
         <div>
-
           <div style={{
             position: "relative",
             background: "#f7f7f7",
@@ -161,10 +186,9 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
-
         </div>
 
-        {/* RIGHT SIDE — DETAILS */}
+        {/* ================= RIGHT SIDE — DETAILS ================= */}
         <div>
 
           <h1 style={{
@@ -214,7 +238,8 @@ export default function ProductDetail() {
                         selectedVariant?.weight === variant.weight
                           ? "#f0f8f5"
                           : "white",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      transition: "0.2s ease"
                     }}
                   >
                     {variant.weight}
@@ -237,38 +262,98 @@ export default function ProductDetail() {
                   width: "80px",
                   padding: "8px",
                   borderRadius: "8px",
-                  border: "1px solid #ccc"
+                  border: "1px solid #ccc",
+                  fontSize: "16px"
                 }}
               />
             </div>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            style={{
-              padding: "14px 28px",
-              background: "#2f6f4e",
-              color: "white",
-              border: "none",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontSize: "16px"
-            }}
-          >
-            Add to Cart
-          </button>
+          {/* ACTION BUTTONS: Add to Cart & Share */}
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+            <button
+              onClick={handleAddToCart}
+              style={{
+                flex: "1",
+                minWidth: "200px",
+                padding: "14px 28px",
+                background: "#2f6f4e",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "600",
+                transition: "0.2s ease",
+                boxShadow: "0 4px 12px rgba(47,111,78,0.2)"
+              }}
+              onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
+              onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
+            >
+              Add to Cart
+            </button>
+
+            {/* --- THE NEW SHARE BUTTON --- */}
+            <button
+              onClick={handleShare}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                padding: "14px 24px",
+                background: "white",
+                color: "#2f6f4e",
+                border: "2px solid #2f6f4e",
+                borderRadius: "10px",
+                cursor: "pointer",
+                fontSize: "15px",
+                fontWeight: "600",
+                transition: "0.2s ease"
+              }}
+              onMouseOver={(e) => {
+                e.target.style.background = "#f0f8f5";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.background = "white";
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              {shareText}
+            </button>
+          </div>
 
           <p style={{
-            marginTop: "18px",
+            marginTop: "25px",
             fontSize: "14px",
-            opacity: 0.7
+            opacity: 0.7,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
           }}>
-            🚚 Expected delivery in 5–7 days
+            <span style={{ fontSize: "18px" }}>🚚</span> Expected delivery in 5–7 days
           </p>
 
         </div>
 
       </div>
+
+      <style>
+        {`
+          @media (max-width: 768px) {
+            .container > div:nth-child(2) {
+              grid-template-columns: 1fr !important;
+              gap: 30px !important;
+            }
+          }
+        `}
+      </style>
 
     </div>
   );
@@ -278,11 +363,16 @@ const arrowStyle = (side) => ({
   position: "absolute",
   top: "45%",
   [side]: "15px",
-  background: "rgba(255,255,255,0.7)",
+  background: "rgba(255,255,255,0.85)",
   border: "none",
   borderRadius: "50%",
-  width: "36px",
-  height: "36px",
+  width: "40px",
+  height: "40px",
   cursor: "pointer",
-  fontSize: "20px"
+  fontSize: "24px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+  transition: "0.2s ease"
 });
