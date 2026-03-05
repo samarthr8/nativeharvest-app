@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import AnnouncementBar from "./components/layout/AnnouncementBar";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import WhatsAppWidget from "./components/layout/WhatsAppWidget"; // <-- NEW
 
 /* Public pages */
 import Home from "./pages/Home";
@@ -51,6 +52,7 @@ const App = () => {
         </Routes>
       </div>
 
+      <WhatsAppWidget /> {/* <-- NEW */}
       <Footer />
     </>
   );

@@ -28,5 +28,3 @@ const links = {
   gap: "24px",
   fontWeight: 500
 };
-
-

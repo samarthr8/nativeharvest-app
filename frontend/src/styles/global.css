@@ -204,3 +204,32 @@ img {
     grid-template-columns: repeat(1, 1fr);
   }
 }
+
+/* =========================================
+   SKELETON LOADER ANIMATION
+========================================= */
+.skeleton-box {
+  background: linear-gradient(90deg, #f0f8f5 25%, #e2eee8 50%, #f0f8f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}

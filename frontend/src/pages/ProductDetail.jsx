@@ -55,7 +55,25 @@ export default function ProductDetail() {
     );
   }
 
-  if (!product) return <p className="container">Loading...</p>;
+  // --- NEW: PREMIUM SKELETON LOADER ---
+  if (!product) {
+    return (
+      <div className="container" style={{ padding: "50px 0" }}>
+        <div className="skeleton-box" style={{ width: "200px", height: "20px", marginBottom: "25px" }}></div>
+        <div className="skeleton-grid">
+          {/* Left: Image Skeleton */}
+          <div className="skeleton-box" style={{ height: "420px", borderRadius: "16px" }}></div>
+          {/* Right: Details Skeleton */}
+          <div>
+            <div className="skeleton-box" style={{ height: "40px", width: "80%", marginBottom: "15px" }}></div>
+            <div className="skeleton-box" style={{ height: "30px", width: "30%", marginBottom: "20px" }}></div>
+            <div className="skeleton-box" style={{ height: "100px", width: "100%", marginBottom: "25px" }}></div>
+            <div className="skeleton-box" style={{ height: "50px", width: "50%" }}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const images =
     product.images?.length > 0
@@ -143,6 +161,7 @@ export default function ProductDetail() {
               <img
                 src={images[activeImage]}
                 alt={product.name}
+                loading="lazy" /* --- NEW: LAZY LOADING --- */
                 style={{
                   width: "100%",
                   height: "100%",
@@ -170,6 +189,7 @@ export default function ProductDetail() {
                   key={i}
                   src={img}
                   alt=""
+                  loading="lazy" /* --- NEW: LAZY LOADING --- */
                   onClick={() => setActiveImage(i)}
                   style={{
                     width: "70px",
