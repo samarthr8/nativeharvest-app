@@ -3,6 +3,9 @@ const router = express.Router();
 const db = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 
+/* --- NEW: Import the checkout rate limiter --- */
+const { checkoutLimiter } = require("../middleware/rateLimiter");
+
 /* =========================================
    NEW: VALIDATE COUPON ROUTE
 ========================================= */
@@ -53,8 +56,9 @@ router.post("/validate-coupon", async (req, res) => {
 
 /* =========================================
    MAIN ORDER CREATION ROUTE
+   (Now protected by checkoutLimiter)
 ========================================= */
-router.post("/", async (req, res) => {
+router.post("/", checkoutLimiter, async (req, res) => {
 
   const client = await db.connect();
 
