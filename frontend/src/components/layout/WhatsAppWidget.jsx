@@ -3,7 +3,7 @@ import React from "react";
 export default function WhatsAppWidget() {
   // Replace with your actual NativeHarvest business WhatsApp number 
   // Make sure it includes the country code (91 for India) but NO '+' sign.
-  const phoneNumber = "919407060070"; 
+  const phoneNumber = "919876543210"; 
   
   // The default message that will auto-fill in their WhatsApp text box
   const defaultMessage = encodeURIComponent("Hi NativeHarvest, I have a question about your products!");
