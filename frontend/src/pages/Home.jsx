@@ -462,7 +462,7 @@ const BrandStory = () => (
     >
       <div style={{ position: "relative" }}>
         <img
-          src="https://images.unsplash.com/photo-1596647285149-8c207d578b87?q=80&w=1000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=1000&auto=format&fit=crop"
           alt="NativeHarvest Preparation"
           loading="lazy"
           style={{ 
