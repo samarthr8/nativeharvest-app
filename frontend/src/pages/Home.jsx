@@ -206,7 +206,7 @@ const HeroSection = () => {
 };
 
 /* ----------------------------------
-   PREMIUM TRUST STRIP
+   TRUST STRIP (RESTORED TEXT & ICONS)
 ---------------------------------- */
 
 const TrustHighlights = () => (
@@ -230,19 +230,31 @@ const TrustHighlights = () => (
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        Fair to Farmers
+        {/* Farm Fresh - Plant/Sprout Icon */}
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22v-7l-2-2"/><path d="M12 15l2-2"/><path d="M12 8a4 4 0 0 0-4-4 4 4 0 0 0-4 4c0 2 2 4 4 4h4z"/><path d="M12 8a4 4 0 0 1 4-4 4 4 0 0 1 4 4c0 2-2 4-4 4h-4z"/>
+        </svg>
+        Farm Fresh
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9"/></svg>
-        100% Preservative Free
+        {/* No Preservatives - Leaf Icon */}
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 20A7 7 0 0 1 4 13c0-3.5 3-7 8-11 5 4 8 7.5 8 11a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/>
+        </svg>
+        No Preservatives
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        Traditional Sun-Cured
+        {/* Traditional Methods - Clock Icon */}
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Traditional Methods
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        {/* Pan India Delivery - Truck Icon */}
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
         Pan India Delivery
       </div>
     </div>
@@ -428,7 +440,7 @@ const FeaturedProducts = () => {
 };
 
 /* ----------------------------------
-   BRAND STORY
+   BRAND STORY (NEW AUTHENTIC COPY)
 ---------------------------------- */
 
 const BrandStory = () => (
@@ -451,7 +463,7 @@ const BrandStory = () => (
       <div style={{ position: "relative" }}>
         <img
           src="https://images.unsplash.com/photo-1596647285149-8c207d578b87?q=80&w=1000&auto=format&fit=crop"
-          alt="NativeHarvest Origins"
+          alt="NativeHarvest Preparation"
           loading="lazy"
           style={{ 
             width: "100%", 
@@ -478,7 +490,7 @@ const BrandStory = () => (
               fontSize: "18px" 
             }}
           >
-            Est. 2025
+            Crafted with Care.
           </p>
         </div>
       </div>
@@ -492,7 +504,7 @@ const BrandStory = () => (
             color: "#1e1e1e" 
           }}
         >
-          Rooted in Madhya Pradesh. Brought to your table.
+          Prepared with utmost care, love, and tradition.
         </h2>
         
         <p 
@@ -503,7 +515,7 @@ const BrandStory = () => (
             marginBottom: "20px" 
           }}
         >
-          From the heart of Chhatarpur, NativeHarvest was born out of a shared vision between two friends to rescue ancient recipes and uncompromising quality from the past.
+          Every NativeHarvest product is a labor of love, prepared by the skilled hands of rural women who have mastered these ancestral techniques over generations. We believe that true flavor cannot be rushed by machines.
         </p>
 
         <p 
@@ -514,7 +526,7 @@ const BrandStory = () => (
             marginBottom: "35px" 
           }}
         >
-          We partner directly with rural farmers to source the finest mustard seeds and sun-ripened mangoes, pressing and curing them in small batches. The result? Traditional food that tastes exactly how your grandparents remember it, crafted for the modern pantry.
+          From our sun-cured Mango Pickle, meticulously marinated in cold-pressed oils and pure spices, to our authentic stone-ground Sattu, we rely entirely on farm-fresh raw materials and unhurried, traditional methods. No shortcuts, no artificial additives—just the honest taste of pure, rural tradition.
         </p>
 
         <Link 
@@ -548,7 +560,7 @@ const BrandStory = () => (
 );
 
 /* ----------------------------------
-   NEWSLETTER
+   NEWSLETTER (RESTORED ORIENTATION)
 ---------------------------------- */
 
 const Newsletter = () => {
@@ -574,99 +586,96 @@ const Newsletter = () => {
       style={{ 
         background: "#2f6f4e", 
         color: "white", 
-        padding: "80px 0", 
-        textAlign: "center" 
+        padding: "80px 0" 
       }}
     >
       <div 
         className="container" 
         style={{ 
-          maxWidth: "700px", 
-          margin: "0 auto" 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
+          alignItems: "center", 
+          gap: "40px" 
         }}
       >
-        <h2 style={{ fontSize: "36px", marginBottom: "15px" }}>
-          Join the Harvest
-        </h2>
-        
-        <p 
-          style={{ 
-            fontSize: "18px", 
-            opacity: "0.9", 
-            marginBottom: "40px", 
-            lineHeight: "1.6" 
-          }}
-        >
-          Subscribe to get exclusive access to limited seasonal batches, new traditional recipes, and stories from our farms.
-        </p>
-
-        <form 
-          onSubmit={handleSubscribe} 
-          style={{ 
-            display: "flex", 
-            gap: "10px", 
-            background: "rgba(255,255,255,0.1)", 
-            padding: "8px", 
-            borderRadius: "40px", 
-            border: "1px solid rgba(255,255,255,0.2)" 
-          }}
-        >
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address..."
-            style={{
-              background: "transparent", 
-              border: "none", 
-              outline: "none", 
-              color: "white",
-              padding: "15px 25px", 
-              flex: 1, 
-              fontSize: "16px"
-            }}
-          />
-          <style>
-            {`input::placeholder { color: rgba(255,255,255,0.6); }`}
-          </style>
-          
-          <button 
-            type="submit" 
-            style={{
-              background: "white", 
-              color: "#2f6f4e", 
-              border: "none", 
-              padding: "15px 35px",
-              borderRadius: "30px", 
-              cursor: "pointer", 
-              fontWeight: "bold", 
-              fontSize: "16px",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease"
-            }} 
-            onMouseOver={(e) => { 
-              e.target.style.transform = "scale(1.05)"; 
-              e.target.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)"; 
-            }}
-            onMouseOut={(e) => { 
-              e.target.style.transform = "scale(1)"; 
-              e.target.style.boxShadow = "none"; 
-            }}
-          >
-            Subscribe
-          </button>
-        </form>
-
-        {message && (
-          <p 
-            style={{ 
-              marginTop: "20px", 
-              fontSize: "16px", 
-              fontWeight: "600", 
-              color: "#a5d6a7" 
-            }}
-          >
-            {message}
+        <div>
+          <h2 style={{ fontSize: "36px", marginBottom: "15px" }}>
+            Stay Connected
+          </h2>
+          <p style={{ fontSize: "18px", opacity: "0.9", lineHeight: "1.6" }}>
+            Get updates on new products and seasonal batches.
           </p>
-        )}
+        </div>
+
+        <div>
+          <form 
+            onSubmit={handleSubscribe} 
+            style={{ 
+              display: "flex", 
+              gap: "10px", 
+              background: "rgba(255,255,255,0.1)", 
+              padding: "8px", 
+              borderRadius: "40px", 
+              border: "1px solid rgba(255,255,255,0.2)" 
+            }}
+          >
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address..."
+              style={{
+                background: "transparent", 
+                border: "none", 
+                outline: "none", 
+                color: "white",
+                padding: "15px 25px", 
+                flex: 1, 
+                fontSize: "16px"
+              }}
+            />
+            <style>
+              {`input::placeholder { color: rgba(255,255,255,0.6); }`}
+            </style>
+            
+            <button 
+              type="submit" 
+              style={{
+                background: "white", 
+                color: "#2f6f4e", 
+                border: "none", 
+                padding: "15px 35px",
+                borderRadius: "30px", 
+                cursor: "pointer", 
+                fontWeight: "bold", 
+                fontSize: "16px",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease"
+              }} 
+              onMouseOver={(e) => { 
+                e.target.style.transform = "scale(1.05)"; 
+                e.target.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)"; 
+              }}
+              onMouseOut={(e) => { 
+                e.target.style.transform = "scale(1)"; 
+                e.target.style.boxShadow = "none"; 
+              }}
+            >
+              Subscribe
+            </button>
+          </form>
+
+          {message && (
+            <p 
+              style={{ 
+                marginTop: "15px", 
+                fontSize: "15px", 
+                fontWeight: "600", 
+                color: "#a5d6a7" 
+              }}
+            >
+              {message}
+            </p>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -3,7 +3,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import AnnouncementBar from "./components/layout/AnnouncementBar";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-import WhatsAppWidget from "./components/layout/WhatsAppWidget"; // <-- NEW
+import WhatsAppWidget from "./components/layout/WhatsAppWidget";
+import FloatingReviewButton from "./components/layout/FloatingReviewButton"; // <-- NEW
 
 /* Public pages */
 import Home from "./pages/Home";
@@ -19,6 +20,13 @@ import Contact from "./pages/Contact";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
 import ProductDetail from "./pages/ProductDetail";
+
+/* NEW: Footer & Floating Pages */
+import Reviews from "./pages/Reviews";
+import Gallery from "./pages/Gallery";
+import Blogs from "./pages/Blogs";
+import Shipping from "./pages/Shipping";
+import Refund from "./pages/Refund";
 
 /* Admin pages */
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -42,6 +50,14 @@ const App = () => {
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          
+          {/* --- NEW ROUTES --- */}
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/refund" element={<Refund />} />
+          
           <Route path="/order-success/:orderId" element={<OrderSuccess />} />
           <Route path="/order/:orderId" element={<OrderTracking />} />
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -52,7 +68,8 @@ const App = () => {
         </Routes>
       </div>
 
-      <WhatsAppWidget /> {/* <-- NEW */}
+      <WhatsAppWidget />
+      <FloatingReviewButton /> {/* <-- NEW */}
       <Footer />
     </>
   );

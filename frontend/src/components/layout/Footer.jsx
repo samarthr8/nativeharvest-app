@@ -69,37 +69,46 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* QUICK LINKS (Track Order kept here for balance) */}
+        {/* QUICK LINKS */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Quick Links</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <Link to="/" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              Home
-            </Link>
-            <Link to="/products" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              Products
-            </Link>
             <Link to="/about" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              About
+              About Us
+            </Link>
+            <Link to="/reviews" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Customer Review
             </Link>
             <Link to="/track" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               Track Order
             </Link>
+            <Link to="/gallery" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Gallery
+            </Link>
+            <Link to="/blogs" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Blogs
+            </Link>
             <Link to="/contact" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              Contact
+              Contact Us
             </Link>
           </div>
         </div>
 
-        {/* POLICIES (FAQs moved here for balance) */}
+        {/* POLICIES */}
         <div>
           <h4 style={{ marginBottom: "16px" }}>Policies</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <Link to="/privacy" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              Privacy Policy
+            <Link to="/shipping" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Shipping Policy
             </Link>
             <Link to="/terms" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
-              Terms & Conditions
+              Terms of Service
+            </Link>
+            <Link to="/refund" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Refund Policy
+            </Link>
+            <Link to="/privacy" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
+              Privacy Policy
             </Link>
             <Link to="/faq" style={{ color: "white", opacity: 0.9, textDecoration: "none" }}>
               FAQs
@@ -112,8 +121,11 @@ const Footer = () => {
           <h4 style={{ marginBottom: "16px" }}>Our Store</h4>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <p style={{ opacity: 0.9 }}>
-              Madhya Pradesh
+            <p style={{ opacity: 0.9, margin: 0 }}>
+              Country Of Origin: India
+            </p>
+            <p style={{ opacity: 0.9, margin: 0 }}>
+              Phone: +91 98765 43210
             </p>
 
             {/* Premium Email */}
@@ -122,7 +134,8 @@ const Footer = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                position: "relative"
+                position: "relative",
+                marginTop: "4px"
               }}
             >
               {/* Mail Icon */}
@@ -239,7 +252,7 @@ const Footer = () => {
           fontSize: "14px"
         }}
       >
-        © 2026 NativeHarvest India. All Rights Reserved.
+        © {new Date().getFullYear()} NativeHarvest India. All Rights Reserved.
       </div>
     </footer>
   );
