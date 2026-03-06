@@ -251,11 +251,36 @@ export default function Header() {
                           zIndex: 999
                         }}
                       >
-                        <Link to="/products#royal">Pickles</Link>
-                        <Link to="/products#orchard">Preserves</Link>
-                        <Link to="/products#cold">Oils and Essentials</Link>
-                        <Link to="/products#heritage">Heritage Staples</Link>
-                        <Link to="/products#indulgence">Healthy Snacks</Link>
+                        {[
+                          { to: "/products#royal", icon: "🫙", label: "Pickles" },
+                          { to: "/products#orchard", icon: "🍯", label: "Preserves" },
+                          { to: "/products#cold", icon: "🫒", label: "Oils & Essentials" },
+                          { to: "/products#heritage", icon: "🌾", label: "Heritage Staples" },
+                          { to: "/products#indulgence", icon: "🥜", label: "Healthy Snacks" },
+                        ].map(item => (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            onClick={() => setShowMega(false)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              padding: "10px 14px",
+                              borderRadius: "10px",
+                              textDecoration: "none",
+                              color: "#1e1e1e",
+                              fontSize: "15px",
+                              fontWeight: "500",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = "#f0f8f5"}
+                            onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
+                          >
+                            <span style={{ fontSize: "22px", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f8f5", borderRadius: "8px" }}>{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        ))}
                       </div>
                     )}
                   </div>

@@ -23,15 +23,16 @@ export default function Products() {
   /* ---------------- FETCH PRODUCTS ---------------- */
   useEffect(() => {
     api.get("/products").then(res => {
-      setProducts(res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setProducts(data);
       const defaults = {};
-      res.data.forEach(p => {
+      data.forEach(p => {
         if (p.variants && p.variants.length > 0) {
           defaults[p.slug] = p.variants[0];
         }
       });
       setSelectedVariants(defaults);
-    });
+    }).catch(() => setProducts([]));
   }, []);
 
   /* ---------------- HASH SCROLL LOGIC (FIXED) ---------------- */

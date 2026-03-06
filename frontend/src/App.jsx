@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import AnnouncementBar from "./components/layout/AnnouncementBar";
@@ -34,6 +35,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <>

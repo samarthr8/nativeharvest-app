@@ -9,13 +9,18 @@ import { useCart } from "../context/CartContext";
 
 const slides = [
   {
-    image: "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/2.jpg",
-    heading: "Ancient Recipes, Modern Flavors.",
-    sub: "Crafted in small batches using traditional methods from rural India."
+    image: "/images/hero-farm-table.png",
+    heading: "From Our Farms to Your Home.",
+    sub: "Premium rural delicacies, crafted in small batches using traditional methods."
   },
   {
-    image: "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/1.jpg",
-    heading: "Authentic Traditional Pickles.",
+    image: "/images/hero-harvest.png",
+    heading: "Handpicked with Love.",
+    sub: "Fresh mangoes and amla harvested straight from our orchards."
+  },
+  {
+    image: "/images/hero-pickle-making.png",
+    heading: "Ancient Recipes, Modern Flavors.",
     sub: "Sun cured. Spice balanced. Naturally preserved."
   }
 ];
@@ -271,8 +276,9 @@ const FeaturedProducts = () => {
 
   useEffect(() => {
     api.get("/products").then((res) => {
-      setProducts(res.data.slice(0, 3));
-    });
+      const data = Array.isArray(res.data) ? res.data : [];
+      setProducts(data.slice(0, 3));
+    }).catch(() => setProducts([]));
   }, []);
 
   return (
