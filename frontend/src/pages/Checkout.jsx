@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
+import SEO from "../components/SEO";
 
 const Checkout = () => {
 
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const [form, setForm] = useState({
     customer_name: "",
@@ -48,12 +51,12 @@ const Checkout = () => {
 
   const validateForm = () => {
     if (!form.full_address || !form.city || !form.state || !form.pincode) {
-      alert("Please fill all address fields");
+      showToast("Please fill all address fields", "warning");
       return false;
     }
 
     if (!/^\d{6}$/.test(form.pincode)) {
-      alert("Pincode must be 6 digits");
+      showToast("Pincode must be 6 digits", "warning");
       return false;
     }
 
@@ -136,7 +139,7 @@ ${form.state} - ${form.pincode}
       const data = await res.json();
 
       if (!data.order_id) {
-        alert(data.message || "Order creation failed");
+        showToast(data.message || "Order creation failed");
         setLoading(false);
         return;
       }
@@ -145,7 +148,7 @@ ${form.state} - ${form.pincode}
       navigate(`/order-success/${data.order_id}`);
 
     } catch (err) {
-      alert("Order creation failed");
+      showToast("Order creation failed");
     } finally {
       setLoading(false);
     }
@@ -203,6 +206,11 @@ ${form.state} - ${form.pincode}
           }
         `}
       </style>
+
+      <SEO
+        title="Checkout | NativeHarvest India"
+        description="Complete your order for farm-fresh products from NativeHarvest India."
+      />
 
       <div className="checkout-grid">
 

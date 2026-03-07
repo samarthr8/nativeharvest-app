@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 
 const posts = [
   {
@@ -17,6 +18,10 @@ const posts = [
 export default function Blogs() {
   return (
     <div className="container" style={{ padding: "80px 0", minHeight: "60vh", maxWidth: "800px", margin: "0 auto" }}>
+      <SEO
+        title="Blog | NativeHarvest India"
+        description="Stories from the harvest — learn about traditional food preparation, rural farming, and the artisans behind NativeHarvest."
+      />
       <h1 style={{ fontSize: "40px", color: "#1e1e1e", marginBottom: "50px", textAlign: "center" }}>Stories from the Harvest</h1>
       
       <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>

@@ -5,6 +5,7 @@ import { HelmetProvider } from "react-helmet-async";
 
 import App from "./App";
 import { CartProvider } from "./context/CartContext";
+import { ToastProvider } from "./components/Toast";
 import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <HelmetProvider>
       <BrowserRouter>
         <CartProvider>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </CartProvider>
       </BrowserRouter>
     </HelmetProvider>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 
 const Cart = () => {
 
@@ -84,6 +85,13 @@ const Cart = () => {
     e.target.style.boxShadow = on ? "0 0 12px rgba(47,111,78,0.4)" : "none";
   };
 
+  const seo = (
+    <SEO
+      title="Cart | NativeHarvest India"
+      description="Review your cart and checkout for farm-fresh products from NativeHarvest India."
+    />
+  );
+
   if (cart.length === 0) {
     return (
       <div
@@ -93,6 +101,7 @@ const Cart = () => {
           textAlign: "center"
         }}
       >
+        {seo}
         <h2 style={{ marginBottom: "10px" }}>Your Cart is Empty</h2>
         <p style={{ opacity: 0.6, marginBottom: "20px" }}>
           Looks like you haven’t added anything yet.
@@ -120,6 +129,7 @@ const Cart = () => {
         margin: "0 auto"
       }}
     >
+      {seo}
 
       <h2 style={{
         marginBottom: "30px",

@@ -10,7 +10,8 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false);
   const [showMega, setShowMega] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
 
   const closeTimeoutRef = useRef(null);
 
@@ -354,39 +355,108 @@ export default function Header() {
 
         {/* MOBILE DROPDOWN MENU */}
         {mobileMenuOpen && (
-          <div 
-            style={{ 
-              position: "absolute", 
-              top: "75px", 
-              left: 0, 
-              width: "100%", 
-              background: "white", 
-              borderTop: "1px solid #eee", 
-              padding: "20px", 
-              boxShadow: "0 10px 20px rgba(0,0,0,0.05)", 
-              display: "flex", 
-              flexDirection: "column", 
-              gap: "15px", 
-              zIndex: 999 
+          <div
+            style={{
+              position: "absolute",
+              top: "75px",
+              left: 0,
+              width: "100%",
+              background: "white",
+              borderTop: "1px solid #eee",
+              padding: "20px",
+              boxShadow: "0 10px 20px rgba(0,0,0,0.05)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0",
+              zIndex: 999
             }}
           >
-            {navItems.map((item) => (
-              <Link 
-                key={item.name} 
-                to={item.path} 
-                onClick={() => setMobileMenuOpen(false)} 
-                style={{ 
-                  fontSize: "16px", 
-                  fontWeight: "500", 
-                  color: "#1e1e1e", 
-                  textDecoration: "none", 
-                  padding: "10px 0", 
-                  borderBottom: "1px solid #f5f5f5" 
-                }}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              if (item.mega) {
+                return (
+                  <div key={item.name}>
+                    <div
+                      onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        color: "#1e1e1e",
+                        padding: "12px 0",
+                        borderBottom: "1px solid #f5f5f5",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}
+                    >
+                      {item.name}
+                      <span style={{ fontSize: "12px", transition: "transform 0.2s", transform: mobileProductsOpen ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+                    </div>
+                    {mobileProductsOpen && (
+                      <div style={{ paddingLeft: "12px" }}>
+                        {[
+                          { to: "/products#royal", icon: "🫙", label: "Pickles" },
+                          { to: "/products#orchard", icon: "🍯", label: "Preserves" },
+                          { to: "/products#cold", icon: "🫒", label: "Oils & Essentials" },
+                          { to: "/products#heritage", icon: "🌾", label: "Heritage Staples" },
+                          { to: "/products#indulgence", icon: "🥜", label: "Healthy Snacks" },
+                        ].map(cat => (
+                          <Link
+                            key={cat.to}
+                            to={cat.to}
+                            onClick={() => { setMobileMenuOpen(false); setMobileProductsOpen(false); }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              fontSize: "15px",
+                              color: "#333",
+                              textDecoration: "none",
+                              padding: "10px 0",
+                              borderBottom: "1px solid #f9f9f9"
+                            }}
+                          >
+                            <span>{cat.icon}</span> {cat.label}
+                          </Link>
+                        ))}
+                        <Link
+                          to="/products"
+                          onClick={() => { setMobileMenuOpen(false); setMobileProductsOpen(false); }}
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "var(--green-dark)",
+                            textDecoration: "none",
+                            padding: "10px 0"
+                          }}
+                        >
+                          View All Products →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#1e1e1e",
+                    textDecoration: "none",
+                    padding: "12px 0",
+                    borderBottom: "1px solid #f5f5f5"
+                  }}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
         )}
 

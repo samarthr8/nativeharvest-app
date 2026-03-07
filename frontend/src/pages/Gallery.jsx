@@ -1,4 +1,5 @@
 import React from "react";
+import SEO from "../components/SEO";
 
 const images = [
   "https://nativeharvest-images.s3.us-east-1.amazonaws.com/products/1.jpg",
@@ -10,6 +11,10 @@ const images = [
 export default function Gallery() {
   return (
     <div className="container" style={{ padding: "80px 0", minHeight: "60vh" }}>
+      <SEO
+        title="Gallery | NativeHarvest India"
+        description="See our farm-fresh products, traditional preparation methods, and the artisans behind NativeHarvest India."
+      />
       <div style={{ textAlign: "center", marginBottom: "50px" }}>
         <h1 style={{ fontSize: "40px", color: "#1e1e1e", marginBottom: "15px" }}>Our Gallery</h1>
         <p style={{ fontSize: "18px", color: "#555" }}>A glimpse into our traditional crafting process.</p>

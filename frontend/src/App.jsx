@@ -6,6 +6,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import WhatsAppWidget from "./components/layout/WhatsAppWidget";
 import FloatingReviewButton from "./components/layout/FloatingReviewButton"; // <-- NEW
+import ErrorBoundary from "./components/ErrorBoundary";
 
 /* Public pages */
 import Home from "./pages/Home";
@@ -32,6 +33,7 @@ import Refund from "./pages/Refund";
 /* Admin pages */
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import NotFound from "./pages/NotFound";
 
 const App = () => {
   const location = useLocation();
@@ -45,6 +47,7 @@ const App = () => {
       <AnnouncementBar />
       <Header />
 
+      <ErrorBoundary>
       <div key={location.pathname} className="page-transition">
         <Routes>
           <Route index element={<Home />} />
@@ -70,8 +73,10 @@ const App = () => {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
+      </ErrorBoundary>
 
       <WhatsAppWidget />
       <FloatingReviewButton /> {/* <-- NEW */}

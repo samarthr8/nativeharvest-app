@@ -1,3 +1,5 @@
+import SEO from "../components/SEO";
+
 export default function About() {
   return (
     <div
@@ -7,6 +9,10 @@ export default function About() {
         minHeight: "100vh"
       }}
     >
+      <SEO
+        title="About Us | NativeHarvest India"
+        description="Learn about NativeHarvest India — our mission to bring authentic, preservative-free farm products from rural India to your home."
+      />
       <div
         style={{
           maxWidth: "900px",

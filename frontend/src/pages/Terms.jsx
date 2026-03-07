@@ -1,6 +1,12 @@
+import SEO from "../components/SEO";
+
 const Terms = () => {
   return (
     <div style={{ background: "#f5f7f6", minHeight: "100vh", padding: "60px 20px" }}>
+      <SEO
+        title="Terms & Conditions | NativeHarvest India"
+        description="Terms and conditions for using the NativeHarvest India website and purchasing our products."
+      />
       <div style={{
         maxWidth: "800px",
         margin: "0 auto",

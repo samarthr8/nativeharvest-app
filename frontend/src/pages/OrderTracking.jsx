@@ -1,20 +1,27 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { useToast } from "../components/Toast";
 
 export default function OrderTracking() {
 
   const { orderId } = useParams();
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email");
+  const showToast = useToast();
   const [order, setOrder] = useState(null);
 
   const fetchOrder = async () => {
     try {
-      // NOTE: Ensure your backend route returns items, shipping_fee, and discount_amount!
-      const res = await api.get(`/orders/${orderId}`);
+      if (!email) {
+        showToast("Email is required for order tracking", "warning");
+        return;
+      }
+      const res = await api.get(`/orders/${orderId}?email=${encodeURIComponent(email)}`);
       setOrder(res.data);
     } catch (err) {
       console.error(err);
-      alert("Order not found");
+      showToast("Order not found or email does not match");
     }
   };
 
@@ -25,8 +32,10 @@ export default function OrderTracking() {
 
   if (!order) {
     return (
-      <div style={{ padding: "60px 20px" }}>
-        <h2>Loading order...</h2>
+      <div style={{ padding: "80px 20px", textAlign: "center" }}>
+        <div style={{ display: "inline-block", width: "40px", height: "40px", border: "4px solid #eee", borderTopColor: "#2f6f4e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ marginTop: "16px", color: "#666" }}>Loading order details...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }

@@ -1,12 +1,19 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 const router = express.Router();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-router.post("/login", (req, res) => {
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: { message: "Too many login attempts, please try again later" },
+});
+
+router.post("/login", loginLimiter, (req, res) => {
   if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !JWT_SECRET) {
     return res.status(503).json({ message: "Admin login is not configured" });
   }

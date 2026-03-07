@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { useToast } from "../../components/Toast";
 
 export default function AdminDashboard() {
+  const showToast = useToast();
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -54,20 +56,20 @@ export default function AdminDashboard() {
 
   // --- PRODUCT FUNCTIONS ---
   const uploadImage = async () => {
-    if (!file) return alert("Select image");
+    if (!file) return showToast("Select image", "warning");
     try {
       const formData = new FormData();
       formData.append("image", file);
       const res = await api.post("/admin/upload", formData);
       setImage(res.data.imageUrl);
-      alert("Main image uploaded ✅");
+      showToast("Main image uploaded", "success");
     } catch (err) {
-      alert("Image upload failed");
+      showToast("Image upload failed");
     }
   };
 
   const uploadExtraImages = async () => {
-    if (!extraFiles || extraFiles.length === 0) return alert("Select extra images first");
+    if (!extraFiles || extraFiles.length === 0) return showToast("Select extra images first", "warning");
     setIsUploadingExtra(true);
     try {
       const uploadedUrls = [];
@@ -79,9 +81,9 @@ export default function AdminDashboard() {
       }
       setExtraImages(prev => [...prev, ...uploadedUrls]);
       setExtraFiles(null);
-      alert("Extra images uploaded ✅");
+      showToast("Extra images uploaded", "success");
     } catch (err) {
-      alert("Failed to upload some extra images");
+      showToast("Failed to upload some extra images");
     } finally {
       setIsUploadingExtra(false);
     }
@@ -97,7 +99,7 @@ export default function AdminDashboard() {
   };
 
   const saveProduct = async () => {
-    if (!category) return alert("Please choose a category!");
+    if (!category) return showToast("Please choose a category!", "warning");
     let variantsArray = null;
     if (variantsInput) {
       variantsArray = variantsInput.split(",").map(v => {
@@ -109,11 +111,11 @@ export default function AdminDashboard() {
 
     if (editingSlug) {
       await api.put(`/admin/products/${editingSlug}`, { name, price, stock: parseInt(stock || 0, 10), image, images: imagesArray, variants: variantsArray, description, category });
-      alert("Product updated ✅");
+      showToast("Product updated", "success");
       setEditingSlug(null);
     } else {
       await api.post("/admin/products", { name, slug, price, stock: parseInt(stock || 0, 10), image, images: imagesArray, variants: variantsArray, description, category });
-      alert("Product added ✅");
+      showToast("Product added", "success");
     }
     setName(""); setSlug(""); setPrice(""); setStock(""); setDescription(""); setCategory("");
     setImage(""); setExtraImages([]); setVariantsInput(""); setFile(null); setExtraFiles(null);
@@ -132,7 +134,7 @@ export default function AdminDashboard() {
     loadOrders();
   };
 
-  const copyAddress = (address) => { navigator.clipboard.writeText(address); alert("Address copied ✅"); };
+  const copyAddress = (address) => { navigator.clipboard.writeText(address); showToast("Address copied", "success"); };
 
   const downloadInvoice = async (orderId) => {
     const res = await api.get(`/admin/orders/${orderId}/invoice`, { responseType: "blob" });
@@ -144,14 +146,14 @@ export default function AdminDashboard() {
 
   // --- COUPON FUNCTIONS ---
   const createCoupon = async () => {
-    if (!cCode || !cValue) return alert("Please provide code and discount value");
+    if (!cCode || !cValue) return showToast("Please provide code and discount value", "warning");
     try {
       await api.post("/admin/coupons", { code: cCode, discount_type: cType, discount_value: parseInt(cValue, 10), min_cart_value: parseInt(cMinCart, 10) });
-      alert("Coupon created! 🎉");
+      showToast("Coupon created!", "success");
       setCCode(""); setCValue(""); setCMinCart("0");
       loadCoupons();
     } catch (err) {
-      alert("Failed to create coupon. Code might already exist.");
+      showToast("Failed to create coupon. Code might already exist.");
     }
   };
 

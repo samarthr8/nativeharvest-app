@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import SEO from "../components/SEO";
 
 /* ----------------------------------
    HERO SLIDER
@@ -272,34 +273,43 @@ const TrustHighlights = () => (
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
   useEffect(() => {
     api.get("/products").then((res) => {
       const data = Array.isArray(res.data) ? res.data : [];
       setProducts(data.slice(0, 3));
-    }).catch(() => setProducts([]));
+    }).catch(() => setProducts([]))
+    .finally(() => setLoading(false));
   }, []);
 
   return (
-    <section 
-      className="section" 
-      style={{ 
-        background: "white", 
-        padding: "80px 0" 
+    <section
+      className="section"
+      style={{
+        background: "white",
+        padding: "80px 0"
       }}
     >
       <div className="container">
-        <h2 
-          style={{ 
-            marginBottom: "50px", 
-            fontSize: "36px", 
-            textAlign: "center", 
-            color: "#1e1e1e" 
+        <h2
+          style={{
+            marginBottom: "50px",
+            fontSize: "36px",
+            textAlign: "center",
+            color: "#1e1e1e"
           }}
         >
           Our Best Sellers
         </h2>
+
+        {loading && (
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <div style={{ display: "inline-block", width: "40px", height: "40px", border: "4px solid #eee", borderTopColor: "#2f6f4e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
 
         <div 
           style={{ 
@@ -690,6 +700,10 @@ const Newsletter = () => {
 export default function Home() {
   return (
     <>
+      <SEO
+        title="NativeHarvest India — Farm Fresh Pickles, Preserves & Heritage Foods"
+        description="Premium farm-fresh pickles, preserves, cold-pressed oils, and heritage staples crafted in small batches from rural India. Free shipping on orders above ₹999."
+      />
       <HeroSection />
       <TrustHighlights />
       <FeaturedProducts />

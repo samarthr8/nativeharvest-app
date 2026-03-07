@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 
 /* 📦 NEW — Needed to fetch the product image for WhatsApp */
 const db = require("./config/db"); // <-- Verify this path matches your project structure!
+const he = require("he");
 
 const productRoutes = require("./routes/products");
 const adminRoutes = require("./routes/admin");
@@ -21,9 +22,31 @@ const orderTrackingRoutes = require("./routes/order-tracking");
 /* 🔐 NEW — Webhook route */
 const webhookRoutes = require("./routes/webhooks");
 
+// Startup validation for required environment variables
+const REQUIRED_ENV = ["DB_PASSWORD", "JWT_SECRET", "ADMIN_EMAIL", "ADMIN_PASSWORD"];
+const OPTIONAL_ENV = ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "RAZORPAY_WEBHOOK_SECRET", "EMAIL_USER", "EMAIL_PASS"];
+
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`FATAL: ${key} environment variable is required`);
+    process.exit(1);
+  }
+}
+
+for (const key of OPTIONAL_ENV) {
+  if (!process.env[key]) {
+    console.warn(`WARNING: ${key} is not set — related features will be disabled`);
+  }
+}
+
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",")
+    : ["http://localhost:3000"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+}));
 
 /* ✅ CRITICAL — Raw body ONLY for webhook */
 app.use(
@@ -71,29 +94,35 @@ app.get("/api/seo/products/:slug", async (req, res) => {
       productImg = product.image;
     }
 
+    // Escape dynamic values to prevent XSS
+    const safeName = he.escape(product.name || "");
+    const safeDesc = he.escape(product.description || "");
+    const safeImg = he.escape(productImg);
+    const safeSlug = encodeURIComponent(slug);
+
     // Build a barebones HTML document specifically for the bot to read
     const botHtml = `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8" />
-          <title>${product.name} | NativeHarvest India</title>
-          <meta name="description" content="${product.description}" />
-          
-          <meta property="og:title" content="${product.name} | NativeHarvest India" />
-          <meta property="og:description" content="${product.description}" />
-          <meta property="og:image" content="${productImg}" />
-          <meta property="og:url" content="https://www.nativeharvest.in/products/${slug}" />
+          <title>${safeName} | NativeHarvest India</title>
+          <meta name="description" content="${safeDesc}" />
+
+          <meta property="og:title" content="${safeName} | NativeHarvest India" />
+          <meta property="og:description" content="${safeDesc}" />
+          <meta property="og:image" content="${safeImg}" />
+          <meta property="og:url" content="https://www.nativeharvest.in/products/${safeSlug}" />
           <meta property="og:type" content="website" />
           <meta property="og:site_name" content="NativeHarvest India" />
-          
+
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:image" content="${productImg}" />
+          <meta name="twitter:image" content="${safeImg}" />
         </head>
         <body>
           <script>
             // If a real human somehow gets here, redirect them to the actual app
-            window.location.href = "/products/${slug}";
+            window.location.href = "/products/${safeSlug}";
           </script>
         </body>
       </html>

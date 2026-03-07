@@ -1,6 +1,12 @@
+import SEO from "../components/SEO";
+
 const Privacy = () => {
   return (
     <div style={{ background: "#f5f7f6", minHeight: "100vh", padding: "60px 20px" }}>
+      <SEO
+        title="Privacy Policy | NativeHarvest India"
+        description="How NativeHarvest India collects, uses, and protects your personal information."
+      />
       <div style={{
         maxWidth: "800px",
         margin: "0 auto",

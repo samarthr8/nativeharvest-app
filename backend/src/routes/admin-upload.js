@@ -5,7 +5,14 @@ const s3 = require("../config/s3");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+});
 
 const BUCKET = "nativeharvest-images";
 
@@ -16,7 +23,13 @@ router.post("/upload", auth, upload.single("image"), async (req, res) => {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  const key = `products/${Date.now()}-${file.originalname}`;
+  if (!ALLOWED_TYPES.includes(file.mimetype)) {
+    return res.status(400).json({ message: "Only JPEG, PNG, and WebP images are allowed" });
+  }
+
+  // Sanitize filename to prevent path traversal
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const key = `products/${Date.now()}-${safeName}`;
 
   await s3.send(
     new PutObjectCommand({

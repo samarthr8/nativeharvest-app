@@ -1,8 +1,13 @@
 import React from "react";
+import SEO from "../components/SEO";
 
 export default function Shipping() {
   return (
     <div className="container" style={{ padding: "80px 0", minHeight: "60vh", maxWidth: "800px", margin: "0 auto" }}>
+      <SEO
+        title="Shipping Policy | NativeHarvest India"
+        description="Learn about NativeHarvest's shipping process, delivery timelines, and free shipping offers across India."
+      />
       <h1 style={{ fontSize: "40px", color: "#1e1e1e", marginBottom: "40px", textAlign: "center" }}>Shipping Policy</h1>
       
       <div style={{ lineHeight: "1.8", color: "#444", fontSize: "16px" }}>

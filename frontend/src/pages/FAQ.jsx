@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEO from "../components/SEO";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -32,6 +33,10 @@ const FAQ = () => {
 
   return (
     <div style={{ background: "#f5f7f6", minHeight: "100vh", padding: "60px 20px" }}>
+      <SEO
+        title="FAQ | NativeHarvest India"
+        description="Frequently asked questions about NativeHarvest products, shipping, payments, and returns."
+      />
       <div style={{
         maxWidth: "800px",
         margin: "0 auto",

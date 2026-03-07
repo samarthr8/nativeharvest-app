@@ -2,14 +2,16 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { useCart } from "../context/CartContext";
+import SEO from "../components/SEO";
 
 export default function Products() {
 
   const location = useLocation();
 
   const [products, setProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); 
-  
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [expanded, setExpanded] = useState({});
   const [addedSlug, setAddedSlug] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState({});
@@ -32,7 +34,8 @@ export default function Products() {
         }
       });
       setSelectedVariants(defaults);
-    }).catch(() => setProducts([]));
+    }).catch(() => setProducts([]))
+    .finally(() => setLoading(false));
   }, []);
 
   /* ---------------- HASH SCROLL LOGIC (FIXED) ---------------- */
@@ -207,8 +210,22 @@ export default function Products() {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="container" style={{ textAlign: "center", padding: "80px 20px" }}>
+        <div style={{ display: "inline-block", width: "40px", height: "40px", border: "4px solid #eee", borderTopColor: "#2f6f4e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ marginTop: "16px", color: "#666" }}>Loading products...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
+      <SEO
+        title="Products | NativeHarvest India"
+        description="Browse our collection of handcrafted pickles, preserves, cold-pressed oils, heritage staples, and healthy snacks from rural India."
+      />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px", flexWrap: "wrap", gap: "20px" }}>
         <h1 style={{ margin: 0 }}>Products</h1>

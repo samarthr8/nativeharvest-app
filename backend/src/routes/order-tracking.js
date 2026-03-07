@@ -9,11 +9,16 @@ router.get("/:orderId", async (req, res) => {
 
   try {
     const { orderId } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required for order tracking" });
+    }
 
     // 1. Fetch the main order details (Now including shipping and discounts)
     const orderResult = await db.query(
       `
-      SELECT 
+      SELECT
         order_id,
         customer_name,
         phone,
@@ -26,9 +31,9 @@ router.get("/:orderId", async (req, res) => {
         order_status,
         created_at
       FROM orders
-      WHERE order_id = $1
+      WHERE order_id = $1 AND email = $2
       `,
-      [orderId]
+      [orderId, email]
     );
 
     if (orderResult.rowCount === 0) {

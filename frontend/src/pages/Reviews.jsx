@@ -1,4 +1,5 @@
 import React from "react";
+import SEO from "../components/SEO";
 
 const dummyReviews = [
   {
@@ -34,6 +35,10 @@ const dummyReviews = [
 export default function Reviews() {
   return (
     <div className="container" style={{ padding: "80px 0", minHeight: "70vh" }}>
+      <SEO
+        title="Reviews | NativeHarvest India"
+        description="Read what our customers say about NativeHarvest's farm-fresh pickles, preserves, and heritage foods."
+      />
       <div style={{ textAlign: "center", marginBottom: "50px" }}>
         <h1 style={{ fontSize: "40px", color: "#1e1e1e", marginBottom: "15px" }}>Customer Reviews</h1>
         <div style={{ display: "flex", justifyContent: "center", gap: "5px", fontSize: "24px", color: "#FFD700" }}>

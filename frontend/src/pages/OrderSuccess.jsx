@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useToast } from "../components/Toast";
 
 const OrderSuccess = () => {
 
   const { orderId } = useParams();
+  const showToast = useToast();
 
   const [status, setStatus] = useState("LOADING");
   const [paymentStarted, setPaymentStarted] = useState(false);
@@ -11,12 +13,15 @@ const OrderSuccess = () => {
   useEffect(() => {
 
     let interval;
+    let cancelled = false;
 
     const checkStatus = async () => {
       try {
 
         const res = await fetch(`/api/orders/${orderId}/status`);
         const data = await res.json();
+
+        if (cancelled) return;
 
         setStatus(data.payment_status);
 
@@ -32,7 +37,10 @@ const OrderSuccess = () => {
     checkStatus();
     interval = setInterval(checkStatus, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
 
   }, [orderId]);
 
@@ -51,7 +59,7 @@ const OrderSuccess = () => {
       const payData = await payRes.json();
 
       if (!payData.razorpay_order_id) {
-        alert("Failed to initiate payment");
+        showToast("Failed to initiate payment");
         setPaymentStarted(false);
         return;
       }
@@ -77,7 +85,7 @@ const OrderSuccess = () => {
 
     } catch (err) {
       console.error(err);
-      alert("Payment initiation failed");
+      showToast("Payment initiation failed");
       setPaymentStarted(false);
     }
   };

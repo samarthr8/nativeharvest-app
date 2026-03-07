@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 const TrackOrder = () => {
   const [orderId, setOrderId] = useState("");
+  const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
   const handleTrack = (e) => {
     e.preventDefault();
-    if (!orderId.trim()) return;
+    if (!orderId.trim() || !email.trim()) return;
 
-    // --- FIXED: Instantly redirects the user to the detailed order tracking page ---
-    navigate(`/order/${orderId.trim().toUpperCase()}`);
+    navigate(`/order/${orderId.trim().toUpperCase()}?email=${encodeURIComponent(email.trim())}`);
   };
 
   const inputStyle = {
@@ -65,9 +65,16 @@ const TrackOrder = () => {
             onChange={(e) => setOrderId(e.target.value)}
             style={inputStyle}
           />
-          <button 
-            type="submit" 
-            disabled={!orderId} 
+          <input
+            type="email"
+            placeholder="Email used during checkout"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ ...inputStyle, textTransform: "none", fontFamily: "inherit", letterSpacing: "normal" }}
+          />
+          <button
+            type="submit"
+            disabled={!orderId || !email}
             style={greenBtn}
             onMouseOver={(e) => e.target.style.boxShadow = "0 0 12px rgba(47,111,78,0.4)"}
             onMouseOut={(e) => e.target.style.boxShadow = "none"}

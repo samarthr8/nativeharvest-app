@@ -1,3 +1,5 @@
+import SEO from "../components/SEO";
+
 export default function Contact() {
   return (
     <div
@@ -7,6 +9,10 @@ export default function Contact() {
         minHeight: "100vh"
       }}
     >
+      <SEO
+        title="Contact Us | NativeHarvest India"
+        description="Get in touch with NativeHarvest India for orders, queries, or wholesale inquiries. We'd love to hear from you."
+      />
       <div
         style={{
           maxWidth: "800px",
