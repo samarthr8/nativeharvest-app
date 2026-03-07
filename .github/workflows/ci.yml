@@ -93,12 +93,19 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${IMAGE_TAG}
 
       # ---------------- IMAGE SECURITY ----------------
-      #      - name: Trivy Image Scan (Backend)
-      # uses: aquasecurity/trivy-action@master
-      # with:
-      #   image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${IMAGE_TAG}
-      #   severity: HIGH,CRITICAL
-      #   exit-code: 1
+      - name: Trivy Image Scan (Frontend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-frontend:${{ env.IMAGE_TAG }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+      - name: Trivy Image Scan (Backend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/nativeharvest-backend:${{ env.IMAGE_TAG }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
 
       # ---------------- UPLOAD ARTIFACTS ----------------
       #- name: Upload reports to Nexus
