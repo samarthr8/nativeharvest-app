@@ -703,6 +703,20 @@ export default function Home() {
       <SEO
         title="NativeHarvest India — Farm Fresh Pickles, Preserves & Heritage Foods"
         description="Premium farm-fresh pickles, preserves, cold-pressed oils, and heritage staples crafted in small batches from rural India. Free shipping on orders above ₹999."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "NativeHarvest India",
+          "url": "https://www.nativeharvest.store",
+          "logo": "https://www.nativeharvest.store/logo.png",
+          "description": "Premium farm-fresh pickles, preserves, cold-pressed oils, and heritage staples crafted in small batches from rural India.",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "availableLanguage": ["English", "Hindi"]
+          },
+          "sameAs": []
+        }}
       />
       <HeroSection />
       <TrustHighlights />

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /order-success/
+Disallow: /order/
+Disallow: /checkout
+Disallow: /cart
+
+Sitemap: https://www.nativeharvest.store/sitemap.xml

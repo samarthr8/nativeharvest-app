@@ -139,6 +139,62 @@ app.get("/api/seo/products/:slug", async (req, res) => {
 });
 /* ============================================================== */
 
+/* ==============================================================
+   DYNAMIC SITEMAP
+============================================================== */
+app.get("/sitemap.xml", async (req, res) => {
+  try {
+    const result = await db.query("SELECT slug FROM products ORDER BY created_at DESC");
+    const domain = "https://www.nativeharvest.store";
+
+    const staticPages = [
+      { loc: "/", priority: "1.0", changefreq: "weekly" },
+      { loc: "/products", priority: "0.9", changefreq: "daily" },
+      { loc: "/about", priority: "0.6", changefreq: "monthly" },
+      { loc: "/contact", priority: "0.5", changefreq: "monthly" },
+      { loc: "/reviews", priority: "0.6", changefreq: "weekly" },
+      { loc: "/gallery", priority: "0.5", changefreq: "monthly" },
+      { loc: "/blogs", priority: "0.6", changefreq: "weekly" },
+      { loc: "/faq", priority: "0.5", changefreq: "monthly" },
+      { loc: "/shipping", priority: "0.4", changefreq: "monthly" },
+      { loc: "/refund", priority: "0.4", changefreq: "monthly" },
+      { loc: "/terms", priority: "0.3", changefreq: "yearly" },
+      { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
+    ];
+
+    const today = new Date().toISOString().split("T")[0];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    for (const page of staticPages) {
+      xml += `  <url>\n`;
+      xml += `    <loc>${domain}${page.loc}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    for (const row of result.rows) {
+      xml += `  <url>\n`;
+      xml += `    <loc>${domain}/products/${encodeURIComponent(row.slug)}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+
+    res.set("Content-Type", "application/xml");
+    res.send(xml);
+  } catch (err) {
+    console.error("Sitemap error:", err);
+    res.status(500).send("Failed to generate sitemap");
+  }
+});
+
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });

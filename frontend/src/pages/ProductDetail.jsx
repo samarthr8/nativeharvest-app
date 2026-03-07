@@ -131,6 +131,45 @@ export default function ProductDetail() {
         title={`${product.name} | NativeHarvest`}
         description={product.description}
         image={images[0]}
+        type="product"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.description,
+            "image": images,
+            "brand": { "@type": "Brand", "name": "NativeHarvest India" },
+            "offers": product.variants.length > 0
+              ? product.variants.map(v => ({
+                  "@type": "Offer",
+                  "price": v.price,
+                  "priceCurrency": "INR",
+                  "availability": (v.stock === undefined || v.stock > 0)
+                    ? "https://schema.org/InStock"
+                    : "https://schema.org/OutOfStock",
+                  "name": v.weight
+                }))
+              : {
+                  "@type": "Offer",
+                  "price": product.price,
+                  "priceCurrency": "INR",
+                  "availability": product.stock > 0
+                    ? "https://schema.org/InStock"
+                    : "https://schema.org/OutOfStock"
+                },
+            "url": `https://www.nativeharvest.store/products/${slug}`
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.nativeharvest.store/" },
+              { "@type": "ListItem", "position": 2, "name": "Products", "item": "https://www.nativeharvest.store/products" },
+              { "@type": "ListItem", "position": 3, "name": product.name }
+            ]
+          }
+        ]}
       />
 
       {/* Breadcrumb */}
