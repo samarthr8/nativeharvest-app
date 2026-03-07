@@ -22,6 +22,15 @@ ingress:
   className: nginx
   host: nativeharvest.local
 
+## REQUIRED: Provide at deploy time via --set or -f secrets-values.yaml
+## DO NOT commit real values to this file
+## Example:
+##   helm install nativeharvest ./helm/nativeharvest \
+##     --set secrets.jwtSecret=<value> \
+##     --set secrets.db.password=<value> \
+##     --set secrets.db.host=<value> \
+##     --set secrets.db.name=<value> \
+##     --set secrets.db.user=<value>
 secrets:
   jwtSecret: ""
   db:
