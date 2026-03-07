@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 
 /* 🔐 NEW — Needed for Razorpay webhook */
 const bodyParser = require("body-parser");
@@ -41,6 +42,7 @@ for (const key of OPTIONAL_ENV) {
 
 const app = express();
 
+app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(",")

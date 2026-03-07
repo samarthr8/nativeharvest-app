@@ -4,12 +4,12 @@ const db = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 
 /* --- NEW: Import the checkout rate limiter --- */
-const { checkoutLimiter } = require("../middleware/rateLimiter");
+const { checkoutLimiter, couponLimiter } = require("../middleware/rateLimiter");
 
 /* =========================================
    NEW: VALIDATE COUPON ROUTE
 ========================================= */
-router.post("/validate-coupon", async (req, res) => {
+router.post("/validate-coupon", couponLimiter, async (req, res) => {
   try {
     const { code, subtotal } = req.body;
 
@@ -257,8 +257,16 @@ router.post("/", checkoutLimiter, async (req, res) => {
 
     await client.query("ROLLBACK");
     console.error("Order creation failed:", err);
+
+    const safeMessages = [
+      "Order items are required",
+      "Product not found",
+      "Insufficient stock"
+    ];
+    const isSafe = safeMessages.some(m => err.message?.startsWith(m));
+
     res.status(400).json({
-      message: err.message
+      message: isSafe ? err.message : "Order creation failed"
     });
 
   } finally {
