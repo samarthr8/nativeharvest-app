@@ -1,10 +1,12 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useToast } from "../components/Toast";
 
 const OrderSuccess = () => {
 
   const { orderId } = useParams();
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email");
   const showToast = useToast();
 
   const [status, setStatus] = useState("LOADING");
@@ -18,7 +20,7 @@ const OrderSuccess = () => {
     const checkStatus = async () => {
       try {
 
-        const res = await fetch(`/api/orders/${orderId}/status`);
+        const res = await fetch(`/api/orders/${orderId}/status?email=${encodeURIComponent(email || "")}`);
         const data = await res.json();
 
         if (cancelled) return;
@@ -184,7 +186,7 @@ const OrderSuccess = () => {
               Your order is now being prepared in small batches.
             </p>
 
-            <Link to={`/order/${orderId}`}>
+            <Link to={`/order/${orderId}?email=${encodeURIComponent(email || "")}`}>
               <button style={{
                 marginTop: "20px",
                 padding: "12px 24px",

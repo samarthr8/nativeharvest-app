@@ -10,7 +10,10 @@ const pool = new Pool({
   user: process.env.DB_USER || "nhuser",
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "nativeharvest",
-  port: process.env.DB_PORT || 5432
+  port: process.env.DB_PORT || 5432,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
 module.exports = pool;

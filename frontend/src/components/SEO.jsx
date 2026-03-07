@@ -8,8 +8,7 @@ export default function SEO({
 }) {
   const siteName = "NativeHarvest India";
   
-  // --- FIXED: WhatsApp strictly requires ABSOLUTE URLs for images ---
-  const domain = "https://www.nativeharvest.store"; // Replace with your actual live domain
+  const domain = typeof window !== "undefined" ? window.location.origin : "https://www.nativeharvest.store";
   
   // If the image already starts with "http" (like your S3 links), use it. 
   // Otherwise, attach your domain to the front of the local path.

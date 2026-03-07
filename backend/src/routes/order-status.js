@@ -9,10 +9,15 @@ const router = express.Router();
 router.get("/:orderId/status", async (req, res) => {
   try {
     const { orderId } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
     const result = await db.query(
-      `SELECT payment_status FROM orders WHERE order_id = $1`,
-      [orderId]
+      `SELECT payment_status FROM orders WHERE order_id = $1 AND email = $2`,
+      [orderId, email]
     );
 
     if (result.rowCount === 0) {

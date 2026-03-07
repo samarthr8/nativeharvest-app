@@ -145,7 +145,7 @@ ${form.state} - ${form.pincode}
       }
 
       clearCart();
-      navigate(`/order-success/${data.order_id}`);
+      navigate(`/order-success/${data.order_id}?email=${encodeURIComponent(form.email)}`);
 
     } catch (err) {
       showToast("Order creation failed");
