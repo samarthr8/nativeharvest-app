@@ -74,7 +74,7 @@ router.post("/", checkoutLimiter, async (req, res) => {
       state,
       pincode,
       items,
-      coupon_code // <--- NEW: Accept coupon code
+      coupon_code
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -127,7 +127,7 @@ router.post("/", checkoutLimiter, async (req, res) => {
     }
 
     // -----------------------------
-    // NEW: Calculate Discount
+    // Calculate Discount
     // -----------------------------
     let discountAmount = 0;
     let appliedCoupon = null;
@@ -199,7 +199,7 @@ router.post("/", checkoutLimiter, async (req, res) => {
     const orderId = "NH-" + uuidv4().slice(0, 8).toUpperCase();
 
     // -----------------------------
-    // Insert into orders (UPDATED for coupons)
+    // Insert into orders
     // -----------------------------
     await client.query(
       `
@@ -221,8 +221,8 @@ router.post("/", checkoutLimiter, async (req, res) => {
         pincode || null,
         finalTotal,
         shippingCost,
-        appliedCoupon,      // <--- New
-        discountAmount      // <--- New
+        appliedCoupon,
+        discountAmount
       ]
     );
 
@@ -244,6 +244,18 @@ router.post("/", checkoutLimiter, async (req, res) => {
           item.qty,
           item.variantKey
         ]
+      );
+    }
+
+    // -----------------------------
+    // NEW: Save Email to Subscribers
+    // -----------------------------
+    if (email) {
+      await client.query(
+        `INSERT INTO subscribers (email, source) 
+         VALUES ($1, 'checkout') 
+         ON CONFLICT (email) DO NOTHING`,
+        [email.toLowerCase()]
       );
     }
 

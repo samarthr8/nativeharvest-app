@@ -36,6 +36,7 @@ import AdminAddProduct from "./pages/admin/AdminAddProduct";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminPromotions from "./pages/admin/AdminPromotions";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminSubscribers from "./pages/admin/AdminSubscribers";
 
 const App = () => {
   const location = useLocation();
@@ -80,6 +81,7 @@ const App = () => {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/promotions" element={<AdminPromotions />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/subscribers" element={<AdminSubscribers />} />
         </Routes>
       </div>
 

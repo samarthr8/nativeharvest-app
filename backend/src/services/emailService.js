@@ -257,9 +257,23 @@ async function sendDeliveredNotification(order) {
   await transporter.sendMail(mailOptions);
 }
 
+/* ---------------------------------------------------
+   📢 Send Promotional Email Blast (NEW)
+--------------------------------------------------- */
+async function sendPromotionalBlast(emails, subject, htmlContent) {
+  const mailOptions = {
+    from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
+    bcc: emails, // Use BCC so subscribers can't see each other's emails
+    subject: subject,
+    html: htmlContent
+  };
+  await transporter.sendMail(mailOptions);
+}
+
 module.exports = {
   sendOrderConfirmation,
   sendAdminNotification,
   sendShipmentNotification,
-  sendDeliveredNotification
+  sendDeliveredNotification,
+  sendPromotionalBlast
 };

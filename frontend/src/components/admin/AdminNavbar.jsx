@@ -21,6 +21,7 @@ export default function AdminNavbar() {
     { name: "Products", path: "/admin/products" },
     { name: "Promotions", path: "/admin/promotions" },
     { name: "Orders", path: "/admin/orders" },
+    { name: "Subscribers", path: "/admin/subscribers" }, // <-- Add this new link here
   ];
 
   return (

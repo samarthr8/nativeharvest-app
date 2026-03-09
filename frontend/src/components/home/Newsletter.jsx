@@ -1,10 +1,12 @@
 import { useState } from "react";
+import api from "../../services/api"; // <-- Import your API client
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
@@ -13,9 +15,18 @@ export default function Newsletter() {
       return;
     }
     
-    setMessage("✓ Welcome to the NativeHarvest family!");
-    setEmail("");
-    setTimeout(() => setMessage(""), 4000);
+    setLoading(true);
+    try {
+      // Hit the new backend endpoint
+      await api.post("/admin/subscribe", { email });
+      setMessage("✓ Welcome to the NativeHarvest family!");
+      setEmail("");
+    } catch (err) {
+      setMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(""), 4000);
+    }
   };
 
   return (
@@ -76,27 +87,32 @@ export default function Newsletter() {
             
             <button 
               type="submit" 
+              disabled={loading}
               style={{
-                background: "white", 
+                background: loading ? "#ccc" : "white", 
                 color: "#2f6f4e", 
                 border: "none", 
                 padding: "15px 35px",
                 borderRadius: "30px", 
-                cursor: "pointer", 
+                cursor: loading ? "not-allowed" : "pointer", 
                 fontWeight: "bold", 
                 fontSize: "16px",
                 transition: "transform 0.2s ease, box-shadow 0.2s ease"
               }} 
               onMouseOver={(e) => { 
-                e.target.style.transform = "scale(1.05)"; 
-                e.target.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)"; 
+                if(!loading) {
+                  e.target.style.transform = "scale(1.05)"; 
+                  e.target.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)"; 
+                }
               }}
               onMouseOut={(e) => { 
-                e.target.style.transform = "scale(1)"; 
-                e.target.style.boxShadow = "none"; 
+                if(!loading) {
+                  e.target.style.transform = "scale(1)"; 
+                  e.target.style.boxShadow = "none"; 
+                }
               }}
             >
-              Subscribe
+              {loading ? "..." : "Subscribe"}
             </button>
           </form>
 
