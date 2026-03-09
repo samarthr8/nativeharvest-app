@@ -5,7 +5,7 @@ import AnnouncementBar from "./components/layout/AnnouncementBar";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import WhatsAppWidget from "./components/layout/WhatsAppWidget";
-import FloatingReviewButton from "./components/layout/FloatingReviewButton"; // <-- NEW
+import FloatingReviewButton from "./components/layout/FloatingReviewButton";
 
 /* Public pages */
 import Home from "./pages/Home";
@@ -22,16 +22,20 @@ import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
 import ProductDetail from "./pages/ProductDetail";
 
-/* NEW: Footer & Floating Pages */
+/* Footer & Floating Pages */
 import Reviews from "./pages/Reviews";
 import Gallery from "./pages/Gallery";
 import Blogs from "./pages/Blogs";
 import Shipping from "./pages/Shipping";
 import Refund from "./pages/Refund";
 
-/* Admin pages */
+/* Admin pages (UPDATED) */
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import DashboardHome from "./pages/admin/DashboardHome";
+import AdminAddProduct from "./pages/admin/AdminAddProduct";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminPromotions from "./pages/admin/AdminPromotions";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 const App = () => {
   const location = useLocation();
@@ -47,6 +51,7 @@ const App = () => {
 
       <div key={location.pathname} className="page-transition">
         <Routes>
+          {/* --- PUBLIC ROUTES --- */}
           <Route index element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
@@ -56,7 +61,6 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* --- NEW ROUTES --- */}
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blogs" element={<Blogs />} />
@@ -65,16 +69,22 @@ const App = () => {
           
           <Route path="/order-success/:orderId" element={<OrderSuccess />} />
           <Route path="/order/:orderId" element={<OrderTracking />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+
+          {/* --- ADMIN ROUTES --- */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<DashboardHome />} />
+          <Route path="/admin/add-product" element={<AdminAddProduct />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/promotions" element={<AdminPromotions />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Routes>
       </div>
 
       <WhatsAppWidget />
-      <FloatingReviewButton /> {/* <-- NEW */}
+      <FloatingReviewButton />
       <Footer />
     </>
   );
