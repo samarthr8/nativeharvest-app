@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 const db = require("../config/db"); // <-- NEW
-const { sendPromotionalBlast } = require("../../services/emailService"); // <-- NEW (Adjust path if needed)
+const { sendPromotionalBlast } = require("../services/emailService"); // <-- NEW (Adjust path if needed)
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@nativeharvest.in";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
