@@ -5,6 +5,7 @@ import AdminNavbar from "../../components/admin/AdminNavbar";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState(15); // <-- NEW: Start with 15 products
   const navigate = useNavigate();
 
   const greenBtn = { background: "#2f6f4e", color: "white", border: "none", padding: "8px 14px", borderRadius: "8px", cursor: "pointer", fontWeight: "500", transition: "0.2s ease" };
@@ -20,7 +21,6 @@ export default function AdminProducts() {
   };
 
   const handleEdit = (product) => {
-    // Navigate to the Add Product page, passing the product data invisibly
     navigate("/admin/add-product", { state: { product } });
   };
 
@@ -30,8 +30,10 @@ export default function AdminProducts() {
 
       <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
         <h3>Existing Products</h3>
-        <div style={{ overflowY: "auto" }}>
-          {products.map(p => (
+        
+        {/* --- RESTORED SCROLL WITH 15 ITEM LIMIT --- */}
+        <div style={{ maxHeight: "600px", overflowY: "auto", paddingRight: "10px" }}>
+          {products.slice(0, visibleProducts).map(p => (
             <div key={p.slug} style={{ borderBottom: "1px solid #eee", padding: "10px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
                 {p.image ? <img src={p.image} alt="" style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "6px" }} /> : <div style={{ width: "50px", height: "50px", background: "#eee", borderRadius: "6px" }} />}
@@ -47,6 +49,13 @@ export default function AdminProducts() {
             </div>
           ))}
         </div>
+
+        {/* --- NEW: LOAD MORE CONTROLS --- */}
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+          {visibleProducts < products.length && <button style={{ ...greenBtn, marginRight: "10px" }} onClick={() => setVisibleProducts(prev => prev + 15)}>Load 15 More</button>}
+          {visibleProducts > 15 && <button style={{ ...greenBtn, background: "#777" }} onClick={() => setVisibleProducts(15)}>Show Less</button>}
+        </div>
+
       </div>
     </div>
   );
