@@ -1,8 +1,8 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-const db = require("../config/db"); // <-- NEW
-const { sendPromotionalBlast } = require("../services/emailService"); // <-- NEW (Adjust path if needed)
+const db = require("../config/db"); 
+const { sendPromotionalBlast } = require("../services/emailService"); 
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@nativeharvest.in";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
@@ -23,7 +23,52 @@ router.post("/login", (req, res) => {
 });
 
 /* =========================================
-   NEW: NEWSLETTER & SUBSCRIBER ROUTES
+   NEW: DASHBOARD STATS (Fixes 100 Limit Bug)
+========================================= */
+router.get("/dashboard-stats", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue FROM orders"
+    );
+    res.json({
+      totalOrders: parseInt(result.rows[0].total_orders || 0),
+      totalRevenue: parseFloat(result.rows[0].total_revenue || 0)
+    });
+  } catch (err) {
+    console.error("Stats error:", err);
+    res.status(500).json({ message: "Failed to load dashboard stats" });
+  }
+});
+
+/* =========================================
+   NEW: GST FILING CHECKLIST
+========================================= */
+router.get("/gst-status", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM gst_filings");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch GST status" });
+  }
+});
+
+router.post("/gst-status", async (req, res) => {
+  const { month_year, is_filed } = req.body;
+  try {
+    await db.query(
+      `INSERT INTO gst_filings (month_year, is_filed) VALUES ($1, $2)
+       ON CONFLICT (month_year) DO UPDATE SET is_filed = EXCLUDED.is_filed`,
+      [month_year, is_filed]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("GST update error:", err);
+    res.status(500).json({ message: "Failed to update GST status" });
+  }
+});
+
+/* =========================================
+   NEWSLETTER & SUBSCRIBER ROUTES
 ========================================= */
 
 // Public route to handle newsletter signups from the Home page
