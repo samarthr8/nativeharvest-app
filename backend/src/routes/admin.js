@@ -23,11 +23,11 @@ router.post("/login", (req, res) => {
 });
 
 /* =========================================
-   UPDATED: DASHBOARD STATS (Timezone & Timeframe Fix)
+   UPDATED: DASHBOARD STATS (Two-Step Timezone Fix)
 ========================================= */
 router.get("/dashboard-stats", async (req, res) => {
   try {
-    const { timeframe, month, year } = req.query; // timeframe can be 'month', 'quarter', 'year'
+    const { timeframe, month, year } = req.query; 
 
     // 1. Lifetime stats (Always returned)
     const lifetimeRes = await db.query("SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue FROM orders");
@@ -42,17 +42,18 @@ router.get("/dashboard-stats", async (req, res) => {
     let condition = "";
     let params = [];
 
-    // 2. Build the timezone-aware query based on selected timeframe
+    // 2. Build the timezone-aware query
+    // FIX: Using AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata' to correctly shift naive timestamps
     if (timeframe === "quarter") {
-      // Last 90 days (converted to IST)
-      condition = "created_at AT TIME ZONE 'Asia/Kolkata' >= NOW() AT TIME ZONE 'Asia/Kolkata' - INTERVAL '90 days'";
+      // Last 90 days (UTC conversion for safety)
+      condition = "created_at AT TIME ZONE 'UTC' >= NOW() - INTERVAL '90 days'";
     } else if (timeframe === "year") {
       // Entire Year (converted to IST)
-      condition = "EXTRACT(YEAR FROM created_at AT TIME ZONE 'Asia/Kolkata') = $1";
+      condition = "EXTRACT(YEAR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata') = $1";
       params = [year];
     } else if (month && year) {
       // Specific Month (converted to IST)
-      condition = "EXTRACT(MONTH FROM created_at AT TIME ZONE 'Asia/Kolkata') = $1 AND EXTRACT(YEAR FROM created_at AT TIME ZONE 'Asia/Kolkata') = $2";
+      condition = "EXTRACT(MONTH FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata') = $1 AND EXTRACT(YEAR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata') = $2";
       params = [month, year];
     }
 
@@ -84,11 +85,11 @@ router.get("/dashboard-stats", async (req, res) => {
 
       // Daily Trend for the graph (Converted to IST)
       const trendRes = await db.query(
-        `SELECT TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') as date, COUNT(*) as daily_orders
+        `SELECT TO_CHAR(created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') as date, COUNT(*) as daily_orders
          FROM orders
          WHERE ${condition}
-         GROUP BY TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD')
-         ORDER BY TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') ASC`,
+         GROUP BY TO_CHAR(created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD')
+         ORDER BY TO_CHAR(created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') ASC`,
         params
       );
       
@@ -140,8 +141,12 @@ router.post("/subscribe", async (req, res) => {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ message: "Invalid email format" });
   }
+
   try {
-    await db.query(`INSERT INTO subscribers (email, source) VALUES ($1, 'newsletter') ON CONFLICT (email) DO NOTHING`, [email.toLowerCase()]);
+    await db.query(
+      `INSERT INTO subscribers (email, source) VALUES ($1, 'newsletter') ON CONFLICT (email) DO NOTHING`,
+      [email.toLowerCase()]
+    );
     res.json({ success: true, message: "Subscribed successfully" });
   } catch (err) {
     console.error("Subscription error:", err);
@@ -160,12 +165,18 @@ router.get("/subscribers", async (req, res) => {
 
 router.post("/subscribers/blast", async (req, res) => {
   const { subject, message } = req.body;
-  if (!subject || !message) return res.status(400).json({ message: "Subject and message are required" });
+
+  if (!subject || !message) {
+    return res.status(400).json({ message: "Subject and message are required" });
+  }
 
   try {
     const result = await db.query("SELECT email FROM subscribers");
     const emails = result.rows.map(row => row.email);
-    if (emails.length === 0) return res.status(400).json({ message: "No subscribers found" });
+
+    if (emails.length === 0) {
+      return res.status(400).json({ message: "No subscribers found" });
+    }
 
     const htmlContent = `
       <div style="font-family: sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto;">
