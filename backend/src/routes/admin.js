@@ -23,17 +23,66 @@ router.post("/login", (req, res) => {
 });
 
 /* =========================================
-   NEW: DASHBOARD STATS (Fixes 100 Limit Bug)
+   UPDATED: DASHBOARD STATS (Month Aggregation)
 ========================================= */
 router.get("/dashboard-stats", async (req, res) => {
   try {
-    const result = await db.query(
-      "SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue FROM orders"
-    );
-    res.json({
-      totalOrders: parseInt(result.rows[0].total_orders || 0),
-      totalRevenue: parseFloat(result.rows[0].total_revenue || 0)
-    });
+    const { month, year } = req.query;
+
+    // 1. Lifetime stats (Always returned)
+    const lifetimeRes = await db.query("SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue FROM orders");
+    const lifetime = {
+      totalOrders: parseInt(lifetimeRes.rows[0].total_orders || 0),
+      totalRevenue: parseFloat(lifetimeRes.rows[0].total_revenue || 0)
+    };
+
+    let selected = { orders: 0, revenue: 0, shipping: 0, discounts: 0, productSales: 0 };
+    let dailyTrend = [];
+
+    // 2. Selected Month stats (If month/year provided)
+    if (month && year) {
+      const monthRes = await db.query(
+        `SELECT
+          COUNT(*) as total_orders,
+          SUM(total_amount) as net_revenue,
+          SUM(shipping_fee) as shipping,
+          SUM(discount_amount) as discounts
+         FROM orders
+         WHERE EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2`,
+        [month, year]
+      );
+
+      const row = monthRes.rows[0];
+      const rev = parseFloat(row.net_revenue || 0);
+      const ship = parseFloat(row.shipping || 0);
+      const disc = parseFloat(row.discounts || 0);
+
+      selected = {
+        orders: parseInt(row.total_orders || 0),
+        revenue: rev,
+        shipping: ship,
+        discounts: disc,
+        // Math: Net Revenue = Product Sales + Shipping - Discounts. So Product Sales = Net - Shipping + Discounts
+        productSales: rev - ship + disc 
+      };
+
+      // 3. Daily Trend for the graph
+      const trendRes = await db.query(
+        `SELECT TO_CHAR(created_at, 'YYYY-MM-DD') as date, COUNT(*) as daily_orders
+         FROM orders
+         WHERE EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2
+         GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
+         ORDER BY TO_CHAR(created_at, 'YYYY-MM-DD') ASC`,
+        [month, year]
+      );
+      
+      dailyTrend = trendRes.rows.map(r => ({
+        date: r.date,
+        orders: parseInt(r.daily_orders || 0)
+      }));
+    }
+
+    res.json({ lifetime, selected, dailyTrend });
   } catch (err) {
     console.error("Stats error:", err);
     res.status(500).json({ message: "Failed to load dashboard stats" });
@@ -41,7 +90,7 @@ router.get("/dashboard-stats", async (req, res) => {
 });
 
 /* =========================================
-   NEW: GST FILING CHECKLIST
+   GST FILING CHECKLIST
 ========================================= */
 router.get("/gst-status", async (req, res) => {
   try {
@@ -70,19 +119,13 @@ router.post("/gst-status", async (req, res) => {
 /* =========================================
    NEWSLETTER & SUBSCRIBER ROUTES
 ========================================= */
-
-// Public route to handle newsletter signups from the Home page
 router.post("/subscribe", async (req, res) => {
   const { email } = req.body;
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ message: "Invalid email format" });
   }
-
   try {
-    await db.query(
-      `INSERT INTO subscribers (email, source) VALUES ($1, 'newsletter') ON CONFLICT (email) DO NOTHING`,
-      [email.toLowerCase()]
-    );
+    await db.query(`INSERT INTO subscribers (email, source) VALUES ($1, 'newsletter') ON CONFLICT (email) DO NOTHING`, [email.toLowerCase()]);
     res.json({ success: true, message: "Subscribed successfully" });
   } catch (err) {
     console.error("Subscription error:", err);
@@ -90,7 +133,6 @@ router.post("/subscribe", async (req, res) => {
   }
 });
 
-// Admin route to fetch all subscribers
 router.get("/subscribers", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM subscribers ORDER BY subscribed_at DESC");
@@ -100,23 +142,15 @@ router.get("/subscribers", async (req, res) => {
   }
 });
 
-// Admin route to send promotional blast
 router.post("/subscribers/blast", async (req, res) => {
   const { subject, message } = req.body;
-
-  if (!subject || !message) {
-    return res.status(400).json({ message: "Subject and message are required" });
-  }
+  if (!subject || !message) return res.status(400).json({ message: "Subject and message are required" });
 
   try {
     const result = await db.query("SELECT email FROM subscribers");
     const emails = result.rows.map(row => row.email);
+    if (emails.length === 0) return res.status(400).json({ message: "No subscribers found" });
 
-    if (emails.length === 0) {
-      return res.status(400).json({ message: "No subscribers found" });
-    }
-
-    // Format the message nicely for email
     const htmlContent = `
       <div style="font-family: sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto;">
         ${message.replace(/\n/g, '<br/>')}
