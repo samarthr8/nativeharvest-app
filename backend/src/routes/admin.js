@@ -23,11 +23,11 @@ router.post("/login", (req, res) => {
 });
 
 /* =========================================
-   UPDATED: DASHBOARD STATS (Month Aggregation)
+   UPDATED: DASHBOARD STATS (Timezone & Timeframe Fix)
 ========================================= */
 router.get("/dashboard-stats", async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { timeframe, month, year } = req.query; // timeframe can be 'month', 'quarter', 'year'
 
     // 1. Lifetime stats (Always returned)
     const lifetimeRes = await db.query("SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue FROM orders");
@@ -39,20 +39,37 @@ router.get("/dashboard-stats", async (req, res) => {
     let selected = { orders: 0, revenue: 0, shipping: 0, discounts: 0, productSales: 0 };
     let dailyTrend = [];
 
-    // 2. Selected Month stats (If month/year provided)
-    if (month && year) {
-      const monthRes = await db.query(
+    let condition = "";
+    let params = [];
+
+    // 2. Build the timezone-aware query based on selected timeframe
+    if (timeframe === "quarter") {
+      // Last 90 days (converted to IST)
+      condition = "created_at AT TIME ZONE 'Asia/Kolkata' >= NOW() AT TIME ZONE 'Asia/Kolkata' - INTERVAL '90 days'";
+    } else if (timeframe === "year") {
+      // Entire Year (converted to IST)
+      condition = "EXTRACT(YEAR FROM created_at AT TIME ZONE 'Asia/Kolkata') = $1";
+      params = [year];
+    } else if (month && year) {
+      // Specific Month (converted to IST)
+      condition = "EXTRACT(MONTH FROM created_at AT TIME ZONE 'Asia/Kolkata') = $1 AND EXTRACT(YEAR FROM created_at AT TIME ZONE 'Asia/Kolkata') = $2";
+      params = [month, year];
+    }
+
+    if (condition) {
+      // Selected Timeframe Stats
+      const statsRes = await db.query(
         `SELECT
           COUNT(*) as total_orders,
           SUM(total_amount) as net_revenue,
           SUM(shipping_fee) as shipping,
           SUM(discount_amount) as discounts
          FROM orders
-         WHERE EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2`,
-        [month, year]
+         WHERE ${condition}`,
+        params
       );
 
-      const row = monthRes.rows[0];
+      const row = statsRes.rows[0];
       const rev = parseFloat(row.net_revenue || 0);
       const ship = parseFloat(row.shipping || 0);
       const disc = parseFloat(row.discounts || 0);
@@ -62,18 +79,17 @@ router.get("/dashboard-stats", async (req, res) => {
         revenue: rev,
         shipping: ship,
         discounts: disc,
-        // Math: Net Revenue = Product Sales + Shipping - Discounts. So Product Sales = Net - Shipping + Discounts
         productSales: rev - ship + disc 
       };
 
-      // 3. Daily Trend for the graph
+      // Daily Trend for the graph (Converted to IST)
       const trendRes = await db.query(
-        `SELECT TO_CHAR(created_at, 'YYYY-MM-DD') as date, COUNT(*) as daily_orders
+        `SELECT TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') as date, COUNT(*) as daily_orders
          FROM orders
-         WHERE EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2
-         GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
-         ORDER BY TO_CHAR(created_at, 'YYYY-MM-DD') ASC`,
-        [month, year]
+         WHERE ${condition}
+         GROUP BY TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD')
+         ORDER BY TO_CHAR(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') ASC`,
+        params
       );
       
       dailyTrend = trendRes.rows.map(r => ({

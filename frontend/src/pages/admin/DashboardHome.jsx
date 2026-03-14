@@ -3,18 +3,19 @@ import api from "../../services/api";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 
 export default function DashboardHome() {
-  // Generate options for the last 12 months
   const today = new Date();
   const monthOptions = Array.from({ length: 12 }).map((_, i) => {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
     return {
       label: d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
       value: `${d.getMonth() + 1}-${d.getFullYear()}`,
-      monthLabel: d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) // For checklist
+      monthLabel: d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
     };
   });
 
-  const [selectedTime, setSelectedTime] = useState(monthOptions[0].value);
+  const [timeframe, setTimeframe] = useState("month"); // 'month', 'quarter', 'year'
+  const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
+  
   const [stats, setStats] = useState({ 
     lifetime: { totalOrders: 0, totalRevenue: 0 }, 
     selected: { orders: 0, revenue: 0, shipping: 0, discounts: 0, productSales: 0 }, 
@@ -23,22 +24,24 @@ export default function DashboardHome() {
   const [gstFilings, setGstFilings] = useState([]);
 
   useEffect(() => {
-    const [m, y] = selectedTime.split('-');
-    api.get(`/admin/dashboard-stats?month=${m}&year=${y}`).then(res => setStats(res.data)).catch(console.error);
+    const [m, y] = selectedMonth.split('-');
+    const yearArg = timeframe === "year" ? today.getFullYear() : y;
+    
+    api.get(`/admin/dashboard-stats?timeframe=${timeframe}&month=${m}&year=${yearArg}`)
+       .then(res => setStats(res.data))
+       .catch(console.error);
+       
     api.get("/admin/gst-status").then(res => setGstFilings(res.data)).catch(console.error);
-  }, [selectedTime]);
+  }, [selectedMonth, timeframe]);
 
   const { lifetime, selected, dailyTrend } = stats;
 
-  // --- MATH & DERIVATIONS ---
   const averageOrderValue = selected.orders > 0 ? (selected.revenue / selected.orders) : 0;
   const maxTrendOrders = Math.max(...(dailyTrend.map(d => d.orders)), 1);
   
-  // 5% Inclusive GST (Total Revenue / 1.05)
   const taxableValue = selected.revenue / 1.05;
   const outputGst = selected.revenue - taxableValue;
 
-  // --- GST CHECKLIST LOGIC ---
   const handleGstToggle = async (monthYear, currentStatus) => {
     const newStatus = !currentStatus;
     setGstFilings(prev => {
@@ -49,26 +52,47 @@ export default function DashboardHome() {
     await api.post("/admin/gst-status", { month_year: monthYear, is_filed: newStatus }).catch(console.error);
   };
 
-  // --- STYLING ---
   const cardStyle = { background: "white", padding: "24px", borderRadius: "12px", border: "1px solid #eee", boxShadow: "0 4px 15px rgba(0,0,0,0.03)", flex: 1 };
   const titleStyle = { fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" };
   const valueStyle = { fontSize: "28px", color: "#2f6f4e", fontWeight: "bold" };
   const subTextStyle = { fontSize: "13px", color: "#888", marginTop: "8px", fontWeight: "500" };
+
+  const timeBtn = (active) => ({
+    background: active ? "#2f6f4e" : "#e8f3ee", color: active ? "white" : "#2f6f4e", 
+    border: "none", padding: "8px 16px", borderRadius: "20px", cursor: "pointer", fontWeight: "600", fontSize: "13px"
+  });
 
   return (
     <div style={{ padding: "30px", background: "#f5f7f6", minHeight: "100vh" }}>
       <AdminNavbar />
 
       {/* --- GLOBAL TIMEFRAME FILTER --- */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", flexWrap: "wrap", gap: "15px" }}>
         <h1 style={{ fontSize: "24px", color: "#1f2d2a", margin: 0 }}>Business Analytics</h1>
-        <select 
-          value={selectedTime} 
-          onChange={(e) => setSelectedTime(e.target.value)}
-          style={{ padding: "10px 16px", fontSize: "15px", borderRadius: "8px", border: "1px solid #ccc", background: "white", fontWeight: "600", color: "#2f6f4e", cursor: "pointer" }}
-        >
-          {monthOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-        </select>
+        
+        <div style={{ display: "flex", gap: "15px", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Restored Toggle Buttons */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button style={timeBtn(timeframe === "month")} onClick={() => setTimeframe("month")}>Month</button>
+            <button style={timeBtn(timeframe === "quarter")} onClick={() => setTimeframe("quarter")}>Last 3 Months</button>
+            <button style={timeBtn(timeframe === "year")} onClick={() => setTimeframe("year")}>This Year</button>
+          </div>
+
+          {/* Month Dropdown (Disabled if not in 'month' view) */}
+          <select 
+            value={selectedMonth} 
+            onChange={(e) => { setTimeframe("month"); setSelectedMonth(e.target.value); }}
+            disabled={timeframe !== "month"}
+            style={{ 
+              padding: "10px 16px", fontSize: "15px", borderRadius: "8px", 
+              border: "1px solid #ccc", background: timeframe !== "month" ? "#f0f0f0" : "white", 
+              fontWeight: "600", color: timeframe !== "month" ? "#999" : "#2f6f4e", cursor: timeframe !== "month" ? "not-allowed" : "pointer",
+              minWidth: "160px"
+            }}
+          >
+            {monthOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+        </div>
       </div>
       
       {/* ======================================= */}
@@ -85,7 +109,7 @@ export default function DashboardHome() {
           </div>
 
           <div style={{ ...cardStyle, maxWidth: "250px" }}>
-            <div style={titleStyle}>Orders This Month</div>
+            <div style={titleStyle}>Orders ({timeframe})</div>
             <div style={valueStyle}>{selected.orders}</div>
             <div style={subTextStyle}>Selected timeframe</div>
           </div>
@@ -93,12 +117,12 @@ export default function DashboardHome() {
           <div style={{ ...cardStyle, maxWidth: "250px" }}>
             <div style={titleStyle}>Avg. Order Value</div>
             <div style={valueStyle}>₹{averageOrderValue.toFixed(0)}</div>
-            <div style={subTextStyle}>Per order this month</div>
+            <div style={subTextStyle}>Per order average</div>
           </div>
 
           {/* Daily Trend Graph */}
           <div style={{ ...cardStyle, flex: "2 1 300px" }}>
-            <div style={titleStyle}>Monthly Order Trend</div>
+            <div style={titleStyle}>Order Trend</div>
             <div style={{ height: "60px", display: "flex", alignItems: "flex-end", gap: "6px", marginTop: "15px" }}>
               {dailyTrend.length === 0 ? <div style={{ color: "#aaa", fontSize: "14px" }}>No orders yet.</div> : 
                 dailyTrend.map(d => (
@@ -126,7 +150,7 @@ export default function DashboardHome() {
           </div>
 
           <div style={{ ...cardStyle, background: "#e8f3ee" }}>
-            <div style={{ ...titleStyle, color: "#1f2d2a" }}>Month Net Revenue</div>
+            <div style={{ ...titleStyle, color: "#1f2d2a" }}>Net Revenue ({timeframe})</div>
             <div style={{ ...valueStyle, color: "#1f2d2a" }}>₹{selected.revenue.toLocaleString()}</div>
             <div style={{ fontSize: "12px", color: "#666", marginTop: "15px", display: "flex", flexDirection: "column", gap: "6px" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}><span>Product Sales:</span> <strong>₹{selected.productSales.toLocaleString()}</strong></div>
