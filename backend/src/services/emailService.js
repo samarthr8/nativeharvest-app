@@ -12,7 +12,53 @@ const transporter = nodemailer.createTransport({
 });
 
 /* ---------------------------------------------------
-   🧾 Generate Professional Invoice PDF (UPDATED WITH GST)
+   🎨 NEW: Base HTML Template for Premium Branding
+--------------------------------------------------- */
+function getBaseEmailTemplate(content) {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7f6; color: #333333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background-color: #2f6f4e; padding: 30px 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; }
+        .content { padding: 40px 30px; line-height: 1.6; }
+        .footer { background-color: #f9fcfb; padding: 20px; text-align: center; font-size: 13px; color: #888888; border-top: 1px solid #eeeeee; }
+        .button { display: inline-block; background-color: #2f6f4e; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-weight: bold; font-size: 16px; margin: 20px 0; }
+        .table-summary { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 25px; }
+        .table-summary th, .table-summary td { padding: 12px 0; border-bottom: 1px solid #eeeeee; text-align: right; }
+        .table-summary th { text-align: left; color: #666666; font-weight: normal; }
+        .table-summary .total-row td { font-weight: bold; font-size: 18px; color: #2f6f4e; border-bottom: none; border-top: 2px solid #eeeeee; }
+        .table-summary .total-row th { font-weight: bold; font-size: 16px; color: #333; border-bottom: none; border-top: 2px solid #eeeeee; }
+        .card { background-color: #f9fcfb; padding: 20px; border-radius: 8px; border: 1px solid #e2eee8; margin: 20px 0; }
+        .card h3 { margin-top: 0; color: #1f2d2a; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #e2eee8; padding-bottom: 10px; }
+        .card p { margin: 5px 0; color: #555; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>NativeHarvest</h1>
+        </div>
+        <div class="content">
+          ${content}
+        </div>
+        <div class="footer">
+          <p>NativeHarvest India LLP • Bringing Bundelkhand's authenticity to your home.</p>
+          <p>Chhatarpur, Madhya Pradesh</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+/* ---------------------------------------------------
+   🧾 Generate Professional Invoice PDF (UNCHANGED)
 --------------------------------------------------- */
 function generateInvoice(order) {
 
@@ -103,7 +149,7 @@ function generateInvoice(order) {
 }
 
 /* ---------------------------------------------------
-   📧 Customer Order Confirmation (UPDATED)
+   📧 Customer Order Confirmation (UPDATED UI)
 --------------------------------------------------- */
 async function sendOrderConfirmation(order) {
 
@@ -114,33 +160,35 @@ async function sendOrderConfirmation(order) {
   const couponCode = order.coupon_code || "";
   const originalSubtotal = order.total_amount - shippingFee + discountAmount;
 
+  const htmlContent = `
+    <h2 style="color: #1f2d2a; margin-top: 0;">Thank you for your order! 🌾</h2>
+    <p>Hi ${order.customer_name || 'there'},</p>
+    <p>We're getting your farm-fresh goods ready to be shipped. We will notify you when your package is on its way.</p>
+    
+    <div class="card">
+      <h3>Order #${order.order_id}</h3>
+      <p><strong>Delivery Address:</strong><br/>
+      ${order.full_address || order.address || ""}<br/>
+      ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}</p>
+    </div>
+
+    <table class="table-summary">
+      <tr><th>Subtotal</th><td>₹${originalSubtotal}</td></tr>
+      ${discountAmount > 0 ? `<tr><th>Discount (${couponCode})</th><td style="color: #c53030;">-₹${discountAmount}</td></tr>` : ""}
+      <tr><th>Delivery Fee</th><td>${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</td></tr>
+      <tr class="total-row"><th>Total Amount</th><td>₹${order.total_amount}</td></tr>
+    </table>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="https://nativeharvest.store/order/${order.order_id}" class="button">Track Your Order</a>
+    </div>
+  `;
+
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
     to: order.email,
-    subject: `Order Confirmation - ${order.order_id}`,
-    html: `
-      <h2>Thank you for your order! 🌾</h2>
-      <p><strong>Order ID:</strong> ${order.order_id}</p>
-      
-      <p><strong>Subtotal:</strong> ₹${originalSubtotal}</p>
-      ${discountAmount > 0 ? `<p><strong>Discount (${couponCode}):</strong> -₹${discountAmount}</p>` : ""}
-      <p><strong>Delivery Fee:</strong> ${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</p>
-      <p><strong>Total Amount:</strong> ₹${order.total_amount}</p>
-
-      <h4>Delivery Address:</h4>
-      <p>
-        ${order.full_address || order.address || ""}<br/>
-        ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
-      </p>
-
-      <p>You can track your order here:</p>
-      <a href="https://nativeharvest.store/order/${order.order_id}">
-        Track Order
-      </a>
-
-      <br/><br/>
-      <p>Thank you for supporting NativeHarvest 🌾</p>
-    `,
+    subject: `Order Confirmation - #${order.order_id}`,
+    html: getBaseEmailTemplate(htmlContent),
     attachments: [
       {
         filename: `Invoice-${order.order_id}.pdf`,
@@ -154,7 +202,7 @@ async function sendOrderConfirmation(order) {
 }
 
 /* ---------------------------------------------------
-   🏢 Admin Notification Email (UPDATED)
+   🏢 Admin Notification Email (UPDATED UI)
 --------------------------------------------------- */
 async function sendAdminNotification(order) {
 
@@ -163,107 +211,104 @@ async function sendAdminNotification(order) {
   const couponCode = order.coupon_code || "";
   const originalSubtotal = order.total_amount - shippingFee + discountAmount;
 
-  const mailOptions = {
-    from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
-    subject: `🛒 New Paid Order - ${order.order_id}`,
-    html: `
-      <h3>New Paid Order Received</h3>
-
+  const htmlContent = `
+    <h2 style="color: #1f2d2a; margin-top: 0;">🛒 New Paid Order</h2>
+    <p>A new order has been placed. Please prepare the items for shipment.</p>
+    
+    <div class="card">
+      <h3>Customer Details</h3>
       <p><strong>Order ID:</strong> ${order.order_id}</p>
-      <p><strong>Customer:</strong> ${order.customer_name || ""}</p>
-      <p><strong>Email:</strong> ${order.email}</p>
-      <p><strong>Phone:</strong> ${order.phone || ""}</p>
+      <p><strong>Customer:</strong> ${order.customer_name || "N/A"}</p>
+      <p><strong>Email:</strong> <a href="mailto:${order.email}" style="color: #2f6f4e;">${order.email}</a></p>
+      <p><strong>Phone:</strong> ${order.phone || "N/A"}</p>
+    </div>
 
-      <h4>Delivery Address:</h4>
+    <div class="card">
+      <h3>Delivery Address</h3>
       <p>
         ${order.full_address || order.address || ""}<br/>
         ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
       </p>
+    </div>
 
-      <p><strong>Subtotal:</strong> ₹${originalSubtotal}</p>
-      ${discountAmount > 0 ? `<p><strong>Discount (${couponCode}):</strong> -₹${discountAmount}</p>` : ""}
-      <p><strong>Delivery Fee:</strong> ${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</p>
-      <p><strong>Total:</strong> ₹${order.total_amount}</p>
+    <table class="table-summary">
+      <tr><th>Subtotal</th><td>₹${originalSubtotal}</td></tr>
+      ${discountAmount > 0 ? `<tr><th>Discount (${couponCode})</th><td style="color: #c53030;">-₹${discountAmount}</td></tr>` : ""}
+      <tr><th>Delivery Fee</th><td>${shippingFee === 0 ? "FREE" : `₹${shippingFee}`}</td></tr>
+      <tr class="total-row"><th>Total Amount</th><td>₹${order.total_amount}</td></tr>
+    </table>
+  `;
 
-      <br/>
-      <p>Please prepare the order for shipment.</p>
-    `
+  const mailOptions = {
+    from: `"NativeHarvest Orders" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_USER,
+    subject: `New Order! #${order.order_id} - ₹${order.total_amount}`,
+    html: getBaseEmailTemplate(htmlContent)
   };
 
   await transporter.sendMail(mailOptions);
 }
 
 /* ---------------------------------------------------
-   🚚 Shipment Notification (UNCHANGED)
+   🚚 Shipment Notification (UPDATED UI)
 --------------------------------------------------- */
 async function sendShipmentNotification(order) {
 
+  const htmlContent = `
+    <h2 style="color: #1f2d2a; margin-top: 0;">Your Order is on its Way! 🚚</h2>
+    <p>Great news, ${order.customer_name || 'there'}!</p>
+    <p>Your order <strong>#${order.order_id}</strong> has been shipped and is heading your way.</p>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="https://nativeharvest.store/order/${order.order_id}" class="button">Track Your Package</a>
+    </div>
+    
+    <p style="margin-top: 30px; font-size: 14px; color: #666;">If you have any questions about your shipment, please reply directly to this email.</p>
+  `;
+
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
     to: order.email,
-    subject: `Your Order ${order.order_id} Has Been Shipped`,
-    html: `
-      <h2>Your Order Has Been Shipped 🚚</h2>
-      <p><strong>Order ID:</strong> ${order.order_id}</p>
-      <p>Your order is on its way!</p>
-
-      <p>You can track your order here:</p>
-      <a href="https://nativeharvest.store/order/${order.order_id}">
-        Track Order
-      </a>
-
-      <br/><br/>
-      <p>Thank you for shopping with NativeHarvest 🌾</p>
-    `
+    subject: `Your NativeHarvest Order #${order.order_id} Has Been Shipped`,
+    html: getBaseEmailTemplate(htmlContent)
   };
 
   await transporter.sendMail(mailOptions);
 }
 
 /* ---------------------------------------------------
-   🎉 Delivered Notification + Marketing (UNCHANGED)
+   🎉 Delivered Notification + Marketing (UPDATED UI)
 --------------------------------------------------- */
 async function sendDeliveredNotification(order) {
 
+  const htmlContent = `
+    <h2 style="color: #1f2d2a; margin-top: 0;">Order Delivered 🎉</h2>
+    <p>Hi ${order.customer_name || 'there'},</p>
+    <p>Your NativeHarvest order <strong>#${order.order_id}</strong> has been successfully delivered.</p>
+    <p>We hope you love our authentic, farm-made goods. Every purchase you make directly supports rural farming communities in Bundelkhand.</p>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="https://nativeharvest.store" class="button">Shop Again</a>
+    </div>
+  `;
+
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
     to: order.email,
-    subject: `Order Delivered - ${order.order_id} 🎉`,
-    html: `
-      <h2>Your Order Has Been Delivered 🎉</h2>
-
-      <p>Hi ${order.customer_name},</p>
-
-      <p>Your order <strong>${order.order_id}</strong> has been successfully delivered.</p>
-
-      <p>We hope you loved our products! 🌾</p>
-
-      <p>
-        Visit us again for fresh and authentic farm-made goodness.
-      </p>
-
-      <a href="https://nativeharvest.store"
-         style="background:#2f6f4e;color:white;padding:10px 20px;
-                text-decoration:none;border-radius:6px;display:inline-block;">
-        Shop Again
-      </a>
-
-      <br/><br/>
-      <p>Thank you for supporting NativeHarvest.</p>
-    `
+    subject: `Order Delivered - #${order.order_id} 🎉`,
+    html: getBaseEmailTemplate(htmlContent)
   };
 
   await transporter.sendMail(mailOptions);
 }
 
 /* ---------------------------------------------------
-   📢 Send Promotional Email Blast (NEW)
+   📢 Send Promotional Email Blast (UNCHANGED)
 --------------------------------------------------- */
 async function sendPromotionalBlast(emails, subject, htmlContent) {
   const mailOptions = {
     from: `"NativeHarvest" <${process.env.EMAIL_USER}>`,
-    bcc: emails, // Use BCC so subscribers can't see each other's emails
+    bcc: emails, 
     subject: subject,
     html: htmlContent
   };
