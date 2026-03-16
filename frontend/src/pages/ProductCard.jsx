@@ -76,7 +76,7 @@ export default function ProductCard({ product }) {
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
           textOverflow: "ellipsis",
-          cursor: "help" // Changes mouse to a question mark to indicate a tooltip
+          cursor: "pointer" // Changes mouse to a pointer to indicate a tooltip
         }}
       >
         {product.description}

@@ -11,8 +11,11 @@ export default function ProductDetail() {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [qty, setQty] = useState(1);
-  const { addToCart } = useCart();
+  
+  // --- RESTORED: Lightbox Zoom State ---
+  const [isZoomed, setIsZoomed] = useState(false);
 
+  const { addToCart } = useCart();
   const [shareText, setShareText] = useState("Share");
 
   useEffect(() => {
@@ -121,13 +124,14 @@ export default function ProductDetail() {
                 src={images[activeImage]}
                 alt={product.name}
                 loading="lazy"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onClick={() => setIsZoomed(true)} /* --- RESTORED: Click to Zoom --- */
+                style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "zoom-in" }}
               />
             )}
             {images.length > 1 && (
               <>
-                <button onClick={prevImage} style={arrowStyle("left")}>‹</button>
-                <button onClick={nextImage} style={arrowStyle("right")}>›</button>
+                <button onClick={(e) => { e.stopPropagation(); prevImage(); }} style={arrowStyle("left")}>‹</button>
+                <button onClick={(e) => { e.stopPropagation(); nextImage(); }} style={arrowStyle("right")}>›</button>
               </>
             )}
           </div>
@@ -195,7 +199,7 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* --- NEW: CUSTOM QUANTITY STEPPER --- */}
+          {/* Quantity Stepper */}
           <div style={{ marginBottom: "30px" }}>
             <strong style={{ display: "block", marginBottom: "10px", color: "#333" }}>Quantity:</strong>
             <div style={{ 
@@ -236,7 +240,8 @@ export default function ProductDetail() {
               onMouseOver={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.background = "#24563d"; }}
               onMouseOut={(e) => { e.target.style.transform = "translateY(0)"; e.target.style.background = "#2f6f4e"; }}
             >
-              Add to Cart — ₹{price * qty}
+              {/* --- RESTORED: Clean Button Text --- */}
+              Add to Cart
             </button>
 
             <button
@@ -270,6 +275,25 @@ export default function ProductDetail() {
         </div>
 
       </div>
+
+      {/* --- RESTORED: Fullscreen Image Lightbox Modal --- */}
+      {isZoomed && (
+        <div 
+          onClick={() => setIsZoomed(false)} 
+          style={{ 
+            position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", 
+            backgroundColor: "rgba(0,0,0,0.85)", zIndex: 9999, display: "flex", 
+            alignItems: "center", justifyContent: "center", cursor: "zoom-out" 
+          }}
+        >
+          <img 
+            src={images[activeImage]} 
+            alt={product.name} 
+            style={{ maxWidth: "90%", maxHeight: "90%", borderRadius: "12px", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }} 
+          />
+          <span style={{ position: "absolute", top: "25px", right: "35px", color: "white", fontSize: "40px" }}>&times;</span>
+        </div>
+      )}
 
       <style>
         {`

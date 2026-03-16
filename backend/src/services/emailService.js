@@ -48,8 +48,8 @@ function getBaseEmailTemplate(content) {
           ${content}
         </div>
         <div class="footer">
-          <p>NativeHarvest India LLP • Bringing Bundelkhand's authenticity to your home.</p>
-          <p>Chhatarpur, Madhya Pradesh</p>
+          <p>NativeHarvest India • Bringing Bundelkhand's authenticity to your home.</p>
+          <p>Khajuraho, Madhya Pradesh</p>
         </div>
       </div>
     </body>
