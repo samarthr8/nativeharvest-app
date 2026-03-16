@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../services/api";
-import ProductCard from "./ProductCard"; // IMPORT THE NEW MODULAR COMPONENT
+import ProductCard from "./ProductCard"; 
 
 export default function Products() {
   const location = useLocation();
@@ -10,14 +10,12 @@ export default function Products() {
   
   const categoryRefs = useRef({});
 
-  /* ---------------- FETCH PRODUCTS ---------------- */
   useEffect(() => {
     api.get("/products").then(res => {
       setProducts(Array.isArray(res.data) ? res.data : []);
     }).catch(() => setProducts([]));
   }, []);
 
-  /* ---------------- HASH SCROLL LOGIC ---------------- */
   const hashToCategoryMap = {
     royal: "Pickles",
     orchard: "Preserves",
@@ -39,7 +37,6 @@ export default function Products() {
     }
   }, [location.hash, products]);
 
-  /* ---------------- SEARCH & CATEGORY LOGIC ---------------- */
   const filteredProducts = products.filter(p => {
     if (!searchQuery) return true;
     const lowerQuery = searchQuery.toLowerCase();
@@ -70,7 +67,6 @@ export default function Products() {
   return (
     <div className="container" style={{ paddingBottom: "60px" }}>
 
-      {/* --- HEADER & SEARCH --- */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "40px 0", flexWrap: "wrap", gap: "20px" }}>
         <h1 style={{ margin: 0, color: "#1f2d2a" }}>Products</h1>
         
@@ -95,7 +91,6 @@ export default function Products() {
         </div>
       </div>
 
-      {/* --- GRID RENDERING --- */}
       {searchQuery && Object.keys(groupedProducts).length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "#666" }}>
           <div style={{ fontSize: "40px", marginBottom: "15px" }}>🌾</div>
@@ -108,7 +103,8 @@ export default function Products() {
           
           return (
             <div key={cat} ref={el => categoryRefs.current[cat] = el}>
-              <h2 style={{ margin: "50px 0 25px", color: "#2f6f4e", fontSize: "24px", borderBottom: "2px solid #e8f3ee", paddingBottom: "10px" }}>
+              {/* --- UPDATED: Increased Font Size & Weight --- */}
+              <h2 style={{ margin: "50px 0 25px", color: "#2f6f4e", fontSize: "32px", fontWeight: "700", borderBottom: "2px solid #e8f3ee", paddingBottom: "12px" }}>
                 {cat === "Pickles" ? "The Royal Achaar Collection" : cat}
               </h2>
               <div style={gridStyle}>

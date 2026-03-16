@@ -5,26 +5,22 @@ import { useCart } from "../context/CartContext";
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   
-  // Normalize images array
   const images = Array.isArray(product.images) && product.images.length > 0 
     ? product.images 
     : product.image ? [product.image] : [];
     
-  // Card-level state
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants && product.variants.length > 0 ? product.variants[0] : null
   );
   const [added, setAdded] = useState(false);
 
-  // Cart handler
   const handleAddToCart = () => {
     addToCart(product, selectedVariant);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
 
-  // Pricing & Stock
   const displayPrice = selectedVariant?.price || product.price;
   const displayStock = selectedVariant && selectedVariant.stock !== undefined ? selectedVariant.stock : product.stock;
 
@@ -44,14 +40,13 @@ export default function ProductCard({ product }) {
   return (
     <div style={{ border: "1px solid #eaeaea", padding: "18px", borderRadius: "12px", background: "white", display: "flex", flexDirection: "column", boxShadow: "0 6px 18px rgba(0,0,0,0.05)", transition: "all 0.25s ease", height: "100%" }}>
       
-      {/* --- IMAGE CONTAINER --- */}
       <div style={{ height: "220px", overflow: "hidden", borderRadius: "10px", position: "relative", background: "#f7f7f7", flexShrink: 0 }}>
         {images.length > 0 && (
           <Link to={`/products/${product.slug}`}>
             <img 
               src={images[currentIndex]} 
               alt={product.name} 
-              loading="lazy" /* NEW: Boosts page load speed */
+              loading="lazy" 
               style={{ width: "100%", height: "100%", objectFit: "cover" }} 
             />
           </Link>
@@ -64,27 +59,29 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      {/* --- PRODUCT DETAILS --- */}
       <Link to={`/products/${product.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
         <h3 style={{ marginTop: "14px", marginBottom: "8px", fontSize: "18px", color: "#1f2d2a" }}>{product.name}</h3>
       </Link>
 
-      {/* NEW: CSS Line Clamping ensures text never breaks grid height */}
-      <p style={{ 
-        flexGrow: 1, 
-        fontSize: "14px", 
-        color: "#666", 
-        margin: "0 0 12px 0",
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-      }}>
+      {/* --- UPDATED: Added title attribute for hover tooltip --- */}
+      <p 
+        title={product.description} 
+        style={{ 
+          flexGrow: 1, 
+          fontSize: "14px", 
+          color: "#666", 
+          margin: "0 0 12px 0",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          cursor: "help" // Changes mouse to a question mark to indicate a tooltip
+        }}
+      >
         {product.description}
       </p>
 
-      {/* --- VARIANTS --- */}
       {product.variants && product.variants.length > 0 && (
         <div style={{ marginBottom: "12px" }}>
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -106,7 +103,6 @@ export default function ProductCard({ product }) {
         </div>
       )}
 
-      {/* --- PRICING & ACTION --- */}
       <div style={{ marginTop: "auto" }}>
         <div style={{ fontSize: "18px", fontWeight: "bold", color: "#1f2d2a" }}>₹{displayPrice}</div>
         <div style={{ marginTop: "4px", fontSize: "12px", fontWeight: "bold", color: stockColor }}>{stockText}</div>

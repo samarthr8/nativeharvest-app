@@ -13,8 +13,8 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ADD TO CART WITH VARIANT AND MAX STOCK SUPPORT */
-  const addToCart = (product, selectedVariant = null) => {
+  /* --- UPDATED: Now accepts an inputQty parameter (defaults to 1 for backward compatibility) --- */
+  const addToCart = (product, selectedVariant = null, inputQty = 1) => {
 
     const variantKey = selectedVariant?.weight || null;
     const price = selectedVariant?.price || product.price;
@@ -33,13 +33,16 @@ export const CartProvider = ({ children }) => {
       if (existing) {
         return prev.map(p => {
           if (p.slug === product.slug && p.variantKey === variantKey) {
-            // Cap the quantity at maxStock
-            const newQty = p.qty + 1 > maxStock ? maxStock : p.qty + 1;
+            // Cap the combined quantity at maxStock
+            const newQty = p.qty + inputQty > maxStock ? maxStock : p.qty + inputQty;
             return { ...p, qty: newQty, maxStock }; 
           }
           return p;
         });
       }
+
+      // Ensure a user can't add more than maxStock on their very first click
+      const startingQty = inputQty > maxStock ? maxStock : inputQty;
 
       return [
         ...prev,
@@ -47,7 +50,7 @@ export const CartProvider = ({ children }) => {
           ...product,
           price,
           variantKey,
-          qty: 1,
+          qty: startingQty,
           maxStock // Save the limit in the cart item
         }
       ];
