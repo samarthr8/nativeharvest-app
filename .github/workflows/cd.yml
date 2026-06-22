@@ -1,5 +1,5 @@
 name: CD - Deploy to EC2
-
+# refresh workflow metadata
 on:
   workflow_run:
     workflows: ["CI Pipeline"]
